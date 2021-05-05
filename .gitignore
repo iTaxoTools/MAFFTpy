@@ -1,0 +1,23 @@
+# general things to ignore
+build/
+dist/
+.eggs/
+*.egg-info/
+*.egg
+*.py[cod]
+__pycache__/
+*.so
+*~
+
+# due to using tox and pytest
+.tox
+.cache
+
+# qt auto-compiled resources
+src/*/qt/resources.py
+
+# accidental test files
+test.abgd.svg
+test.disthist.svg
+test.rank.svg
+distmat.txt
