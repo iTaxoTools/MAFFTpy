@@ -63,14 +63,18 @@ class MultipleSequenceAlignment():
         Run the MAFFT core with given params,
         save results to a temporary directory.
         """
-        kwargs = self.param.as_dictionary()
-        kwargs['file'] = self.file
-        kwargs['logfile'] = self.useLogfile
-        kwargs['time'] = datetime.now().strftime(self.time_format)
-        if self.target is not None:
-            kwargs['out'] = self.target
+        # kwargs = self.param.as_dictionary()
+        # kwargs['file'] = self.file
+        # kwargs['logfile'] = self.useLogfile
+        # kwargs['time'] = datetime.now().strftime(self.time_format)
+        # kwargs['a'] = None
+        # kwargs['1'] = 2
+        kwargs = dict()
+        kwargs['-i'] = self.file
+        # if self.target is not None:
+        #     kwargs['out'] = self.target
         print(kwargs)
-        mafft.main(kwargs)
+        mafft.disttbfast(kwargs)
         self.results = self.target
 
     def launch(self):

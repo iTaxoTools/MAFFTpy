@@ -94,17 +94,76 @@ int parseItem(PyObject *dict, const char *str, const char t, void *var) {
 	return 0;
 }
 
+// Create arguments from dictionary
+// On failure, sets error indicator and returns -1.
+// Return 0 on success.
+int argsFromDict(PyObject *dict, int* rargc, char*** rargv, char* progname) {
+
+	PyObject *key, *value;
+	PyObject *str, *enc, *check;
+	Py_ssize_t pos = 0;
+
+	int len = (int) PyDict_Size(dict);
+	char **argv = malloc(sizeof(char*)*(len*2+2));
+	int argc = 1;
+	argv[0] = progname;
+
+	while (PyDict_Next(dict, &pos, &key, &value)) {
+
+		str = PyObject_Str(key);
+		enc = PyUnicode_AsEncodedString(str, "utf-8", "~E~");
+		const char *bytes = PyBytes_AS_STRING(enc);
+		Py_XDECREF(str);
+		Py_XDECREF(enc);
+		check = PyUnicode_AsEncodedString(key, "utf-8", "~E~");
+		if (check == NULL) {
+			PyErr_Format(PyExc_TypeError, "argsFromDict: key must be string: %s", bytes);
+			return -1;
+		}
+
+		argv[argc] = malloc(strlen (bytes) + 2);
+		strcpy(argv[argc], bytes);
+		argc++;
+
+		if (value != Py_None) {
+			str = PyObject_Str(value);
+			enc = PyUnicode_AsEncodedString(str, "utf-8", "~E~");
+			const char *bytes = PyBytes_AS_STRING(enc);
+	    Py_XDECREF(str);
+	    Py_XDECREF(enc);
+
+			argv[argc] = malloc(strlen (bytes) + 1);
+			strcpy(argv[argc], bytes);
+			argc++;
+		}
+	}
+	argv[argc] = NULL;
+
+	*rargc = argc;
+	*rargv = argv;
+
+	return 0;
+}
+
+// Frees memory allocated by argsFromDict
+// Doesn't work since disttbfast alters argv pointers
+// int argsFree(int argc, char** argv) {
+// 		for (int i = 1; i < argc; i++) {
+// 			printf("freeing %d, %s\n", i, argv[i]);
+// 			free(argv[i]);
+// 		}
+// 		printf("freeing last\n");
+// 		free(argv);
+// }
+
 static PyObject *
-mafft_main(PyObject *self, PyObject *args) {
+mafft_disttbfast(PyObject *self, PyObject *args) {
 
 	/* module specific */
 
 	PyObject *dict;
 	PyObject *item;
-	char *file_data;
 	FILE *f_in;
-
-	printf("foobar\n");
 
 	// Accept a dictionary-like python object
 	if (!PyArg_ParseTuple(args, "O", &dict))
@@ -114,29 +173,18 @@ mafft_main(PyObject *self, PyObject *args) {
 		return NULL;
 	}
 
-	if (parseItem(dict, "file", 's', &file_data)) return NULL;
+	int argc;
+	char **argv;
+	if (argsFromDict(dict, &argc, &argv, "disttbfast")) return NULL;
 
-	if (!file_data) {
-		PyErr_SetString(PyExc_KeyError, "asap_main: Mandatory key: 'file'");
-		return NULL;
-	}
+	printf(">");
+	for (int i = 0; i < argc; i++) printf(" %s", argv[i]);
+	printf("\n");
 
-	f_in = fopen(file_data, "r");
-	if (f_in==NULL) {
-		PyErr_Format(PyExc_FileNotFoundError, "asap_main: Input file not found: '%s'", file_data);
-		return NULL;
-	}
-
-	printf("file = %s\n", file_data);
-
-	int argc = 3;
-	char *argv[3];
-	argv[0] = "disttbfast";
-	argv[1] = "-i";
-	argv[2] = file_data;
 	int res = disttbfast( 0, 0, NULL, NULL, argc, argv, NULL );
-
 	printf("res=%d\n", res);
+
+	// argsFree(argc, argv);
 
 	Py_INCREF(Py_None);
 	return Py_None;
@@ -144,7 +192,7 @@ mafft_main(PyObject *self, PyObject *args) {
 
 
 static PyMethodDef MafftMethods[] = {
-  {"main",  mafft_main, METH_VARARGS,
+  {"disttbfast",  mafft_disttbfast, METH_VARARGS,
    "Run MAFFT for given parameters."},
   {NULL, NULL, 0, NULL}        /* Sentinel */
 };
