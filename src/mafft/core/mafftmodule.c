@@ -166,6 +166,7 @@ mafft_disttbfast(PyObject *self, PyObject *args) {
 	FILE *f_in;
 
 	// Accept a dictionary-like python object
+	// ! Change this to grab kwargs
 	if (!PyArg_ParseTuple(args, "O", &dict))
 		return NULL;
 	if (!PyDict_Check(dict)) {
