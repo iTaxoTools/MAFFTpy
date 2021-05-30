@@ -34,6 +34,16 @@ from . import params
 
 
 @contextmanager
+def pushd(target):
+    """Temporarily change directory"""
+    re = os.getcwd()
+    os.chdir(target)
+    try:
+        yield
+    finally:
+        os.chdir(re)
+
+@contextmanager
 def redirect(file=sys.stdout, dest=os.devnull):
     """Used to redirect output to a file"""
     with os.fdopen(os.dup(file.fileno()), 'wb') as dup:
@@ -61,7 +71,6 @@ class MultipleSequenceAlignment():
         """
         """
         self.file = file
-        self.useLogfile = False
         self.target = None
         self.results = None
         # self.time_format = '%x - %I:%M%p'
@@ -79,6 +88,16 @@ class MultipleSequenceAlignment():
                 res[key] = val
         return res
 
+    @staticmethod
+    def _trim(file, dest):
+        """Copy file while trimming carriage returns"""
+        tr = str.maketrans('\r','\n')
+        with open(file, 'r') as fin:
+            with open(dest, 'w') as fout:
+                for line in fin:
+                    fout.write(line.translate(tr))
+
+
     def fetch(self, destination):
         """Copy results as a new directory"""
         if self.results is None:
@@ -90,6 +109,17 @@ class MultipleSequenceAlignment():
         Run the MAFFT core with given params,
         save results to a temporary directory.
         """
+
+        if self.target is None:
+            self._temp = tempfile.TemporaryDirectory(prefix='mafft_')
+            self.target = pathlib.Path(self._temp.name).as_posix()
+
+        self._trim(self.file, pathlib.Path(self.target) / 'infile')
+
+        with pushd(self.target):
+            self._script()
+
+    def _script(self):
 
         defaultiterate=0
         defaultcycle=2
@@ -419,10 +449,10 @@ class MultipleSequenceAlignment():
             else:
                 with open('pre', 'w') as fout, \
                      open(progressfile, 'a') as ferr, \
-                     open(self.file, 'r') as fin, \
                      redirect(sys.stdout, fout), \
-                     redirect(sys.stderr, ferr), \
-                     redirect(sys.stdin, fin):
+                     redirect(sys.stderr, ferr):
+                     # open('infile', 'r') as fin, \
+                     # redirect(sys.stdin, fin), \
 
                     extras = self._vars_to_kwargs([legacygapopt,
                             mergearg,
@@ -444,7 +474,7 @@ class MultipleSequenceAlignment():
                             oneiterationopt,
                             ])
                     mafft.disttbfast(
-                            # i = self.file,
+                            i = 'infile',
                             q = npickup,
                             E = cycledisttbfast,
                             V = '-' + gopdist,
@@ -486,7 +516,6 @@ class MultipleSequenceAlignment():
 
         # kwargs = self.param.as_dictionary()
         # kwargs['file'] = self.file
-        # kwargs['logfile'] = self.useLogfile
         # kwargs['time'] = datetime.now().strftime(self.time_format)
         # kwargs['a'] = None
         # kwargs['1'] = 2
