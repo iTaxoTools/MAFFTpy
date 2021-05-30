@@ -22,6 +22,7 @@ from multiprocessing import Process
 import tempfile
 import shutil
 import pathlib
+import re
 from datetime import datetime
 
 from . import mafft
@@ -50,10 +51,19 @@ class MultipleSequenceAlignment():
         self.time_format = '%FT%T'
         self.param = param.ParamList(params.params)
 
+    @staticmethod
+    def _vars_to_kwargs(list):
+        """Convert strings into kwargs accepted by the module"""
+        res = dict()
+        for item in list:
+            for var in re.finditer('-([a-zA-Z])\s*([^-\s]*)?', item):
+                key = var.group(1)
+                val = None if var.group(2) == '' else var.group(2)
+                res[key] = val
+        return res
+
     def fetch(self, destination):
-        """
-        Copy results as a new directory.
-        """
+        """Copy results as a new directory"""
         if self.results is None:
             raise RuntimeError('No results to fetch.')
         shutil.copytree(self.results, destination)
@@ -88,13 +98,13 @@ class MultipleSequenceAlignment():
         defaultfmodel=" "
         defaultkappa=" "
 
-        if True: #ginsi
+        if False: #ginsi
         	defaultfft=1
         	defaultcycle=1
         	defaultiterate=1000
         	defaultdistance="global"
 
-        if False: #fftns1
+        if True: #fftns1
         	defaultfft=1
         	defaultcycle=1
         	defaultdistance="ktuples"
@@ -167,6 +177,7 @@ class MultipleSequenceAlignment():
         treeout=0
         nodeout=0
         distout=0
+        distoutopt=" "
         treein=0
         topin=0
         treeinopt="  "
@@ -197,6 +208,7 @@ class MultipleSequenceAlignment():
         mapoutfile="/dev/null"
         fragment=0
         legacygapopt=" "
+        oneiterationopt=" "
         mergetable="/dev/null"
         mergearg=" "
         seedoffset=0
@@ -287,6 +299,38 @@ class MultipleSequenceAlignment():
         parttreeoutopt=" "
         treeoutopt=" "
 
+        if cycle == 0:
+            if nodeout == 1:
+                treeoutopt = "-^ -T"
+            else:
+                treeoutopt = "-t -T"
+            iterate = 0
+            weighti = "0.0"
+            if treeout == 1:
+                parttreeoutopt = "-t"
+                groupsize = 1
+            else:
+                parttreeoutopt = " "
+            if distout == 1:
+                distoutopt = "-y -T"
+                if treeout == 0:
+                    treeoutopt = ""
+        else:
+            if nodeout == 1:
+                if iterate > 0:
+                    print("The --nodeout option supports only progressive method (--maxiterate 0) for now.")
+                    return
+                parttreeoutopt = "-t"
+                treeoutopt = "-^"
+            elif treeout == 1:
+                parttreeoutopt = "-t"
+                treeoutopt = "-t"
+            else:
+                parttreeoutopt = " "
+                treeoutopt = " "
+            if distout == 1:
+                distoutopt = "-y"
+
         # check format (>)
 
         # nseq = number of lines starting with > or =
@@ -302,6 +346,9 @@ class MultipleSequenceAlignment():
             return
 
         if distance == "ktuples":
+            # THIS IS CHEATING, setting cycle to 1 for no good reason
+            cycle =1
+
             localparam=""
             weighti=0.0
         else:
@@ -354,8 +401,43 @@ class MultipleSequenceAlignment():
                 pass
         # "$prefix/addsingle" -Q 100 $legacygapopt -W $tuplesize -O $outnum $addsinglearg $addarg $add2ndhalfarg -C $numthreads $memopt $weightopt $treeinopt $treeoutopt $distoutopt $seqtype $model -f "-"$gop  -h $aof  $param_fft $localparam   $algopt $treealg $scoreoutarg < infile   > /dev/null 2>>"$progressfile" || exit 1
             else:
+                extras = self._vars_to_kwargs([legacygapopt,
+                        mergearg,
+                        termgapopt,
+                        outnum,
+                        addarg,
+                        add2ndhalfarg,
+                        memopt,
+                        weightopt,
+                        treeinopt,
+                        distoutopt,
+                        seqtype,
+                        model,
+                        param_fft,
+                        algopt,
+                        treealg,
+                        scoreoutarg,
+                        anchoropt,
+                        oneiterationopt,
+                        ])
+                mafft.disttbfast(
+                        i = self.file,
+                        q = npickup,
+                        E = cycledisttbfast,
+                        V = '-' + gopdist,
+                        s = unalignlevel,
+                        W = tuplesize,
+                        C = str(numthreads) + '-' + str(numthreadstb),
+                        g = gexp,
+                        f = '-' + gop, # <<<<<<<<<<<<
+                        Q = spfactor,
+                        h = aof,
+                        x = maxanchorseparation,
+                        **extras)
                 pass
-        # echo "$prefix/disttbfast" -q $npickup -E $cycledisttbfast -V "-"$gopdist  -s $unalignlevel $legacygapopt $mergearg -W $tuplesize $termgapopt $outnum $addarg $add2ndhalfarg -C $numthreads-$numthreadstb $memopt $weightopt $treeinopt $treeoutopt $distoutopt $seqtype $model -g $gexp -f "-"$gop -Q $spfactor -h $aof  $param_fft $algopt $treealg $scoreoutarg $anchoropt -x $maxanchorseparation $oneiterationopt \< infile   \> pre 2\>\>"$progressfile"
+        # echo "$prefix/disttbfast" -q $npickup -E $cycledisttbfast -V "-"$gopdist  -s $unalignlevel $legacygapopt $mergearg -W $tuplesize $termgapopt $outnum $addarg $add2ndhalfarg
+        # -C $numthreads-$numthreadstb $memopt $weightopt $treeinopt $treeoutopt $distoutopt $seqtype $model -g $gexp -f "-"$gop -Q $spfactor -h $aof  $param_fft $algopt $treealg
+        # $scoreoutarg $anchoropt -x $maxanchorseparation $oneiterationopt \< infile   \> pre 2\>\>"$progressfile"
         # "$prefix/disttbfast" -q $npickup -E $cycledisttbfast -V "-"$gopdist  -s $unalignlevel $legacygapopt $mergearg -W $tuplesize $termgapopt $outnum $addarg $add2ndhalfarg -C $numthreads-$numthreadstb $memopt $weightopt $treeinopt $treeoutopt $distoutopt $seqtype $model -g $gexp -f "-"$gop -Q $spfactor -h $aof  $param_fft $algopt $treealg $scoreoutarg $anchoropt -x $maxanchorseparation $oneiterationopt < infile   > pre 2>>"$progressfile" || exit 1
         # mv hat3.seed hat3\
 
@@ -365,6 +447,7 @@ class MultipleSequenceAlignment():
                 # mv pre infile
                 # "$prefix/splittbfast" $legacygapopt -Z $algopt $splitopt $partorderopt $parttreeoutopt $memopt $seqtype $model -f "-"$gop -Q $spfactor -h $aof  -p $partsize -s $groupsize $treealg $outnum -i infile   > pre 2>>"$progressfile" || exit 1
             else:
+                mafft.disttbfast(W=minimumweight, V='-'+gopdist, s=unalignlevel, S=None)
                 pass
                 # "$prefix/tbfast" -W $minimumweight -V "-"$gopdist -s $unalignlevel $legacygapopt $mergearg $termgapopt $outnum -C $numthreadstb $rnaopt $weightopt $treeoutopt $distoutopt $memopt $seqtype $model  -f "-"$gop -Q $spfactor -h $aof $param_fft  $localparam $algopt -J $treealg $scoreoutarg < pre > /dev/null 2>>"$progressfile" || exit 1
                 # fragment>0 no baai, nanimoshinai
@@ -390,12 +473,9 @@ class MultipleSequenceAlignment():
         # kwargs['time'] = datetime.now().strftime(self.time_format)
         # kwargs['a'] = None
         # kwargs['1'] = 2
-        kwargs = dict()
-        kwargs['-i'] = self.file
         # if self.target is not None:
         #     kwargs['out'] = self.target
-        print(kwargs)
-        mafft.disttbfast(kwargs)
+        # mafft.disttbfast(i=self.file)
         self.results = self.target
 
     def launch(self):

@@ -122,7 +122,8 @@ int argsFromDict(PyObject *dict, int* rargc, char*** rargv, char* progname) {
 		}
 
 		argv[argc] = malloc(strlen (bytes) + 2);
-		strcpy(argv[argc], bytes);
+		argv[argc][0] = '-';
+		strcpy(argv[argc]+1, bytes);
 		argc++;
 
 		if (value != Py_None) {
@@ -157,22 +158,13 @@ int argsFromDict(PyObject *dict, int* rargc, char*** rargv, char* progname) {
 // }
 
 static PyObject *
-mafft_disttbfast(PyObject *self, PyObject *args) {
+mafft_disttbfast(PyObject *self, PyObject *args, PyObject *kwargs) {
 
 	/* module specific */
 
-	PyObject *dict;
+	PyObject *dict = kwargs;
 	PyObject *item;
 	FILE *f_in;
-
-	// Accept a dictionary-like python object
-	// ! Change this to grab kwargs
-	if (!PyArg_ParseTuple(args, "O", &dict))
-		return NULL;
-	if (!PyDict_Check(dict)) {
-		PyErr_SetString(PyExc_TypeError, "asap_main: Argument must be a dictionary");
-		return NULL;
-	}
 
 	int argc;
 	char **argv;
@@ -193,8 +185,8 @@ mafft_disttbfast(PyObject *self, PyObject *args) {
 
 
 static PyMethodDef MafftMethods[] = {
-  {"disttbfast",  mafft_disttbfast, METH_VARARGS,
-   "Run MAFFT for given parameters."},
+  {"disttbfast",  mafft_disttbfast, METH_VARARGS | METH_KEYWORDS,
+   "Run mafft/disttbfast with given parameters."},
   {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
