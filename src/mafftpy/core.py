@@ -23,11 +23,28 @@ import tempfile
 import shutil
 import pathlib
 import re
+import os
+import sys
 from datetime import datetime
+from contextlib import contextmanager
 
 from . import mafft
 from . import param
 from . import params
+
+
+@contextmanager
+def redirect(file=sys.stdout, dest=os.devnull):
+    """Used to redirect output to a file"""
+    with os.fdopen(os.dup(file.fileno()), 'wb') as dup:
+        file.flush()
+        os.dup2(dest.fileno(), file.fileno())
+        try:
+            yield file
+        finally:
+            file.flush()
+            os.dup2(dup.fileno(), file.fileno())
+
 
 class MultipleSequenceAlignment():
     """
@@ -73,7 +90,6 @@ class MultipleSequenceAlignment():
         Run the MAFFT core with given params,
         save results to a temporary directory.
         """
-
 
         defaultiterate=0
         defaultcycle=2
@@ -401,45 +417,46 @@ class MultipleSequenceAlignment():
                 pass
         # "$prefix/addsingle" -Q 100 $legacygapopt -W $tuplesize -O $outnum $addsinglearg $addarg $add2ndhalfarg -C $numthreads $memopt $weightopt $treeinopt $treeoutopt $distoutopt $seqtype $model -f "-"$gop  -h $aof  $param_fft $localparam   $algopt $treealg $scoreoutarg < infile   > /dev/null 2>>"$progressfile" || exit 1
             else:
-                extras = self._vars_to_kwargs([legacygapopt,
-                        mergearg,
-                        termgapopt,
-                        outnum,
-                        addarg,
-                        add2ndhalfarg,
-                        memopt,
-                        weightopt,
-                        treeinopt,
-                        distoutopt,
-                        seqtype,
-                        model,
-                        param_fft,
-                        algopt,
-                        treealg,
-                        scoreoutarg,
-                        anchoropt,
-                        oneiterationopt,
-                        ])
-                mafft.disttbfast(
-                        i = self.file,
-                        q = npickup,
-                        E = cycledisttbfast,
-                        V = '-' + gopdist,
-                        s = unalignlevel,
-                        W = tuplesize,
-                        C = str(numthreads) + '-' + str(numthreadstb),
-                        g = gexp,
-                        f = '-' + gop, # <<<<<<<<<<<<
-                        Q = spfactor,
-                        h = aof,
-                        x = maxanchorseparation,
-                        **extras)
-                pass
-        # echo "$prefix/disttbfast" -q $npickup -E $cycledisttbfast -V "-"$gopdist  -s $unalignlevel $legacygapopt $mergearg -W $tuplesize $termgapopt $outnum $addarg $add2ndhalfarg
-        # -C $numthreads-$numthreadstb $memopt $weightopt $treeinopt $treeoutopt $distoutopt $seqtype $model -g $gexp -f "-"$gop -Q $spfactor -h $aof  $param_fft $algopt $treealg
-        # $scoreoutarg $anchoropt -x $maxanchorseparation $oneiterationopt \< infile   \> pre 2\>\>"$progressfile"
-        # "$prefix/disttbfast" -q $npickup -E $cycledisttbfast -V "-"$gopdist  -s $unalignlevel $legacygapopt $mergearg -W $tuplesize $termgapopt $outnum $addarg $add2ndhalfarg -C $numthreads-$numthreadstb $memopt $weightopt $treeinopt $treeoutopt $distoutopt $seqtype $model -g $gexp -f "-"$gop -Q $spfactor -h $aof  $param_fft $algopt $treealg $scoreoutarg $anchoropt -x $maxanchorseparation $oneiterationopt < infile   > pre 2>>"$progressfile" || exit 1
-        # mv hat3.seed hat3\
+                with open('pre', 'w') as fout, \
+                     open(progressfile, 'a') as ferr, \
+                     open(self.file, 'r') as fin, \
+                     redirect(sys.stdout, fout), \
+                     redirect(sys.stderr, ferr), \
+                     redirect(sys.stdin, fin):
+
+                    extras = self._vars_to_kwargs([legacygapopt,
+                            mergearg,
+                            termgapopt,
+                            outnum,
+                            addarg,
+                            add2ndhalfarg,
+                            memopt,
+                            weightopt,
+                            treeinopt,
+                            distoutopt,
+                            seqtype,
+                            model,
+                            param_fft,
+                            algopt,
+                            treealg,
+                            scoreoutarg,
+                            anchoropt,
+                            oneiterationopt,
+                            ])
+                    mafft.disttbfast(
+                            # i = self.file,
+                            q = npickup,
+                            E = cycledisttbfast,
+                            V = '-' + gopdist,
+                            s = unalignlevel,
+                            W = tuplesize,
+                            C = str(numthreads) + '-' + str(numthreadstb),
+                            g = gexp,
+                            f = '-' + gop, # <<<<<<<<<<<<
+                            Q = spfactor,
+                            h = aof,
+                            x = maxanchorseparation,
+                            **extras)
 
         while cycletbfast > 1:
             if distance == "parttree":

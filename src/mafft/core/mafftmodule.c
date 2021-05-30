@@ -175,7 +175,10 @@ mafft_disttbfast(PyObject *self, PyObject *args, PyObject *kwargs) {
 	printf("\n");
 
 	int res = disttbfast( 0, 0, NULL, NULL, argc, argv, NULL );
-	printf("res=%d\n", res);
+	if (res) {
+		PyErr_Format(PyExc_TypeError, "mafft_disttbfast: Abnormal exit code: %i", res);
+		return NULL;
+	}
 
 	// argsFree(argc, argv);
 
