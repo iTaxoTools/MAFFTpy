@@ -447,6 +447,7 @@ class MultipleSequenceAlignment():
                 pass
         # "$prefix/addsingle" -Q 100 $legacygapopt -W $tuplesize -O $outnum $addsinglearg $addarg $add2ndhalfarg -C $numthreads $memopt $weightopt $treeinopt $treeoutopt $distoutopt $seqtype $model -f "-"$gop  -h $aof  $param_fft $localparam   $algopt $treealg $scoreoutarg < infile   > /dev/null 2>>"$progressfile" || exit 1
             else:
+                progressfile = 'err.log'
                 with open('pre', 'w') as fout, \
                      open(progressfile, 'a') as ferr, \
                      redirect(sys.stdout, fout), \

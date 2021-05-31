@@ -1,0 +1,37 @@
+Added python module: `mafftmodule.c`, `mafftmodule.h`
+
+Changed for MSVC compatibility:
+
+diff `disttbfast.c`:
+1422c1422
+<       return (int)((char *)p - (char *)q);
+---
+>       return (int)((void *)p - (void *)q);
+1429c1429
+<       return (int)((char *)q - (char *)p);
+---
+>       return (int)((void *)q - (void *)p);
+
+diff `dp.h`:
+2,4d1
+< #ifdef _MSC_VER
+< #define TLS __declspec(thread)
+< #else
+6d2
+< #endif
+8c4
+< #define TLS
+---
+> #define TLS
+
+diff `mltaln.h`:
+339,341d338
+< #ifdef _MSC_VER
+< #define TLS __declspec(thread)
+< #else
+343d339
+< #endif
+345c341
+< #define TLS
+---
+> #define TLS

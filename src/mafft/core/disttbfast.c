@@ -1419,14 +1419,14 @@ static int anchcomp( const void *p, const void *q )
 {
 	if ( ((ExtAnch *)q)->starti != ((ExtAnch *)p)->starti )
 		return ((ExtAnch *)p)->starti - ((ExtAnch *)q)->starti;
-	return (int)((void *)p - (void *)q);
+	return (int)((char *)p - (void *)q);
 }
 
 static int anchscorecomp( const void *p, const void *q )
 {
 	if ( ((ExtAnch *)q)->score != ((ExtAnch *)p)->score )
 		return ((ExtAnch *)q)->score - ((ExtAnch *)p)->score;
-	return (int)((void *)q - (void *)p);
+	return (int)((char *)q - (void *)p);
 }
 
 

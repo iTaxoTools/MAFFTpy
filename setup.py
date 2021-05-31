@@ -1,8 +1,9 @@
 """A setuptools based setup module."""
 
 # Always prefer setuptools over distutils
-from setuptools import setup, find_packages, Extension, Command
+from setuptools import setup, find_packages, Command, Extension
 from setuptools.command.build_py import build_py as _build_py
+from setuptools.command.build_ext import build_ext as _build_ext
 import pathlib
 
 here = pathlib.Path(__file__).parent.resolve()
@@ -27,42 +28,76 @@ class CommandQtAutoCompile(Command):
         except ModuleNotFoundError as exception:
             raise ModuleNotFoundError('Missing Qt auto-compiler, please try: pip install pyqt5ac')
 
+class CommandPthread(Command):
+    """Custom command for compiling the pthread-win32 library"""
+    description = 'compile pthread-win32'
+    user_options = []
+    def initialize_options(self):
+        """virtual overload"""
+        pass
+    def finalize_options(self):
+        """virtual overload"""
+        pass
+    def run(self):
+        """build_pthread"""
+        print('PTHREAD COMPILATION PLACEHOLDER for VS cmd: nmake VC-static')
+
 class build_py(_build_py):
     """Overrides setuptools build to autocompile first"""
     def run(self):
         self.run_command('build_qt')
         _build_py.run(self)
 
-mafftmodule = Extension('mafftpy.mafft',
-                    include_dirs = ['src/mafft/core'],
-                    sources = [
-                        'src/mafft/core/mafftmodule.c',
-                        'src/mafft/core/disttbfast.c',
-                        'src/mafft/core/mtxutl.c',
-                        'src/mafft/core/mltaln9.c',
-                        'src/mafft/core/defs.c',
-                        'src/mafft/core/io.c',
-                        'src/mafft/core/tddis.c',
-                        'src/mafft/core/constants.c',
-                        'src/mafft/core/Salignmm.c',
-                        'src/mafft/core/Dalignmm.c',
-                        'src/mafft/core/partSalignmm.c',
-                        'src/mafft/core/Lalignmm.c',
-                        'src/mafft/core/rna.c',
-                        'src/mafft/core/Falign.c',
-                        'src/mafft/core/Falign_localhom.c',
-                        'src/mafft/core/Galign11.c',
-                        'src/mafft/core/Lalign11.c',
-                        'src/mafft/core/genalign11.c',
-                        'src/mafft/core/SAalignmm.c',
-                        'src/mafft/core/MSalignmm.c',
-                        'src/mafft/core/fft.c',
-                        'src/mafft/core/fftFunctions.c',
-                        'src/mafft/core/addfunctions.c',
-                        ],
-                    # extra_compile_args = ["-w"],
-                    extra_compile_args = ["-Denablemultithread -std=c99 -O3 -lm  -lpthread "],
-                        )
+class build_ext(_build_ext):
+    """Overrides setuptools build_ext to execute build_init commands"""
+    def build_extensions(self):
+        for ext in self.extensions:
+            if hasattr(ext, 'build_init'):
+                ext.build_init(self)
+        _build_ext.build_extensions(self)
+
+class MafftExtension(Extension):
+    """Extension subclass that defines build_init"""
+    def build_init(self, build):
+        """Called by build_ext to compile and include pthread-win32 if needed"""
+        if build.compiler.compiler_type == 'msvc':
+            self.include_dirs += ['src/pthread-win32']
+            self.library_dirs += ['src/pthread-win32']
+            self.libraries += ['libpthreadVC3']
+            build.run_command('build_pthread')
+
+mafftmodule = MafftExtension('mafftpy.mafft',
+        include_dirs = ['src/mafft/core'],
+        define_macros = [('enablemultithread', '1')],
+        library_dirs  = [],
+        libraries  = [],
+        sources = [
+            'src/mafft/core/mafftmodule.c',
+            'src/mafft/core/disttbfast.c',
+            'src/mafft/core/mtxutl.c',
+            'src/mafft/core/mltaln9.c',
+            'src/mafft/core/defs.c',
+            'src/mafft/core/io.c',
+            'src/mafft/core/tddis.c',
+            'src/mafft/core/constants.c',
+            'src/mafft/core/Salignmm.c',
+            'src/mafft/core/Dalignmm.c',
+            'src/mafft/core/partSalignmm.c',
+            'src/mafft/core/Lalignmm.c',
+            'src/mafft/core/rna.c',
+            'src/mafft/core/Falign.c',
+            'src/mafft/core/Falign_localhom.c',
+            'src/mafft/core/Galign11.c',
+            'src/mafft/core/Lalign11.c',
+            'src/mafft/core/genalign11.c',
+            'src/mafft/core/SAalignmm.c',
+            'src/mafft/core/MSalignmm.c',
+            'src/mafft/core/fft.c',
+            'src/mafft/core/fftFunctions.c',
+            'src/mafft/core/addfunctions.c',
+            ],
+        )
+
 
 # Get the long description from the README file
 long_description = (here / 'README.md').read_text(encoding='utf-8')
@@ -238,7 +273,9 @@ setup(
     # Custom options for setuptools
     cmdclass = {
         'build_qt': CommandQtAutoCompile,
-        'build_py': build_py
+        'build_pthread': CommandPthread,
+        'build_py': build_py,
+        'build_ext': build_ext,
     },
 
     # List additional URLs that are relevant to your project as a dict.

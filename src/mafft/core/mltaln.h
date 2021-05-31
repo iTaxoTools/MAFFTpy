@@ -62,7 +62,7 @@
 #define GETA2 0.001
 #define GETA3 0.001
 #define NOTSPECIFIED  100009
-#define SUEFF   0.1  /* upg/(spg+upg)  -> sueff.sed */ 
+#define SUEFF   0.1  /* upg/(spg+upg)  -> sueff.sed */
 #define DIVLOCAL 0
 #define INTMTXSCALE 1000000.0
 #define JTT 201
@@ -336,9 +336,13 @@ typedef struct _extanch
 #include "functions.h"
 
 #ifdef enablemultithread
-#define TLS __thread
+#ifdef _MSC_VER
+#define TLS __declspec(thread)
 #else
-#define TLS 
+#define TLS __thread
+#endif
+#else
+#define TLS
 #endif
 
 extern TLS int commonAlloc1;

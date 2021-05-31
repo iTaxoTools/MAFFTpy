@@ -170,9 +170,9 @@ mafft_disttbfast(PyObject *self, PyObject *args, PyObject *kwargs) {
 	char **argv;
 	if (argsFromDict(dict, &argc, &argv, "disttbfast")) return NULL;
 
-	printf(">");
-	for (int i = 0; i < argc; i++) printf(" %s", argv[i]);
-	printf("\n");
+	fprintf(stderr, ">");
+	for (int i = 0; i < argc; i++) fprintf(stderr, " %s", argv[i]);
+	fprintf(stderr, "\n");
 
 	int res = disttbfast( 0, 0, NULL, NULL, argc, argv, NULL );
 	if (res) {
@@ -181,6 +181,10 @@ mafft_disttbfast(PyObject *self, PyObject *args, PyObject *kwargs) {
 	}
 
 	// argsFree(argc, argv);
+
+	// Required, as streams are redirected by python caller
+	fflush(stdout);
+	fflush(stderr);
 
 	Py_INCREF(Py_None);
 	return Py_None;
