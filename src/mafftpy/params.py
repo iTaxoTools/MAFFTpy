@@ -2,11 +2,15 @@ params = {
     "general": {
         "label": "General",
         "fields": {
-            "placeholder": {
-                "label":    "placeholder",
-                "doc":      "placeholder.",
-                "type":     "bool",
-                "default":  False
+            "strategy": {
+                "label":    "Strategy",
+                "doc":      "Strategy.",
+                "type":     "list",
+                "default":  "fftns1",
+                "data": {
+                    "items":  ["fftns1","ginsi"],
+                    "labels": ["FFT-NS-1","G-INS-i"]
+                }
             },
         },
     },

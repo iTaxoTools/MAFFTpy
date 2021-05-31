@@ -55,6 +55,190 @@ def redirect(file=sys.stdout, dest=os.devnull):
             file.flush()
             os.dup2(dup.fileno(), file.fileno())
 
+class MafftVars():
+    """Variables used by MAFFT core"""
+    def __init__(self, params=None):
+        """As defined in the mafft bash script"""
+        self.defaultiterate = 0
+        self.defaultcycle = 2
+        self.defaultgop = "1.53"
+        # self.defaultaof = "0.123"
+        self.defaultaof = "0.000"
+        self.defaultlaof = "0.100"
+        self.defaultlgop = "-2.00"
+        self.defaultfft = 1
+        self.defaultrough = 0
+        self.defaultdistance = "ktuples"
+        # self.defaultdistance = "local"
+        self.defaultweighti = 2.7
+        self.defaultweightr = "0.0"
+        self.defaultweightm = "1.0"
+        self.defaultdafs = 0
+        self.defaultmccaskill = 0
+        self.defaultcontrafold = 0
+        self.defaultalgopt = "  "
+        self.defaultalgoptit = "  "
+        self.defaultsbstmodel = " -b 62 "
+        self.defaultfmodel = " "
+        self.defaultkappa = " "
+
+        self.outputfile = ""
+        self.namelength = -1
+        self.anysymbol = 0
+        self.parallelizationstrategy = "BAATARI2"
+        self.kappa = self.defaultkappa
+        self.sbstmodel = self.defaultsbstmodel
+        self.fmodel = self.defaultfmodel
+        self.nmodel = " "
+        self.gexp = 0
+        self.gop = self.defaultgop
+        self.gopdist = self.defaultgop
+        self.aof = self.defaultaof
+        self.cycle = self.defaultcycle
+        self.iterate = self.defaultiterate
+        self.fft = self.defaultfft
+        self.rough = self.defaultrough
+        self.distance = self.defaultdistance
+        self.forcefft = 0
+        self.memopt = " "
+        self.weightopt = " "
+        self.GGOP = "-6.00"
+        self.LGOP = "-6.00"
+        self.LEXP = "-0.000"
+        self.GEXP = "-0.000"
+        self.lgop = self.defaultlgop
+        self.lexp = "-0.100"
+        self.laof = self.defaultlaof
+        self.pggop = "-2.00"
+        self.pgexp = "-0.10"
+        self.pgaof = "0.10"
+        self.rgop = "-1.530"
+        self.rgep = "-0.000"
+        self.seqtype = "  "
+        self.weighti = self.defaultweighti
+        self.weightr = self.defaultweightr
+        self.weightm = self.defaultweightm
+        self.rnaalifold = 0
+        self.dafs = self.defaultdafs
+        self.mccaskill = self.defaultmccaskill
+        self.contrafold = self.defaultcontrafold
+        self.progressfile = "/dev/stderr"
+        self.anchorfile = "/dev/null"
+        self.anchoropt = ""
+        self.maxanchorseparation = 1000
+        self.debug = 0
+        self.sw = 0
+        self.algopt = self.defaultalgopt
+        self.algoptit = self.defaultalgoptit
+        # self.algspecified = 0
+        self.pairspecified = 0
+        self.scorecalcopt = " "
+        self.coreout = 0
+        self.corethr = "0.5"
+        self.corewin = "100"
+        self.coreext = " "
+        self.outputformat = "pir"
+        self.f2clext = "-N"
+        self.outorder = "input"
+        self.seed = "x"
+        self.seedtable = "x"
+        self.auto = 0
+        self.groupsize = -1
+        self.partsize = 50
+        self.partdist = "ktuples"
+        self.partorderopt = " -x "
+        self.treeout = 0
+        self.nodeout = 0
+        self.distout = 0
+        self.distoutopt = " "
+        self.treein = 0
+        self.topin = 0
+        self.treeinopt = "  "
+        self.seedfiles = "/dev/null"
+        self.seedtablefile = "/dev/null"
+        self.pdblist = "/dev/null"
+        self.ownlist = "/dev/null"
+        self.strdir = "$PWD"
+        self.scorematrix = "/dev/null"
+        self.textmatrix = "/dev/null"
+        self.treeinfile = "/dev/null"
+        self.rnascoremtx = " "
+        self.laraparams = "/dev/null"
+        self.foldalignopt = " "
+        self.treealg = " -X 0.1 "
+        self.sueff = "1.0"
+        self.maxambiguous = "1.0"
+        self.scoreoutarg = " "
+        self.numthreads = 0
+        self.numthreadsit = -1
+        self.numthreadstb = -1
+        self.randomseed = 0
+        self.addfile = "/dev/null"
+        self.addarg0 = " "
+        self.addarg = " "
+        self.addsinglearg = " "
+        self.add2ndhalfarg = " "
+        self.mapoutfile = "/dev/null"
+        self.fragment = 0
+        self.legacygapopt = " "
+        self.oneiterationopt = " "
+        self.mergetable = "/dev/null"
+        self.mergearg = " "
+        self.seedoffset = 0
+        self.outnum = " "
+        self.last_e = 5000
+        self.last_m = 3
+        self.last_subopt = " "
+        self.last_once = " "
+        self.adjustdirection = 0
+        self.tuplesize = 6
+        self.termgapopt = " -O "
+        # self.termgapopt = " " # gap/gap ga kakenai node
+        self.similarityoffset = "0.0"
+        self.unalignlevel = "0.0"
+        self.unalignspecified = 0
+        self.spfactor = "100.0"
+        self.shiftpenaltyspecified = 0
+        self.opdistspecified = 0
+        self.allowshift = 0
+        self.enrich = 0        # ato de kezuru
+        self.enrichseq = 0     # ato de kezuru
+        self.enrichstr = 0     # ato de kezuru
+        self.seektarget = ""   # ato de kezuru
+        self.newdash = 0
+        self.newdash_originalsequenceonly = 0
+        self.exclude_ho = 0
+        self.fixthreshold = "0.0"
+        self.bunkatsuopt = " "
+        self.npickup = 0
+        self.minimumweight = "0.00001" # 2016/Mar
+        self.usenaivepairscore = " "
+        self.oldgenafparam = 0
+        self.sprigorous = 0
+        self.treeext = "none"
+        self.initialramusage = "20GB"
+        self.focusarg = " "
+        self.lhlimit = " "
+        self.mpiscript = "/dev/null"
+
+        if params is not None:
+            self.update_from_params(params)
+
+    def update_from_params(self, params):
+        """Parse params and update variables"""
+
+        d = params.as_dictionary()
+
+        if d['strategy'] == 'ginsi':
+            self.fft = 1
+            self.cycle = 1
+            self.iterate = 1000
+            self.distance = "global"
+        elif d['strategy'] == 'fftns1':
+            self.fft = 1
+            self.cycle = 1
+            self.distance = "ktuples"
+
 
 class MultipleSequenceAlignment():
     """
@@ -75,7 +259,7 @@ class MultipleSequenceAlignment():
         self.results = None
         # self.time_format = '%x - %I:%M%p'
         self.time_format = '%FT%T'
-        self.param = param.ParamList(params.params)
+        self.params = param.ParamList(params.params)
 
     @staticmethod
     def _vars_to_kwargs(list):
@@ -121,178 +305,7 @@ class MultipleSequenceAlignment():
 
     def _script(self):
 
-        defaultiterate=0
-        defaultcycle=2
-        defaultgop="1.53"
-        #defaultaof="0.123"
-        defaultaof="0.000"
-        defaultlaof="0.100"
-        defaultlgop="-2.00"
-        defaultfft=1
-        defaultrough=0
-        defaultdistance="ktuples"
-        #defaultdistance="local"
-        defaultweighti=2.7
-        defaultweightr="0.0"
-        defaultweightm="1.0"
-        defaultdafs=0
-        defaultmccaskill=0
-        defaultcontrafold=0
-        defaultalgopt="  "
-        defaultalgoptit="  "
-        defaultsbstmodel=" -b 62 "
-        defaultfmodel=" "
-        defaultkappa=" "
-
-        if False: #ginsi
-        	defaultfft=1
-        	defaultcycle=1
-        	defaultiterate=1000
-        	defaultdistance="global"
-
-        if True: #fftns1
-        	defaultfft=1
-        	defaultcycle=1
-        	defaultdistance="ktuples"
-
-        outputfile=""
-        namelength=-1
-        anysymbol=0
-        parallelizationstrategy="BAATARI2"
-        kappa=defaultkappa
-        sbstmodel=defaultsbstmodel
-        fmodel=defaultfmodel
-        nmodel=" "
-        gexp=0
-        gop=defaultgop
-        gopdist=defaultgop
-        aof=defaultaof
-        cycle=defaultcycle
-        iterate=defaultiterate
-        fft=defaultfft
-        rough=defaultrough
-        distance=defaultdistance
-        forcefft=0
-        memopt=" "
-        weightopt=" "
-        GGOP="-6.00"
-        LGOP="-6.00"
-        LEXP="-0.000"
-        GEXP="-0.000"
-        lgop=defaultlgop
-        lexp="-0.100"
-        laof=defaultlaof
-        pggop="-2.00"
-        pgexp="-0.10"
-        pgaof="0.10"
-        rgop="-1.530"
-        rgep="-0.000"
-        seqtype="  "
-        weighti=defaultweighti
-        weightr=defaultweightr
-        weightm=defaultweightm
-        rnaalifold=0
-        dafs=defaultdafs
-        mccaskill=defaultmccaskill
-        contrafold=defaultcontrafold
-        progressfile="/dev/stderr"
-        anchorfile="/dev/null"
-        anchoropt=""
-        maxanchorseparation=1000
-        debug=0
-        sw=0
-        algopt=defaultalgopt
-        algoptit=defaultalgoptit
-        #algspecified=0
-        pairspecified=0
-        scorecalcopt=" "
-        coreout=0
-        corethr="0.5"
-        corewin="100"
-        coreext=" "
-        outputformat="pir"
-        f2clext="-N"
-        outorder="input"
-        seed="x"
-        seedtable="x"
-        auto=0
-        groupsize=-1
-        partsize=50
-        partdist="ktuples"
-        partorderopt=" -x "
-        treeout=0
-        nodeout=0
-        distout=0
-        distoutopt=" "
-        treein=0
-        topin=0
-        treeinopt="  "
-        seedfiles="/dev/null"
-        seedtablefile="/dev/null"
-        pdblist="/dev/null"
-        ownlist="/dev/null"
-        strdir="$PWD"
-        scorematrix="/dev/null"
-        textmatrix="/dev/null"
-        treeinfile="/dev/null"
-        rnascoremtx=" "
-        laraparams="/dev/null"
-        foldalignopt=" "
-        treealg=" -X 0.1 "
-        sueff="1.0"
-        maxambiguous="1.0"
-        scoreoutarg=" "
-        numthreads=0
-        numthreadsit=-1
-        numthreadstb=-1
-        randomseed=0
-        addfile="/dev/null"
-        addarg0=" "
-        addarg=" "
-        addsinglearg=" "
-        add2ndhalfarg=" "
-        mapoutfile="/dev/null"
-        fragment=0
-        legacygapopt=" "
-        oneiterationopt=" "
-        mergetable="/dev/null"
-        mergearg=" "
-        seedoffset=0
-        outnum=" "
-        last_e=5000
-        last_m=3
-        last_subopt=" "
-        last_once=" "
-        adjustdirection=0
-        tuplesize=6
-        termgapopt=" -O "
-        #termgapopt=" " # gap/gap ga kakenai node
-        similarityoffset="0.0"
-        unalignlevel="0.0"
-        unalignspecified=0
-        spfactor="100.0"
-        shiftpenaltyspecified=0
-        opdistspecified=0
-        allowshift=0
-        enrich=0        # ato de kezuru
-        enrichseq=0     # ato de kezuru
-        enrichstr=0     # ato de kezuru
-        seektarget=""   # ato de kezuru
-        newdash=0
-        newdash_originalsequenceonly=0
-        exclude_ho=0
-        fixthreshold="0.0"
-        bunkatsuopt=" "
-        npickup=0
-        minimumweight="0.00001" # 2016/Mar
-        usenaivepairscore=" "
-        oldgenafparam=0
-        sprigorous=0
-        treeext="none"
-        initialramusage="20GB"
-        focusarg=" "
-        lhlimit=" "
-        mpiscript="/dev/null"
+        v = MafftVars(self.params)
 
         # TMPFILE=`env TMPDIR="$MAFFT_TMPDIR" mktemp -dt "$progname.XXXXXXXXXX"`
         # os.chdir()
@@ -312,205 +325,205 @@ class MultipleSequenceAlignment():
 
         # check that files are ASCII, not utf-16-32
 
-        infilename = self.file
+        v.infilename = self.file
 
         # do something with seedfiles
 
         # numthreads = number of cores
         # max 16 and 8 threads for some reason
-        numthreadstb = numthreads
-        numthreadsit = numthreads
+        v.numthreadstb = v.numthreads
+        v.numthreadsit = v.numthreads
 
-        nadd="0"
+        v.nadd = "0"
 
         # check auto strats here
 
         # fragments
 
-        gopdist=gop
+        v.gopdist = v.gop
 
-        if parallelizationstrategy == "BESTFIRST" or parallelizationstrategy == "BAATARI0":
-            iteratelimit=254
+        if v.parallelizationstrategy == "BESTFIRST" or v.parallelizationstrategy == "BAATARI0":
+            v.iteratelimit=254
         else:
-            iteratelimit=16
-        if iterate > iteratelimit:
-            iterate=iteratelimit
+            v.iteratelimit=16
+        if v.iterate > v.iteratelimit:
+            v.iterate = v.iteratelimit
 
-        rnaopt="  "
-        rnaoptit=" -F "
+        v.rnaopt = "  "
+        v.rnaoptit = " -F "
 
-        model=sbstmodel + kappa + fmodel + nmodel
+        v.model = v.sbstmodel + v.kappa + v.fmodel + v.nmodel
 
-        swopt=" "
-        parttreeoutopt=" "
-        treeoutopt=" "
+        v.swopt = " "
+        v.parttreeoutopt = " "
+        v.treeoutopt = " "
 
-        if cycle == 0:
-            if nodeout == 1:
-                treeoutopt = "-^ -T"
+        if v.cycle == 0:
+            if v.nodeout == 1:
+                v.treeoutopt = "-^ -T"
             else:
-                treeoutopt = "-t -T"
-            iterate = 0
-            weighti = "0.0"
-            if treeout == 1:
-                parttreeoutopt = "-t"
-                groupsize = 1
+                v.treeoutopt = "-t -T"
+            v.iterate = 0
+            v.weighti = "0.0"
+            if v.treeout == 1:
+                v.parttreeoutopt = "-t"
+                v.groupsize = 1
             else:
-                parttreeoutopt = " "
+                v.parttreeoutopt = " "
             if distout == 1:
-                distoutopt = "-y -T"
-                if treeout == 0:
-                    treeoutopt = ""
+                v.distoutopt = "-y -T"
+                if v.treeout == 0:
+                    v.treeoutopt = ""
         else:
-            if nodeout == 1:
-                if iterate > 0:
+            if v.nodeout == 1:
+                if v.iterate > 0:
                     print("The --nodeout option supports only progressive method (--maxiterate 0) for now.")
                     return
-                parttreeoutopt = "-t"
-                treeoutopt = "-^"
-            elif treeout == 1:
-                parttreeoutopt = "-t"
-                treeoutopt = "-t"
+                v.parttreeoutopt = "-t"
+                v.treeoutopt = "-^"
+            elif v.treeout == 1:
+                v.parttreeoutopt = "-t"
+                v.treeoutopt = "-t"
             else:
-                parttreeoutopt = " "
-                treeoutopt = " "
-            if distout == 1:
-                distoutopt = "-y"
+                v.parttreeoutopt = " "
+                v.treeoutopt = " "
+            if v.distout == 1:
+                v.distoutopt = "-y"
 
         # check format (>)
 
         # nseq = number of lines starting with > or =
-        nseq = 333
-        if nseq ==2:
-            cycle = 1
-        if nseq > 3:
-            cycle = 3
+        v.nseq = 333
+        if v.nseq ==2:
+            v.cycle = 1
+        if v.nseq > 3:
+            v.cycle = 3
 
-        if nseq > 60000 and iterate > 1:
+        if v.nseq > 60000 and v.iterate > 1:
             print("Too many sequences to perform iterative refinement!")
             print("Please use a progressive method.")
             return
 
-        if distance == "ktuples":
+        if v.distance == "ktuples":
             # THIS IS CHEATING, setting cycle to 1 for no good reason
-            cycle =1
+            v.cycle = 1
 
-            localparam=""
-            weighti=0.0
+            v.localparam = ""
+            v.weighti = 0.0
         else:
-            localparam="-l " + str(weighti)
-            if cycle > 1:
-                cycle = 1
+            v.localparam = "-l " + str(weighti)
+            if v.cycle > 1:
+                v.cycle = 1
 
-        param_fft=" -F "
-        memsavetree=0
+        v.param_fft = " -F "
+        v.memsavetree = 0
 
-        cycletbfast=1
-        if localparam=='' and fragment == 0 and distance != "parttree":
+        v.cycletbfast = 1
+        if v.localparam == '' and v.fragment == 0 and v.distance != "parttree":
     #		echo "use disttbfast"
-            cycletbfast=1
-            cycledisttbfast=cycle
-            if cycledisttbfast == 0:
-                cycledisttbfast=1
+            v.cycletbfast = 1
+            v.cycledisttbfast = v.cycle
+            if v.cycledisttbfast == 0:
+                v.cycledisttbfast = 1
             else:
                 #		echo "use tbfast"
-                cycletbfast=cycle
-                cycledisttbfast=1
+                v.cycletbfast = v.cycle
+                v.cycledisttbfast = 1
 
-        if distance == "global" or distance == "distonly":
-            strategy="G-"
-        elif fft == 1:
-            strategy="FFT-"
+        if v.distance == "global" or v.distance == "distonly":
+            v.strategy = "G-"
+        elif v.fft == 1:
+            v.strategy = "FFT-"
         else:
-            strategy="NW-"
+            v.strategy = "NW-"
 
-        if weighti > 0:
-            strategy=strategy+"I"
-        strategy=strategy+"NS-"
+        if v.weighti > 0:
+            v.strategy += "I"
+        v.strategy += "NS-"
 
-        if iterate > 0:
-            strategy += "i"
+        if v.iterate > 0:
+            v.strategy += "i"
         else:
-            strategy += str(cycle)
+            v.strategy += str(v.cycle)
 
-        explanation='?'
-        performance='Not tested.'
+        v.explanation = '?'
+        v.performance = 'Not tested.'
 
-        outputopt="-f"
+        v.outputopt = "-f"
 
-        # GOTO 2501 toi finally call the thing!
-        if distance == "global" and memsavetree == 0:
+        if v.distance == "global" and v.memsavetree == 0:
                 pass
                 # "$prefix/tbfast" _  -u $unalignlevel $localparam  -C $numthreads $seqtype $model -g $pgexp -f $pggop -Q $spfactor -h $pgaof  -A  $usenaivepairscore $focusarg  _ -+ $iterate -W $minimumweight -V "-"$gopdist -s $unalignlevel $legacygapopt $mergearg $outnum $addarg $add2ndhalfarg -C $numthreadstb $rnaopt $weightopt $treeinopt $treeoutopt $distoutopt $seqtype $model -f "-"$gop -Q $spfactor -h $aof  $param_fft $localparam   $algopt $treealg $scoreoutarg $focusarg < infile   > /dev/null 2>>"$progressfile" || exit 1
         else:
-            if fragment != 0:
+            if v.fragment != 0:
                 pass
         # "$prefix/addsingle" -Q 100 $legacygapopt -W $tuplesize -O $outnum $addsinglearg $addarg $add2ndhalfarg -C $numthreads $memopt $weightopt $treeinopt $treeoutopt $distoutopt $seqtype $model -f "-"$gop  -h $aof  $param_fft $localparam   $algopt $treealg $scoreoutarg < infile   > /dev/null 2>>"$progressfile" || exit 1
             else:
-                progressfile = 'err.log'
+                v.progressfile = 'err.log'
                 with open('pre', 'w') as fout, \
-                     open(progressfile, 'a') as ferr, \
+                     open(v.progressfile, 'a') as ferr, \
                      redirect(sys.stdout, fout), \
                      redirect(sys.stderr, ferr):
                      # open('infile', 'r') as fin, \
                      # redirect(sys.stdin, fin), \
 
-                    extras = self._vars_to_kwargs([legacygapopt,
-                            mergearg,
-                            termgapopt,
-                            outnum,
-                            addarg,
-                            add2ndhalfarg,
-                            memopt,
-                            weightopt,
-                            treeinopt,
-                            distoutopt,
-                            seqtype,
-                            model,
-                            param_fft,
-                            algopt,
-                            treealg,
-                            scoreoutarg,
-                            anchoropt,
-                            oneiterationopt,
-                            ])
+                    extras = self._vars_to_kwargs([
+                            v.legacygapopt,
+                            v.mergearg,
+                            v.termgapopt,
+                            v.outnum,
+                            v.addarg,
+                            v.add2ndhalfarg,
+                            v.memopt,
+                            v.weightopt,
+                            v.treeinopt,
+                            v.distoutopt,
+                            v.seqtype,
+                            v.model,
+                            v.param_fft,
+                            v.algopt,
+                            v.treealg,
+                            v.scoreoutarg,
+                            v.anchoropt,
+                            v.oneiterationopt,
+                        ])
                     mafft.disttbfast(
                             i = 'infile',
-                            q = npickup,
-                            E = cycledisttbfast,
-                            V = '-' + gopdist,
-                            s = unalignlevel,
-                            W = tuplesize,
-                            C = str(numthreads) + '-' + str(numthreadstb),
-                            g = gexp,
-                            f = '-' + gop, # <<<<<<<<<<<<
-                            Q = spfactor,
-                            h = aof,
-                            x = maxanchorseparation,
+                            q = v.npickup,
+                            E = v.cycledisttbfast,
+                            V = '-' + v.gopdist,
+                            s = v.unalignlevel,
+                            W = v.tuplesize,
+                            C = str(v.numthreads) + '-' + str(v.numthreadstb),
+                            g = v.gexp,
+                            f = '-' + v.gop,
+                            Q = v.spfactor,
+                            h = v.aof,
+                            x = v.maxanchorseparation,
                             **extras)
 
-        while cycletbfast > 1:
-            if distance == "parttree":
+        while v.cycletbfast > 1:
+            if v.distance == "parttree":
                 pass
                 # mv pre infile
                 # "$prefix/splittbfast" $legacygapopt -Z $algopt $splitopt $partorderopt $parttreeoutopt $memopt $seqtype $model -f "-"$gop -Q $spfactor -h $aof  -p $partsize -s $groupsize $treealg $outnum -i infile   > pre 2>>"$progressfile" || exit 1
             else:
-                mafft.disttbfast(W=minimumweight, V='-'+gopdist, s=unalignlevel, S=None)
+                mafft.disttbfast(W=v.minimumweight, V='-'+v.gopdist, s=v.unalignlevel, S=None)
                 pass
                 # "$prefix/tbfast" -W $minimumweight -V "-"$gopdist -s $unalignlevel $legacygapopt $mergearg $termgapopt $outnum -C $numthreadstb $rnaopt $weightopt $treeoutopt $distoutopt $memopt $seqtype $model  -f "-"$gop -Q $spfactor -h $aof $param_fft  $localparam $algopt -J $treealg $scoreoutarg < pre > /dev/null 2>>"$progressfile" || exit 1
                 # fragment>0 no baai, nanimoshinai
                 # seed youchuui!!
-            cycletbfast -= 1
+            v.cycletbfast -= 1
 
-        if iterate > 0:
-            if distance == "ktuples":
+        if v.iterate > 0:
+            if v.distance == "ktuples":
                 pass
             # "$prefix/dndpre" $seqtype $model -M 2 -C $numthreads < pre     > /dev/null 2>>"$progressfile" || exit 1
         # "$prefix/dvtditr" -W $minimumweight $bunkatsuopt -E $fixthreshold -s $unalignlevel  $legacygapopt $mergearg $outnum -C $numthreadsit -t $randomseed $rnaoptit $memopt $scorecalcopt $localparam -z 50 $seqtype $model -f "-"$gop -Q $spfactor -h $aof  -I $iterate $weightopt $treeinopt $algoptit $treealg -p $parallelizationstrategy  $scoreoutarg  -K $nadd < pre     > /dev/null 2>>"$progressfile" || exit 1
 
-        print(strategy)
-        print(explanation)
-        print(performance)
+        print(v.strategy)
+        print(v.explanation)
+        print(v.performance)
 
         # call f2cl for windows
         # print file named "pre"
@@ -527,8 +540,7 @@ class MultipleSequenceAlignment():
 
     def launch(self):
         """
-        Should always use a seperate process to launch the MAFFT core,
-        since it uses exit(1) and doesn't always free allocated memory.
+        Should probably use a seperate process to launch the MAFFT core.
         Save results on a temporary directory, use fetch() to retrieve them.
         """
         # When the last reference of TemporaryDirectory is gone,
