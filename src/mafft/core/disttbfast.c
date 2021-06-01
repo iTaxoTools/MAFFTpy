@@ -5231,9 +5231,11 @@ chudan:
 	return( GUI_CANCEL );
 }
 
+#ifndef ismodule
 int main( int argc, char **argv )
 {
 	int res = disttbfast( 0, 0, NULL, NULL, argc, argv, NULL );
 	if( res == GUI_CANCEL ) res = 0; // treeout de goto chudan wo riyousuru
 	return res;
 }
+#endif

@@ -190,10 +190,78 @@ mafft_disttbfast(PyObject *self, PyObject *args, PyObject *kwargs) {
 	return Py_None;
 }
 
+static PyObject *
+mafft_tbfast(PyObject *self, PyObject *args, PyObject *kwargs) {
+
+	/* module specific */
+
+	PyObject *dict = kwargs;
+	PyObject *pdict = NULL;
+	PyObject *item;
+	FILE *f_in;
+
+	int argc, pargc = 0, targc = 0;
+	char **argv, **pargv = NULL, **targv = NULL;
+
+	const char *pair_string = "pair";
+
+	pdict = PyDict_GetItemString(dict, pair_string);
+	if (pdict != NULL) {
+		if (!PyDict_Check(pdict)) {
+			PyErr_SetString(PyExc_TypeError, "mafft_tbfast: Pair argument must be a dictionary");
+			return NULL;
+		}
+		if (PyDict_DelItemString(dict, pair_string)) {
+			PyErr_SetString(PyExc_TypeError, "mafft_tbfast: Unexpected error deleting pair key");
+			return NULL;
+		}
+		if (argsFromDict(pdict, &pargc, &pargv, "tbfast-pair")) return NULL;
+	}
+
+	if (argsFromDict(dict, &targc, &targv, "tbfast")) return NULL;
+
+	// Prepare arguments to be parsed by tbfast()
+	// Pair args (if any) are "enclosed" in underscores
+	if (pargc) {
+		argc = pargc + targc + 1;
+		argv = malloc(sizeof(char*)*(argc+1));
+		argv[0] = targv[0];
+		argv[1] = "_";
+		for (int i = 1; i < pargc; i++) argv[1+i] = pargv[i];
+		argv[pargc+1] = "_";
+		for (int i = 1; i < targc; i++) argv[pargc+1+i] = targv[i];
+		argv[argc] = NULL;
+	}
+	else {
+		argc = targc;
+		argv = targv;
+	}
+
+	fprintf(stderr, ">");
+	for (int i = 0; i < argc; i++) fprintf(stderr, " %s", argv[i]);
+	fprintf(stderr, "\n");
+
+	int res = tbfast(argc, argv);
+	if (res) {
+		PyErr_Format(PyExc_TypeError, "mafft_tbfast: Abnormal exit code: %i", res);
+		return NULL;
+	}
+
+	// argsFree(argc, argv);
+
+	// Required, as streams are redirected by python caller
+	fflush(stdout);
+	fflush(stderr);
+
+	Py_INCREF(Py_None);
+	return Py_None;
+}
 
 static PyMethodDef MafftMethods[] = {
   {"disttbfast",  mafft_disttbfast, METH_VARARGS | METH_KEYWORDS,
    "Run mafft/disttbfast with given parameters."},
+	{"tbfast",  mafft_tbfast, METH_VARARGS | METH_KEYWORDS,
+   "Run mafft/tbfast with given parameters."},
   {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 

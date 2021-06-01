@@ -212,7 +212,7 @@ class MafftVars():
         self.bunkatsuopt = " "
         self.npickup = 0
         self.minimumweight = "0.00001" # 2016/Mar
-        self.usenaivepairscore = " "
+        self.usenaivepairscore = None
         self.oldgenafparam = 0
         self.sprigorous = 0
         self.treeext = "none"
@@ -228,6 +228,7 @@ class MafftVars():
         """Parse params and update variables"""
 
         d = params.as_dictionary()
+        d['strategy'] = 'ginsi'
 
         if d['strategy'] == 'ginsi':
             self.fft = 1
@@ -266,7 +267,7 @@ class MultipleSequenceAlignment():
         """Convert strings into kwargs accepted by the module"""
         res = dict()
         for item in list:
-            for var in re.finditer('-([a-zA-Z])\s*([^-\s]*)?', item):
+            for var in re.finditer('-([\+a-zA-Z])\s*([^-\s]*)?', item):
                 key = var.group(1)
                 val = None if var.group(2) == '' else var.group(2)
                 res[key] = val
@@ -307,10 +308,7 @@ class MultipleSequenceAlignment():
 
         v = MafftVars(self.params)
 
-        # TMPFILE=`env TMPDIR="$MAFFT_TMPDIR" mktemp -dt "$progname.XXXXXXXXXX"`
-        # os.chdir()
-
-        # REMOVE \r from infile
+        # v.progressfile = 'err.log'
 
         # if maxambiguous != 1: call filter()
 
@@ -411,7 +409,7 @@ class MultipleSequenceAlignment():
             v.localparam = ""
             v.weighti = 0.0
         else:
-            v.localparam = "-l " + str(weighti)
+            v.localparam = "-l " + str(v.weighti)
             if v.cycle > 1:
                 v.cycle = 1
 
@@ -452,14 +450,64 @@ class MultipleSequenceAlignment():
         v.outputopt = "-f"
 
         if v.distance == "global" and v.memsavetree == 0:
-                pass
-                # "$prefix/tbfast" _  -u $unalignlevel $localparam  -C $numthreads $seqtype $model -g $pgexp -f $pggop -Q $spfactor -h $pgaof  -A  $usenaivepairscore $focusarg  _ -+ $iterate -W $minimumweight -V "-"$gopdist -s $unalignlevel $legacygapopt $mergearg $outnum $addarg $add2ndhalfarg -C $numthreadstb $rnaopt $weightopt $treeinopt $treeoutopt $distoutopt $seqtype $model -f "-"$gop -Q $spfactor -h $aof  $param_fft $localparam   $algopt $treealg $scoreoutarg $focusarg < infile   > /dev/null 2>>"$progressfile" || exit 1
+            with open('/dev/null', 'w') as fout, \
+                 open(v.progressfile, 'a') as ferr, \
+                 redirect(sys.stdout, fout), \
+                 redirect(sys.stderr, ferr):
+
+                mafft.tbfast(
+                        i = 'infile',
+                        pair = dict(
+                            i = 'infile',
+                            u = v.unalignlevel,
+                            C = v.numthreads,
+                            g = v.pgexp,
+                            f = v.pggop,
+                            Q = v.spfactor,
+                            h = v.pgaof,
+                            A = v.usenaivepairscore,
+                            **self._vars_to_kwargs([
+                                v.localparam,
+                                v.seqtype,
+                                v.model,
+                                v.focusarg,
+                            ]),
+                        ),
+                        W = v.minimumweight,
+                        V = '-' + v.gopdist,
+                        s = v.unalignlevel,
+                        C = v.numthreadstb,
+                        f = '-' + v.gop,
+                        Q = v.spfactor,
+                        h = v.aof,
+                        **self._vars_to_kwargs([
+                            '-+ ' + str(v.iterate),
+                            v.legacygapopt,
+                            v.mergearg,
+                            v.outnum,
+                            v.addarg,
+                            v.add2ndhalfarg,
+                            v.rnaopt,
+                            v.weightopt,
+                            v.treeinopt,
+                            v.treeoutopt,
+                            v.distoutopt,
+                            v.seqtype,
+                            v.model,
+                            v.param_fft,
+                            v.localparam,
+                            v.algopt,
+                            v.treealg,
+                            v.scoreoutarg,
+                            v.focusarg,
+                        ])
+                    )
+                return
         else:
             if v.fragment != 0:
                 pass
         # "$prefix/addsingle" -Q 100 $legacygapopt -W $tuplesize -O $outnum $addsinglearg $addarg $add2ndhalfarg -C $numthreads $memopt $weightopt $treeinopt $treeoutopt $distoutopt $seqtype $model -f "-"$gop  -h $aof  $param_fft $localparam   $algopt $treealg $scoreoutarg < infile   > /dev/null 2>>"$progressfile" || exit 1
             else:
-                v.progressfile = 'err.log'
                 with open('pre', 'w') as fout, \
                      open(v.progressfile, 'a') as ferr, \
                      redirect(sys.stdout, fout), \
@@ -467,26 +515,6 @@ class MultipleSequenceAlignment():
                      # open('infile', 'r') as fin, \
                      # redirect(sys.stdin, fin), \
 
-                    extras = self._vars_to_kwargs([
-                            v.legacygapopt,
-                            v.mergearg,
-                            v.termgapopt,
-                            v.outnum,
-                            v.addarg,
-                            v.add2ndhalfarg,
-                            v.memopt,
-                            v.weightopt,
-                            v.treeinopt,
-                            v.distoutopt,
-                            v.seqtype,
-                            v.model,
-                            v.param_fft,
-                            v.algopt,
-                            v.treealg,
-                            v.scoreoutarg,
-                            v.anchoropt,
-                            v.oneiterationopt,
-                        ])
                     mafft.disttbfast(
                             i = 'infile',
                             q = v.npickup,
@@ -500,7 +528,27 @@ class MultipleSequenceAlignment():
                             Q = v.spfactor,
                             h = v.aof,
                             x = v.maxanchorseparation,
-                            **extras)
+                            **self._vars_to_kwargs([
+                                v.legacygapopt,
+                                v.mergearg,
+                                v.termgapopt,
+                                v.outnum,
+                                v.addarg,
+                                v.add2ndhalfarg,
+                                v.memopt,
+                                v.weightopt,
+                                v.treeinopt,
+                                v.distoutopt,
+                                v.seqtype,
+                                v.model,
+                                v.param_fft,
+                                v.algopt,
+                                v.treealg,
+                                v.scoreoutarg,
+                                v.anchoropt,
+                                v.oneiterationopt,
+                            ])
+                        )
 
         while v.cycletbfast > 1:
             if v.distance == "parttree":
@@ -517,9 +565,9 @@ class MultipleSequenceAlignment():
 
         if v.iterate > 0:
             if v.distance == "ktuples":
+                # "$prefix/dndpre" $seqtype $model -M 2 -C $numthreads < pre     > /dev/null 2>>"$progressfile" || exit 1
                 pass
-            # "$prefix/dndpre" $seqtype $model -M 2 -C $numthreads < pre     > /dev/null 2>>"$progressfile" || exit 1
-        # "$prefix/dvtditr" -W $minimumweight $bunkatsuopt -E $fixthreshold -s $unalignlevel  $legacygapopt $mergearg $outnum -C $numthreadsit -t $randomseed $rnaoptit $memopt $scorecalcopt $localparam -z 50 $seqtype $model -f "-"$gop -Q $spfactor -h $aof  -I $iterate $weightopt $treeinopt $algoptit $treealg -p $parallelizationstrategy  $scoreoutarg  -K $nadd < pre     > /dev/null 2>>"$progressfile" || exit 1
+            # "$prefix/dvtditr" -W $minimumweight $bunkatsuopt -E $fixthreshold -s $unalignlevel  $legacygapopt $mergearg $outnum -C $numthreadsit -t $randomseed $rnaoptit $memopt $scorecalcopt $localparam -z 50 $seqtype $model -f "-"$gop -Q $spfactor -h $aof  -I $iterate $weightopt $treeinopt $algoptit $treealg -p $parallelizationstrategy  $scoreoutarg  -K $nadd < pre     > /dev/null 2>>"$progressfile" || exit 1
 
         print(v.strategy)
         print(v.explanation)

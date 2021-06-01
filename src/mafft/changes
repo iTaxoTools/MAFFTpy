@@ -1,5 +1,8 @@
 Added python module: `mafftmodule.c`, `mafftmodule.h`
 
+Renamed `disttbfast.c` and `tbfast.c` main() functions
+and put ``#ifndef ismodule` around them.
+
 Changed for MSVC compatibility:
 
 diff `disttbfast.c`:

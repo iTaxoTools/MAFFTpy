@@ -68,12 +68,16 @@ class MafftExtension(Extension):
 
 mafftmodule = MafftExtension('mafftpy.mafft',
         include_dirs = ['src/mafft/core'],
-        define_macros = [('enablemultithread', '1')],
+        define_macros = [
+            ('enablemultithread', '1'),
+            ('ismodule', '1')
+            ],
         library_dirs  = [],
         libraries  = [],
         sources = [
             'src/mafft/core/mafftmodule.c',
             'src/mafft/core/disttbfast.c',
+            'src/mafft/core/tbfast.c',
             'src/mafft/core/mtxutl.c',
             'src/mafft/core/mltaln9.c',
             'src/mafft/core/defs.c',
@@ -95,6 +99,8 @@ mafftmodule = MafftExtension('mafftpy.mafft',
             'src/mafft/core/fft.c',
             'src/mafft/core/fftFunctions.c',
             'src/mafft/core/addfunctions.c',
+            'src/mafft/core/pairlocalalign.c',
+            'src/mafft/core/MSalign11.c',
             ],
         )
 
