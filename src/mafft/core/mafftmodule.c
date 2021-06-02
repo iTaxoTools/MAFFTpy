@@ -257,11 +257,46 @@ mafft_tbfast(PyObject *self, PyObject *args, PyObject *kwargs) {
 	return Py_None;
 }
 
+static PyObject *
+mafft_dvtditr(PyObject *self, PyObject *args, PyObject *kwargs) {
+
+	/* module specific */
+
+	PyObject *dict = kwargs;
+	PyObject *item;
+	FILE *f_in;
+
+	int argc;
+	char **argv;
+	if (argsFromDict(dict, &argc, &argv, "dvtditr")) return NULL;
+
+	fprintf(stderr, ">");
+	for (int i = 0; i < argc; i++) fprintf(stderr, " %s", argv[i]);
+	fprintf(stderr, "\n");
+
+	int res = dvtditr(argc, argv);
+	if (res) {
+		PyErr_Format(PyExc_TypeError, "mafft_dvtditr: Abnormal exit code: %i", res);
+		return NULL;
+	}
+
+	// argsFree(argc, argv);
+
+	// Required, as streams are redirected by python caller
+	fflush(stdout);
+	fflush(stderr);
+
+	Py_INCREF(Py_None);
+	return Py_None;
+}
+
 static PyMethodDef MafftMethods[] = {
   {"disttbfast",  mafft_disttbfast, METH_VARARGS | METH_KEYWORDS,
    "Run mafft/disttbfast with given parameters."},
 	{"tbfast",  mafft_tbfast, METH_VARARGS | METH_KEYWORDS,
    "Run mafft/tbfast with given parameters."},
+  {"dvtditr",  mafft_dvtditr, METH_VARARGS | METH_KEYWORDS,
+   "Run mafft/dvtditr with given parameters."},
   {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 

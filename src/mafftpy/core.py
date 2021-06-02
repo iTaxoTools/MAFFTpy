@@ -55,6 +55,23 @@ def redirect(file=sys.stdout, dest=os.devnull):
             file.flush()
             os.dup2(dup.fileno(), file.fileno())
 
+def call(function, *args, **kwargs):
+# def call(function, *args, _stdout=None, _stderr=None, **kwargs):
+    """Call function with kwargs as subprocess while redirecting output"""
+
+            # if True:
+            # with open('/dev/null', 'w') as fout, \
+            #      open(v.progressfile, 'a') as ferr, \
+            #      redirect(sys.stdout, fout), \
+            #      redirect(sys.stderr, ferr):
+                # mafft.dvtditr(
+    p = Process(target=function, args=args, kwargs=kwargs)
+    p.start()
+    p.join()
+    if p.exitcode != 0:
+        raise RuntimeError('MAFFT internal error, please check logs.')
+    return p.exitcode
+
 class MafftVars():
     """Variables used by MAFFT core"""
     def __init__(self, params=None):
@@ -299,6 +316,9 @@ class MultipleSequenceAlignment():
             self._temp = tempfile.TemporaryDirectory(prefix='mafft_')
             self.target = pathlib.Path(self._temp.name).as_posix()
 
+        #! for testing!
+        self.target = "/tmp/"
+
         self._trim(self.file, pathlib.Path(self.target) / 'infile')
 
         with pushd(self.target):
@@ -450,10 +470,11 @@ class MultipleSequenceAlignment():
         v.outputopt = "-f"
 
         if v.distance == "global" and v.memsavetree == 0:
-            with open('/dev/null', 'w') as fout, \
-                 open(v.progressfile, 'a') as ferr, \
-                 redirect(sys.stdout, fout), \
-                 redirect(sys.stderr, ferr):
+            if True:
+            # with open('/dev/null', 'w') as fout, \
+            #      open(v.progressfile, 'a') as ferr, \
+            #      redirect(sys.stdout, fout), \
+            #      redirect(sys.stderr, ferr):
 
                 mafft.tbfast(
                         i = 'infile',
@@ -502,16 +523,16 @@ class MultipleSequenceAlignment():
                             v.focusarg,
                         ])
                     )
-                return
         else:
             if v.fragment != 0:
                 pass
         # "$prefix/addsingle" -Q 100 $legacygapopt -W $tuplesize -O $outnum $addsinglearg $addarg $add2ndhalfarg -C $numthreads $memopt $weightopt $treeinopt $treeoutopt $distoutopt $seqtype $model -f "-"$gop  -h $aof  $param_fft $localparam   $algopt $treealg $scoreoutarg < infile   > /dev/null 2>>"$progressfile" || exit 1
             else:
-                with open('pre', 'w') as fout, \
-                     open(v.progressfile, 'a') as ferr, \
-                     redirect(sys.stdout, fout), \
-                     redirect(sys.stderr, ferr):
+                if True:
+                # with open('pre', 'w') as fout, \
+                #      open(v.progressfile, 'a') as ferr, \
+                #      redirect(sys.stdout, fout), \
+                #      redirect(sys.stderr, ferr):
                      # open('infile', 'r') as fin, \
                      # redirect(sys.stdin, fin), \
 
@@ -549,6 +570,9 @@ class MultipleSequenceAlignment():
                                 v.oneiterationopt,
                             ])
                         )
+        # print("v.cycletbfast", v.cycletbfast)
+        # shutil.copyfile('pre', 'pre2')
+        # return
 
         while v.cycletbfast > 1:
             if v.distance == "parttree":
@@ -556,7 +580,7 @@ class MultipleSequenceAlignment():
                 # mv pre infile
                 # "$prefix/splittbfast" $legacygapopt -Z $algopt $splitopt $partorderopt $parttreeoutopt $memopt $seqtype $model -f "-"$gop -Q $spfactor -h $aof  -p $partsize -s $groupsize $treealg $outnum -i infile   > pre 2>>"$progressfile" || exit 1
             else:
-                mafft.disttbfast(W=v.minimumweight, V='-'+v.gopdist, s=v.unalignlevel, S=None)
+                # mafft.disttbfast(W=v.minimumweight, V='-'+v.gopdist, s=v.unalignlevel, S=None)
                 pass
                 # "$prefix/tbfast" -W $minimumweight -V "-"$gopdist -s $unalignlevel $legacygapopt $mergearg $termgapopt $outnum -C $numthreadstb $rnaopt $weightopt $treeoutopt $distoutopt $memopt $seqtype $model  -f "-"$gop -Q $spfactor -h $aof $param_fft  $localparam $algopt -J $treealg $scoreoutarg < pre > /dev/null 2>>"$progressfile" || exit 1
                 # fragment>0 no baai, nanimoshinai
@@ -567,7 +591,47 @@ class MultipleSequenceAlignment():
             if v.distance == "ktuples":
                 # "$prefix/dndpre" $seqtype $model -M 2 -C $numthreads < pre     > /dev/null 2>>"$progressfile" || exit 1
                 pass
-            # "$prefix/dvtditr" -W $minimumweight $bunkatsuopt -E $fixthreshold -s $unalignlevel  $legacygapopt $mergearg $outnum -C $numthreadsit -t $randomseed $rnaoptit $memopt $scorecalcopt $localparam -z 50 $seqtype $model -f "-"$gop -Q $spfactor -h $aof  -I $iterate $weightopt $treeinopt $algoptit $treealg -p $parallelizationstrategy  $scoreoutarg  -K $nadd < pre     > /dev/null 2>>"$progressfile" || exit 1
+
+            if True:
+            # with open('/dev/null', 'w') as fout, \
+            #      open(v.progressfile, 'a') as ferr, \
+            #      redirect(sys.stdout, fout), \
+            #      redirect(sys.stderr, ferr):
+                mafft.dvtditr(
+                        i = 'pre',
+                        W = v.minimumweight,
+                        E = v.fixthreshold,
+                        s = v.unalignlevel,
+                        C = v.numthreadsit,
+                        t = v.randomseed,
+                        z = 50,
+                        f = '-' + v.gop,
+                        Q = v.spfactor,
+                        h = v.aof,
+                        I = v.iterate,
+                        p = v.parallelizationstrategy,
+                        K = v.nadd,
+                        **self._vars_to_kwargs([
+                            v.bunkatsuopt,
+                            v.legacygapopt,
+                            v.mergearg,
+                            v.outnum,
+                            v.rnaoptit,
+                            v.memopt,
+                            v.scorecalcopt,
+                            v.localparam,
+                            v.seqtype,
+                            v.model,
+                            v.weightopt,
+                            v.treeinopt,
+                            v.algoptit,
+                            v.treealg,
+                            v.scoreoutarg,
+                        ])
+                    )
+            # "$prefix/dvtditr" -W $minimumweight $bunkatsuopt -E $fixthreshold -s $unalignlevel  $legacygapopt $mergearg $outnum -C $numthreadsit -t $randomseed $rnaoptit $memopt $scorecalcopt $localparam
+            # -z 50 $seqtype $model -f "-"$gop -Q $spfactor -h $aof  -I $iterate $weightopt $treeinopt $algoptit $treealg -p $parallelizationstrategy  $scoreoutarg
+            # -K $nadd < pre     > /dev/null 2>>"$progressfile" || exit 1
 
         print(v.strategy)
         print(v.explanation)
@@ -588,8 +652,10 @@ class MultipleSequenceAlignment():
 
     def launch(self):
         """
-        Should probably use a seperate process to launch the MAFFT core.
-        Save results on a temporary directory, use fetch() to retrieve them.
+        Should always use a seperate process to launch the MAFFT core,
+        as the script uses global I/O redirection  that could affect threaded
+        applications, while some internal functions may call exit().
+        Save results in a temporary directory, use fetch() to retrieve them.
         """
         # When the last reference of TemporaryDirectory is gone,
         # the directory is automatically cleaned up, so keep it here.

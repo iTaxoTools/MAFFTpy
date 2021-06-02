@@ -459,7 +459,7 @@ void putlocalhom3( char *al1, char *al2, LocalHom *localhompt, int off1, int off
 				start1 = pos1; start2 = pos2;
 				st = 1;
 			}
-			score += (double)n_dis[(int)amino_n[(unsigned char)*pt1]][(int)amino_n[(unsigned char)*pt2]]; // - offset はいらないかも
+			score += (double)n_dis[(int)amino_n[(unsigned char)*pt1]][(int)amino_n[(unsigned char)*pt2]]; // - offset 鐃熟わ申鐃緒申鐃淑わ申鐃緒申鐃緒申
 //			fprintf( stderr, "%c-%c, score(0) = %f\n", *pt1, *pt2, score );
 		}
 		if( *pt1++ != '-' ) pos1++;
@@ -595,7 +595,7 @@ void putlocalhom_ext( char *al1, char *al2, LocalHom *localhompt, int off1, int 
 				start1 = pos1; start2 = pos2;
 				st = 1;
 			}
-			iscore += n_dis[(int)amino_n[(unsigned char)*pt1]][(int)amino_n[(unsigned char)*pt2]]; // - offset はいらないかも
+			iscore += n_dis[(int)amino_n[(unsigned char)*pt1]][(int)amino_n[(unsigned char)*pt2]]; // - offset 鐃熟わ申鐃緒申鐃淑わ申鐃緒申鐃緒申
 //			fprintf( stderr, "%c-%c, iscore(0) = %d\n", *pt1, *pt2, iscore );
 		}
 		if( *pt1++ != '-' ) pos1++;
@@ -618,7 +618,7 @@ void putlocalhom_ext( char *al1, char *al2, LocalHom *localhompt, int off1, int 
 		tmppt->end1   = end1  ;
 		tmppt->end2   = end2  ;
 		tmppt->korh   = korh  ;
-	
+
 #if 1
 		if( divpairscore )
 		{
@@ -782,7 +782,7 @@ void putlocalhom2( char *al1, char *al2, LocalHom *localhompt, int off1, int off
 				start1 = pos1; start2 = pos2;
 				st = 1;
 			}
-			iscore += n_dis[(int)amino_n[(unsigned char)*pt1]][(int)amino_n[(unsigned char)*pt2]]; // - offset はいらないかも
+			iscore += n_dis[(int)amino_n[(unsigned char)*pt1]][(int)amino_n[(unsigned char)*pt2]]; // - offset 鐃熟わ申鐃緒申鐃淑わ申鐃緒申鐃緒申
 //			fprintf( stderr, "%c-%c, iscore(0) = %d\n", *pt1, *pt2, iscore );
 		}
 		if( *pt1++ != '-' ) pos1++;
@@ -807,7 +807,7 @@ void putlocalhom2( char *al1, char *al2, LocalHom *localhompt, int off1, int off
 		tmppt->korh   = korh  ;
 		tmppt->nokori  += 1;
 		localhompt->last  = tmppt;
-	
+
 #if 1
 		if( divpairscore )
 		{
@@ -917,7 +917,7 @@ void putlocalhom( char *al1, char *al2, LocalHom *localhompt, int off1, int off2
 				start1 = pos1; start2 = pos2;
 				st = 1;
 			}
-			score += (double)n_dis[(int)amino_n[(unsigned char)*pt1]][(int)amino_n[(unsigned char)*pt2]]; // - offset はいらないかも
+			score += (double)n_dis[(int)amino_n[(unsigned char)*pt1]][(int)amino_n[(unsigned char)*pt2]]; // - offset 鐃熟わ申鐃緒申鐃淑わ申鐃緒申鐃緒申
 //			fprintf( stderr, "%c-%c, score(0) = %f\n", *pt1, *pt2, score );
 		}
 		if( *pt1++ != '-' ) pos1++;
@@ -999,21 +999,21 @@ void ErrorExit( char *message )
 
 void strncpy_caseC( char *str1, char *str2, int len )
 {
-	if( dorp == 'd' && upperCase > 0 ) 
+	if( dorp == 'd' && upperCase > 0 )
 	{
 		while( len-- )
 			*str1++ = toupper( *str2++ );
 	}
 	else strncpy( str1, str2, len );
 }
-	
+
 void seqUpper( int nseq, char **seq )
 {
 	int i, j, len;
-	for( i=0; i<nseq; i++ ) 
+	for( i=0; i<nseq; i++ )
 	{
 		len = strlen( seq[i] );
-		for( j=0; j<len; j++ ) 
+		for( j=0; j<len; j++ )
 			seq[i][j] = toupper( seq[i][j] );
 	}
 }
@@ -1021,10 +1021,10 @@ void seqUpper( int nseq, char **seq )
 void seqLower( int nseq, char **seq )
 {
 	int i, j, len;
-	for( i=0; i<nseq; i++ ) 
+	for( i=0; i<nseq; i++ )
 	{
 		len = strlen( seq[i] );
-		for( j=0; j<len; j++ ) 
+		for( j=0; j<len; j++ )
 			seq[i][j] = tolower( seq[i][j] );
 	}
 }
@@ -1033,7 +1033,7 @@ int getaline_fp_eof( char *s, int l, FILE *fp )  /* end of file -> return 1 */
 {
     int c, i = 0 ;
     int noteofflag = 0;
-    for( i=0; i<l && ( noteofflag = ( (c=getc(fp)) != EOF ) ) && c != '\n'; i++ ) 
+    for( i=0; i<l && ( noteofflag = ( (c=getc(fp)) != EOF ) ) && c != '\n'; i++ )
     	*s++ = c;
     *s = '\0' ;
      return( !noteofflag );
@@ -1047,7 +1047,7 @@ char    s[] ; int l ; FILE *fp ;
 
 		if( feof( fp ) ) return( 1 );
 
-		for( i=0; i<l && ( noteofflag = ( (c=getc(fp)) != EOF ) ) && c != '\n'; i++ ) 
+		for( i=0; i<l && ( noteofflag = ( (c=getc(fp)) != EOF ) ) && c != '\n'; i++ )
         { *s++ = c ; }
         *s = '\0' ;
 		if( c != '\n' && c != EOF ) while( getc(fp) != '\n' )
@@ -1055,17 +1055,17 @@ char    s[] ; int l ; FILE *fp ;
 		return( !noteofflag );
 }
 
-int myfgets(s, l, fp)  /* l以上は、行末まで読み飛ばす */
+int myfgets(s, l, fp)  /* l鐃淑常申鐃熟￥申鐃緒申鐃緒申鐃殉わ申鐃宿わ申鐃緒申鐃出わ申 */
 char    s[] ; int l ; FILE *fp ;
 {
         int     c = 0, i = 0 ;
 
 		if( feof( fp ) ) return( 1 );
 
-		for( i=0; i<l && ( c=getc( fp ) ) != '\n'; i++ ) 
+		for( i=0; i<l && ( c=getc( fp ) ) != '\n'; i++ )
         	*s++ = c;
         *s = '\0' ;
-		if( c != '\n' ) 
+		if( c != '\n' )
 			while( getc(fp) != '\n' )
 				;
 		return( 0 );
@@ -1095,7 +1095,7 @@ void PreRead( FILE *fp, int *locnjob, int *locnlenmax )
 
 	fgets( b, B-1, fp ); *locnjob = atoi( b );
 	*locnlenmax = 0;
-	i=0; 
+	i=0;
 	while( i<*locnjob )
 	{
 		fgets( b, B-1, fp );
@@ -1111,13 +1111,13 @@ void PreRead( FILE *fp, int *locnjob, int *locnlenmax )
 		fprintf( stderr, "TOO LONG SEQUENCE!\n" );
 		exit( 1 );
 	}
-	if( njob > M  ) 
+	if( njob > M  )
 	{
 		fprintf( stderr, "TOO MANY SEQUENCE!\n" );
 		fprintf( stderr, "%d > %d\n", njob, M );
 		exit( 1 );
 	}
-}	
+}
 
 int allSpace( char *str )
 {
@@ -1125,7 +1125,7 @@ int allSpace( char *str )
 	while( *str ) value *= ( !isdigit( *str++ ) );
 	return( value );
 }
-	
+
 void Read( char name[M][B], int nlen[M], char **seq )
 {
 	extern void FRead( FILE *x, char y[M][B], int z[M], char **w );
@@ -1135,7 +1135,7 @@ void Read( char name[M][B], int nlen[M], char **seq )
 
 void FRead( FILE *fp, char name[][B], int nlen[], char **seq )
 {
-	int i, j; 
+	int i, j;
 	char b[B];
 
 	fgets( b, B-1, fp );
@@ -1144,22 +1144,22 @@ void FRead( FILE *fp, char name[][B], int nlen[], char **seq )
 #endif
 
     if( strstr( b, "onnet" ) ) scoremtx = 1;
-    else if( strstr( b, "DnA" ) ) 
+    else if( strstr( b, "DnA" ) )
 	{
-		scoremtx = -1; 
+		scoremtx = -1;
 		upperCase = -1;
 	}
-    else if( strstr( b, "dna" ) ) 
+    else if( strstr( b, "dna" ) )
 	{
-		scoremtx = -1; 
+		scoremtx = -1;
 		upperCase = 0;
 	}
 	else if( strstr( b, "DNA" ) )
 	{
-		scoremtx = -1; 
+		scoremtx = -1;
 		upperCase = 1;
 	}
-    else if( strstr( b, "M-Y" ) || strstr( b, "iyata" ) ) scoremtx = 2; 
+    else if( strstr( b, "M-Y" ) || strstr( b, "iyata" ) ) scoremtx = 2;
     else scoremtx = 0;
 #if DEBUG
 	fprintf( stderr, " %s->scoremtx = %d\n", b, scoremtx );
@@ -1235,7 +1235,7 @@ void FRead( FILE *fp, char name[][B], int nlen[], char **seq )
 			getaline_fp_eof_new( b, B-1, fp );
 			/*	b[C] = 0;  */
 			strcat( seq[i], b );
-		} 
+		}
 		seq[i][nlen[i]] = 0;
 	}
 	if( scoremtx == -1 && upperCase != -1 ) seqLower( njob, seq );
@@ -1276,7 +1276,7 @@ static int onlyGraph( char *str )
 	char *bk = str;
 
 //	while( (tmp=*str++) ) if( isgraph( tmp ) ) *res++ = tmp;
-	while( (tmp=*str++) ) 
+	while( (tmp=*str++) )
 	{
 		if( 0x20 < tmp && tmp < 0x7f ) *res++ = tmp;
 		if( tmp == '>' || tmp == '(' )
@@ -1315,7 +1315,7 @@ static int charfilter( unsigned char *str )
 			exit( 1 );
 		}
 //		if( 0x20 < tmp && tmp < 0x7f )
-//		if( 0x0 <=tmp && tmp < 0x100 && 
+//		if( 0x0 <=tmp && tmp < 0x100 &&
 		if( tmp != 0x0a && tmp != 0x20 && tmp != 0x0d )
 //		if( tmp != '\n' && tmp != ' ' && tmp != '\t' ) // unprintable characters mo ok.
 		{
@@ -1371,10 +1371,10 @@ char *load1SeqWithoutName_realloc_casepreserve( FILE *fpp )
 	cbuf = val;
 
 	b = '\n';
-	while( ( c = getc( fpp ) ) != EOF &&           
+	while( ( c = getc( fpp ) ) != EOF &&
           !( ( c == '>' || c == EOF ) && b == '\n' ) )
 	{
-		*cbuf++ = (char)c;  /* 長すぎてもしらない */
+		*cbuf++ = (char)c;  /* 長鐃緒申鐃緒申鐃銃もし鐃緒申鐃淑わ申 */
 		if( cbuf - val == size )
 		{
 			size += N;
@@ -1409,10 +1409,10 @@ char *load1SeqWithoutName_realloc( FILE *fpp )
 	cbuf = val;
 
 	b = '\n';
-	while( ( c = getc( fpp ) ) != EOF &&           
+	while( ( c = getc( fpp ) ) != EOF &&
           !( ( c == '>' || c == EOF ) && b == '\n' ) )
 	{
-		*cbuf++ = (char)c;  /* 長すぎてもしらない */
+		*cbuf++ = (char)c;  /* 長鐃緒申鐃緒申鐃銃もし鐃緒申鐃淑わ申 */
 		if( cbuf - val == size )
 		{
 			size += N;
@@ -1455,7 +1455,7 @@ int load1SeqWithoutName_new( FILE *fpp, char *cbuf )
 	while( ( c = getc( fpp ) ) != EOF &&                    /* by T. Nishiyama */
           !( ( c == '>' || c == EOF ) && b == '\n' ) )
 	{
-		*cbuf++ = (char)c;  /* 長すぎてもしらない */
+		*cbuf++ = (char)c;  /* 長鐃緒申鐃緒申鐃銃もし鐃緒申鐃淑わ申 */
 		b = c;
 	}
 	ungetc( c, fpp );
@@ -1471,7 +1471,7 @@ int load1SeqWithoutName_new( FILE *fpp, char *cbuf )
 
 void readDataforgaln( FILE *fp, char **name, int *nlen, char **seq )
 {
-	int i; 
+	int i;
 	static char *tmpseq = NULL;
 
 #if 0
@@ -1486,15 +1486,15 @@ void readDataforgaln( FILE *fp, char **name, int *nlen, char **seq )
 
 	for( i=0; i<njob; i++ )
 	{
-		name[i][0] = '='; getc( fp ); 
+		name[i][0] = '='; getc( fp );
 #if 0
-		fgets( name[i]+1, B-2, fp ); 
+		fgets( name[i]+1, B-2, fp );
 		j = strlen( name[i] );
 		if( name[i][j-1] != '\n' )
 			ErrorExit( "Too long name\n" );
 		name[i][j-1] = 0;
 #else
-		myfgets( name[i]+1, B-2, fp ); 
+		myfgets( name[i]+1, B-2, fp );
 #endif
 #if 0
 		fprintf( stderr, "name[%d] = %s\n", i, name[i] );
@@ -1512,7 +1512,7 @@ void readDataforgaln( FILE *fp, char **name, int *nlen, char **seq )
 
 void readData_varlen( FILE *fp, char **name, int *nlen, char **seq )
 {
-	int i; 
+	int i;
 	static char *tmpseq = NULL;
 
 	rewind( fp );
@@ -1520,15 +1520,15 @@ void readData_varlen( FILE *fp, char **name, int *nlen, char **seq )
 
 	for( i=0; i<njob; i++ )
 	{
-		name[i][0] = '='; getc( fp ); 
+		name[i][0] = '='; getc( fp );
 #if 0
-		fgets( name[i]+1, B-2, fp ); 
+		fgets( name[i]+1, B-2, fp );
 		j = strlen( name[i] );
 		if( name[i][j-1] != '\n' )
 			ErrorExit( "Too long name\n" );
 		name[i][j-1] = 0;
 #else
-		myfgets( name[i]+1, B-2, fp ); 
+		myfgets( name[i]+1, B-2, fp );
 #endif
 #if 0
 		fprintf( stderr, "name[%d] = %s\n", i, name[i] );
@@ -1548,7 +1548,7 @@ void readData_varlen( FILE *fp, char **name, int *nlen, char **seq )
 
 void readData_pointer2( FILE *fp, int nseq, char **name, int *nlen, char **seq )
 {
-	int i; 
+	int i;
 	static char *tmpseq = NULL;
 
 #if 0
@@ -1563,15 +1563,15 @@ void readData_pointer2( FILE *fp, int nseq, char **name, int *nlen, char **seq )
 
 	for( i=0; i<nseq; i++ )
 	{
-		name[i][0] = '='; getc( fp ); 
+		name[i][0] = '='; getc( fp );
 #if 0
-		fgets( name[i]+1, B-2, fp ); 
+		fgets( name[i]+1, B-2, fp );
 		j = strlen( name[i] );
 		if( name[i][j-1] != '\n' )
 			ErrorExit( "Too long name\n" );
 		name[i][j-1] = 0;
 #else
-		myfgets( name[i]+1, B-2, fp ); 
+		myfgets( name[i]+1, B-2, fp );
 #endif
 #if 0
 		fprintf( stderr, "name[%d] = %s\n", i, name[i] );
@@ -1609,7 +1609,7 @@ void readData_pointer2( FILE *fp, int nseq, char **name, int *nlen, char **seq )
 
 void readData_pointer_casepreserve( FILE *fp, char **name, int *nlen, char **seq )
 {
-	int i; 
+	int i;
 	static char *tmpseq = NULL;
 
 #if 0
@@ -1624,15 +1624,15 @@ void readData_pointer_casepreserve( FILE *fp, char **name, int *nlen, char **seq
 
 	for( i=0; i<njob; i++ )
 	{
-		name[i][0] = '='; getc( fp ); 
+		name[i][0] = '='; getc( fp );
 #if 0
-		fgets( name[i]+1, B-2, fp ); 
+		fgets( name[i]+1, B-2, fp );
 		j = strlen( name[i] );
 		if( name[i][j-1] != '\n' )
 			ErrorExit( "Too long name\n" );
 		name[i][j-1] = 0;
 #else
-		myfgets( name[i]+1, B-2, fp ); 
+		myfgets( name[i]+1, B-2, fp );
 #endif
 #if 0
 		fprintf( stderr, "name[%d] = %s\n", i, name[i] );
@@ -1647,21 +1647,21 @@ void readData_pointer_casepreserve( FILE *fp, char **name, int *nlen, char **seq
 
 int copydatafromgui( char **namegui, char **seqgui, char **name, int *nlen, char **seq )
 {
-	int i; 
+	int i;
 
 
 	for( i=0; i<njob; i++ )
 	{
-		name[i][0] = '='; 
+		name[i][0] = '=';
 		strncpy( name[i]+1, namegui[i], B-2 );
 		name[i][B-1] = 0;
 
 		strcpy( seq[i], seqgui[i] );
 		nlen[i] = strlen( seq[i] );
 	}
-	if( dorp == 'd' ) 
+	if( dorp == 'd' )
 		seqLower( njob, seq );
-	else if( dorp == 'p' ) 
+	else if( dorp == 'p' )
 		seqUpper( njob, seq );
 	else
 	{
@@ -1694,7 +1694,7 @@ int copydatafromgui( char **namegui, char **seqgui, char **name, int *nlen, char
 
 void readData_pointer( FILE *fp, char **name, int *nlen, char **seq )
 {
-	int i; 
+	int i;
 	static char *tmpseq = NULL;
 
 #if 0
@@ -1709,15 +1709,15 @@ void readData_pointer( FILE *fp, char **name, int *nlen, char **seq )
 
 	for( i=0; i<njob; i++ )
 	{
-		name[i][0] = '='; getc( fp ); 
+		name[i][0] = '='; getc( fp );
 #if 0
-		fgets( name[i]+1, B-2, fp ); 
+		fgets( name[i]+1, B-2, fp );
 		j = strlen( name[i] );
 		if( name[i][j-1] != '\n' )
 			ErrorExit( "Too long name\n" );
 		name[i][j-1] = 0;
 #else
-		myfgets( name[i]+1, B-2, fp ); 
+		myfgets( name[i]+1, B-2, fp );
 #endif
 #if 0
 		fprintf( stderr, "name[%d] = %s\n", i, name[i] );
@@ -1754,7 +1754,7 @@ void readData_pointer( FILE *fp, char **name, int *nlen, char **seq )
 
 void readData( FILE *fp, char name[][B], int nlen[], char **seq )
 {
-	int i; 
+	int i;
 	static char *tmpseq = NULL;
 
 #if 0
@@ -1769,15 +1769,15 @@ void readData( FILE *fp, char name[][B], int nlen[], char **seq )
 
 	for( i=0; i<njob; i++ )
 	{
-		name[i][0] = '='; getc( fp ); 
+		name[i][0] = '='; getc( fp );
 #if 0
-		fgets( name[i]+1, B-2, fp ); 
+		fgets( name[i]+1, B-2, fp );
 		j = strlen( name[i] );
 		if( name[i][j-1] != '\n' )
 			ErrorExit( "Too long name\n" );
 		name[i][j-1] = 0;
 #else
-		myfgets( name[i]+1, B-2, fp ); 
+		myfgets( name[i]+1, B-2, fp );
 #endif
 #if 0
 		fprintf( stderr, "name[%d] = %s\n", i, name[i] );
@@ -1795,7 +1795,7 @@ void readData( FILE *fp, char name[][B], int nlen[], char **seq )
 
 void cutAlignment( FILE *fp, int **regtable, char **revtable, int *outtable, char **name, char **outseq )
 {
-	int i, j; 
+	int i, j;
 	int outlen;
 	static char *tmpseq = NULL;
 	static char *dumname = NULL;
@@ -1815,8 +1815,8 @@ void cutAlignment( FILE *fp, int **regtable, char **revtable, int *outtable, cha
 	npos = 0;
 	for( i=0; i<njob; i++ )
 	{
-		dumname[0] = '>'; getc( fp ); 
-		myfgets( dumname+1, B-1, fp ); 
+		dumname[0] = '>'; getc( fp );
+		myfgets( dumname+1, B-1, fp );
 		tmpseq = load1SeqWithoutName_realloc_casepreserve( fp );
 
 		if( outtable[i] )
@@ -1824,10 +1824,10 @@ void cutAlignment( FILE *fp, int **regtable, char **revtable, int *outtable, cha
 //			putc( '>', stdout );
 //			puts( dumname+1 );
 
-	
+
 			strncat( name[npos], dumname, B-1 );
 			name[npos][B-1] = 0;
-	
+
 			if( dorp == 'd' && upperCase != -1 ) seqLower( 1, &tmpseq );
 			seqlen = strlen( tmpseq );
 			lpos = 0;
@@ -1884,7 +1884,7 @@ void cutAlignment( FILE *fp, int **regtable, char **revtable, int *outtable, cha
 
 void cutData( FILE *fp, int **regtable, char **revtable, int *outtable )
 {
-	int i, j; 
+	int i, j;
 	int outlen, seqlen, startpos, endpos;
 	static char *tmpseq = NULL;
 	static char *dumname = NULL;
@@ -1900,8 +1900,8 @@ void cutData( FILE *fp, int **regtable, char **revtable, int *outtable )
 
 	for( i=0; i<njob; i++ )
 	{
-		dumname[0] = '='; getc( fp ); 
-		myfgets( dumname+1, B-2, fp ); 
+		dumname[0] = '='; getc( fp );
+		myfgets( dumname+1, B-2, fp );
 		tmpseq = load1SeqWithoutName_realloc_casepreserve( fp );
 
 		if( outtable[i] )
@@ -1925,21 +1925,21 @@ void cutData( FILE *fp, int **regtable, char **revtable, int *outtable )
 				for( j=0; j<5; j++ )
 				{
 					if( regtable[i][j*2] == -1 && regtable[i][j*2+1] == -1 ) continue;
-	
+
 					startpos = regtable[i][j*2];
 					endpos   = regtable[i][j*2+1];
-	
+
 					if( startpos > endpos )
 					{
 						endpos   = regtable[i][j*2];
 						startpos = regtable[i][j*2+1];
 					}
-	
+
 					if( startpos < 0 ) startpos = 0;
 					if( endpos   < 0 ) endpos   = 0;
 					if( endpos   >= seqlen ) endpos   = seqlen-1;
 					if( startpos >= seqlen ) startpos = seqlen-1;
-	
+
 					outlen = endpos - startpos + 1;
 					if( revtable[i][j] == 'f' )
 					{
@@ -1952,7 +1952,7 @@ void cutData( FILE *fp, int **regtable, char **revtable, int *outtable )
 					{
 						fs = AllocateCharVec( outlen+1 );
 						rs = AllocateCharVec( outlen+1 );
-	
+
 						fs[outlen] = 0;
 						strncpy( fs, tmpseq+startpos, outlen );
 						sreverse( rs, fs );
@@ -1969,7 +1969,7 @@ void cutData( FILE *fp, int **regtable, char **revtable, int *outtable )
 
 void catData( FILE *fp )
 {
-	int i; 
+	int i;
 	static char *tmpseq = NULL;
 	static char *dumname = NULL;
 //	char *cptr;
@@ -1984,8 +1984,8 @@ void catData( FILE *fp )
 
 	for( i=0; i<njob; i++ )
 	{
-		dumname[0] = '='; getc( fp ); 
-		myfgets( dumname+1, B-2, fp ); 
+		dumname[0] = '='; getc( fp );
+		myfgets( dumname+1, B-2, fp );
 		if( outnumber )
 		{
 			fprintf( stdout, ">_numo_s_%08d_numo_e_", i+1 );
@@ -2010,7 +2010,7 @@ int countATGCandN( char *s, int *countN, int *total )
 	char c;
 	nN = nATGC = nChar = 0;
 
-	if( *s == 0 ) 
+	if( *s == 0 )
 	{
 		*total = 0;
 		return( 0 );
@@ -2044,7 +2044,7 @@ int countATGC( char *s, int *total )
 	char c;
 	nATGC = nChar = 0;
 
-	if( *s == 0 ) 
+	if( *s == 0 )
 	{
 		*total = 0;
 		return( 0 );
@@ -2141,12 +2141,12 @@ void getnumlen_casepreserve( FILE *fp, int *nlenminpt )
 //	fprintf( stderr, "##### atgcfreq = %f\n", atgcfreq );
 	if( dorp == NOTSPECIFIED )
 	{
-		if( atgcfreq > 0.75 ) 	
+		if( atgcfreq > 0.75 )
 		{
 			dorp = 'd';
 			upperCase = -1;
 		}
-		else                  
+		else
 		{
 			dorp = 'p';
 			upperCase = 0;
@@ -2189,12 +2189,12 @@ void getnumlen_nogap_countn( FILE *fp, int *nlenminpt, double *nfreq )
 //	fprintf( stderr, "##### atgcfreq = %f, *nfreq = %f\n", atgcfreq, *nfreq );
 	if( dorp == NOTSPECIFIED )
 	{
-		if( atgcfreq > 0.75 ) 	
+		if( atgcfreq > 0.75 )
 		{
 			dorp = 'd';
 			upperCase = -1;
 		}
-		else                  
+		else
 		{
 			dorp = 'p';
 			upperCase = 0;
@@ -2236,12 +2236,12 @@ void getnumlen_nogap( FILE *fp, int *nlenminpt )
 //	fprintf( stderr, "##### atgcfreq = %f\n", atgcfreq );
 	if( dorp == NOTSPECIFIED )
 	{
-		if( atgcfreq > 0.75 ) 	
+		if( atgcfreq > 0.75 )
 		{
 			dorp = 'd';
 			upperCase = -1;
 		}
-		else                  
+		else
 		{
 			dorp = 'p';
 			upperCase = 0;
@@ -2287,12 +2287,12 @@ void getnumlen_nogap_outallreg( FILE *fp, int *nlenminpt )
 //	fprintf( stderr, "##### atgcfreq = %f\n", atgcfreq );
 	if( dorp == NOTSPECIFIED )
 	{
-		if( atgcfreq > 0.75 ) 	
+		if( atgcfreq > 0.75 )
 		{
 			dorp = 'd';
 			upperCase = -1;
 		}
-		else                  
+		else
 		{
 			dorp = 'p';
 			upperCase = 0;
@@ -2305,27 +2305,27 @@ static void escapehtml( char *res, char *ori, int maxlen )
 	char *res0 = res;
 	while( *ori )
 	{
-		if( *ori == '<' ) 
+		if( *ori == '<' )
 		{
 			strcpy( res, "&lt;" );
 			res += 3;
 		}
-		else if( *ori == '>' ) 
+		else if( *ori == '>' )
 		{
 			strcpy( res, "&gt;" );
 			res += 3;
 		}
-		else if( *ori == '&' ) 
+		else if( *ori == '&' )
 		{
 			strcpy( res, "&amp;" );
 			res += 4;
 		}
-		else if( *ori == '"' ) 
+		else if( *ori == '"' )
 		{
 			strcpy( res, "&quot;" );
 			res += 5;
 		}
-		else if( *ori == ' ' ) 
+		else if( *ori == ' ' )
 		{
 			strcpy( res, "&nbsp;" );
 			res += 5;
@@ -2390,18 +2390,18 @@ void getnumlen_nogap_outallreg_web( FILE *fp, FILE *ofp, int *nlenminpt, int *is
 //		fprintf( stderr, "##### atgcfreq = %f\n", atgcfreq );
 //		if( dorp == NOTSPECIFIED ) // you kentou
 		{
-			if( atgcfreq > 0.75 ) 	
+			if( atgcfreq > 0.75 )
 			{
 				dorp = 'd';
 				upperCase = -1;
 			}
-			else                  
+			else
 			{
 				dorp = 'p';
 				upperCase = 0;
 			}
 		}
-	
+
 		if( dorp == 'd' ) lennormalchar = countnormalletters( tmpseq, "atgcuATGCU" );
 		else              lennormalchar = countnormalletters( tmpseq, "ARNDCQEGHILKMFPSTWYVarndcqeghilkmfpstwyv" );
 		free( tmpseq );
@@ -2436,12 +2436,12 @@ void getnumlen_nogap_outallreg_web( FILE *fp, FILE *ofp, int *nlenminpt, int *is
 	fprintf( stderr, "##### atgcfreq = %f\n", atgcfreq );
 //	if( dorp == NOTSPECIFIED ) // you kentou
 	{
-		if( atgcfreq > 0.75 ) 	
+		if( atgcfreq > 0.75 )
 		{
 			dorp = 'd';
 			upperCase = -1;
 		}
-		else                  
+		else
 		{
 			dorp = 'p';
 			upperCase = 0;
@@ -2492,7 +2492,7 @@ void getnumlen( FILE *fp )
 	setmode( fileno( stdout ), O_BINARY );
 #endif
 
-	
+
 	tmpname = AllocateCharVec( N );
 	njob = countKUorWA( fp );
 	searchKUorWA( fp );
@@ -2516,12 +2516,12 @@ void getnumlen( FILE *fp )
 //	fprintf( stderr, "##### atgcfreq = %f\n", atgcfreq );
 	if( dorp == NOTSPECIFIED )
 	{
-		if( atgcfreq > 0.75 ) 	
+		if( atgcfreq > 0.75 )
 		{
 			dorp = 'd';
 			upperCase = -1;
 		}
-		else                  
+		else
 		{
 			dorp = 'p';
 			upperCase = 0;
@@ -2529,7 +2529,7 @@ void getnumlen( FILE *fp )
 	}
 	free( tmpname );
 }
-	
+
 
 
 void WriteGapFill( FILE *fp, int locnjob, char name[][B], int nlen[M], char **aseq )
@@ -2664,9 +2664,9 @@ void readhat2_doublehalf_part_pointer( FILE *fp, int nseq, int nadd, char **name
     char b[B];
 
     fgets( b, B, fp );
-//  fgets( b, B, fp ); b[5] = 0; nseq0 = atoi( b ); if( nseq != nseq0 ) 
+//  fgets( b, B, fp ); b[5] = 0; nseq0 = atoi( b ); if( nseq != nseq0 )
     fgets( b, B, fp ); nseq0 = atoi( b );  // 2020/Oct/23
-	if( nseq != nseq0 ) 
+	if( nseq != nseq0 )
 	{
 		fprintf( stderr, "%d != %d\n", nseq, nseq0 );
 		ErrorExit( "hat2 is wrong." );
@@ -2675,13 +2675,13 @@ void readhat2_doublehalf_part_pointer( FILE *fp, int nseq, int nadd, char **name
     for( i=0; i<nseq; i++ )
     {
 #if 0
-        getaline_fp_eof( b, B, fp ); 
+        getaline_fp_eof( b, B, fp );
 #else
 		myfgets( b, B-2, fp );
 #endif
 #if 0
 		j = MIN( strlen( b+6 ), 10 );
-        if( strncmp( name[i], b+6 , j ) ) 
+        if( strncmp( name[i], b+6 , j ) )
 		{
 			fprintf( stderr, "Error in hat2\n" );
 			fprintf( stderr, "%s != %s\n", b, name[i] );
@@ -2702,7 +2702,7 @@ void readhat2_doublehalf_pointer( FILE *fp, int nseq, char **name, double **mtx 
     char b[B];
 
     fgets( b, B, fp );
-    fgets( b, B, fp ); b[5] = 0; nseq0 = atoi( b ); if( nseq != nseq0 ) 
+    fgets( b, B, fp ); b[5] = 0; nseq0 = atoi( b ); if( nseq != nseq0 )
 	{
 		fprintf( stderr, "%d != %d\n", nseq, nseq0 );
 		ErrorExit( "hat2 is wrong." );
@@ -2711,13 +2711,13 @@ void readhat2_doublehalf_pointer( FILE *fp, int nseq, char **name, double **mtx 
     for( i=0; i<nseq; i++ )
     {
 #if 0
-        getaline_fp_eof( b, B, fp ); 
+        getaline_fp_eof( b, B, fp );
 #else
 		myfgets( b, B-2, fp );
 #endif
 #if 0
 		j = MIN( strlen( b+6 ), 10 );
-        if( strncmp( name[i], b+6 , j ) ) 
+        if( strncmp( name[i], b+6 , j ) )
 		{
 			fprintf( stderr, "Error in hat2\n" );
 			fprintf( stderr, "%s != %s\n", b, name[i] );
@@ -2741,13 +2741,13 @@ void readhat2_doublehalf( FILE *fp, int nseq, char name[M][B], double **mtx )
     for( i=0; i<nseq; i++ )
     {
 #if 0
-        getaline_fp_eof( b, B, fp ); 
+        getaline_fp_eof( b, B, fp );
 #else
 		myfgets( b, B-2, fp );
 #endif
 #if 0
 		j = MIN( strlen( b+6 ), 10 );
-        if( strncmp( name[i], b+6 , j ) ) 
+        if( strncmp( name[i], b+6 , j ) )
 		{
 			fprintf( stderr, "Error in hat2\n" );
 			fprintf( stderr, "%s != %s\n", b, name[i] );
@@ -2771,13 +2771,13 @@ void readhat2_double( FILE *fp, int nseq, char name[M][B], double **mtx )
     for( i=0; i<nseq; i++ )
     {
 #if 0
-        getaline_fp_eof( b, B, fp ); 
+        getaline_fp_eof( b, B, fp );
 #else
 		myfgets( b, B-2, fp );
 #endif
 #if 0
 		j = MIN( strlen( b+6 ), 10 );
-        if( strncmp( name[i], b+6 , j ) ) 
+        if( strncmp( name[i], b+6 , j ) )
 		{
 			fprintf( stderr, "Error in hat2\n" );
 			fprintf( stderr, "%s != %s\n", b, name[i] );
@@ -2801,13 +2801,13 @@ void readhat2_int( FILE *fp, int nseq, char name[M][B], int **mtx )
     for( i=0; i<nseq; i++ )
     {
 #if 0
-        getaline_fp_eof( b, B, fp ); 
+        getaline_fp_eof( b, B, fp );
 #else
 		myfgets( b, B-2, fp );
 #endif
 #if 0
 		j = MIN( strlen( b+6 ), 10 );
-        if( strncmp( name[i], b+6 , j ) ) 
+        if( strncmp( name[i], b+6 , j ) )
 		{
 			fprintf( stderr, "Error in hat2\n" );
 			fprintf( stderr, "%s != %s\n", b, name[i] );
@@ -2832,13 +2832,13 @@ void readhat2_pointer( FILE *fp, int nseq, char **name, double **mtx )
     for( i=0; i<nseq; i++ )
     {
 #if 0
-        getaline_fp_eof( b, B, fp ); 
+        getaline_fp_eof( b, B, fp );
 #else
 		myfgets( b, B-2, fp );
 #endif
 #if 0
 		j = MIN( strlen( b+6 ), 10 );
-        if( strncmp( name[i], b+6 , j ) ) 
+        if( strncmp( name[i], b+6 , j ) )
 		{
 			fprintf( stderr, "Error in hat2\n" );
 			fprintf( stderr, "%s != %s\n", b, name[i] );
@@ -2862,13 +2862,13 @@ void readhat2( FILE *fp, int nseq, char name[M][B], double **mtx )
     for( i=0; i<nseq; i++ )
     {
 #if 0
-        getaline_fp_eof( b, B, fp ); 
+        getaline_fp_eof( b, B, fp );
 #else
 		myfgets( b, B-2, fp );
 #endif
 #if 0
 		j = MIN( strlen( b+6 ), 10 );
-        if( strncmp( name[i], b+6 , j ) ) 
+        if( strncmp( name[i], b+6 , j ) )
 		{
 			fprintf( stderr, "Error in hat2\n" );
 			fprintf( stderr, "%s != %s\n", b, name[i] );
@@ -2917,7 +2917,7 @@ void WriteFloatHat2_pointer( FILE *hat2p, int locnjob, char **name, double **mtx
 	for( i=0; i<locnjob; i++ ) fprintf( hat2p, "%4d. %s\n", i+1, name[i] );
 	for( i=0; i<locnjob; i++ )
 	{
-		for( j=1; j<locnjob-i; j++ ) 
+		for( j=1; j<locnjob-i; j++ )
 		{
 			fprintf( hat2p, DFORMAT, mtx[i][j] );
 			if( j % 12 == 0 || j == locnjob-i-1 ) fprintf( hat2p, "\n" );
@@ -2938,7 +2938,7 @@ void WriteFloatHat2( FILE *hat2p, int locnjob, char name[M][B], double **mtx )
 	for( i=0; i<locnjob; i++ ) fprintf( hat2p, "%4d. %s\n", i+1, name[i] );
 	for( i=0; i<locnjob; i++ )
 	{
-		for( j=1; j<locnjob-i; j++ ) 
+		for( j=1; j<locnjob-i; j++ )
 		{
 			fprintf( hat2p, DFORMAT, mtx[i][j] );
 			if( j % 12 == 0 || j == locnjob-i-1 ) fprintf( hat2p, "\n" );
@@ -2960,7 +2960,7 @@ void WriteHat2_int( FILE *hat2p, int locnjob, char name[M][B], int **mtx )
 	for( i=0; i<locnjob; i++ ) fprintf( hat2p, "%4d. %s\n", i+1, name[i] );
 	for( i=0; i<locnjob-1; i++ )
 	{
-		for( j=i+1; j<locnjob; j++ ) 
+		for( j=i+1; j<locnjob; j++ )
 		{
 			fprintf( hat2p, DFORMAT, (double)mtx[i][j] / INTMTXSCALE );
 			if( (j-i) % 12 == 0 || j == locnjob-1 ) fprintf( hat2p, "\n" );
@@ -2982,7 +2982,7 @@ void WriteHat2_part_pointer( FILE *hat2p, int locnjob, int nadd, char **name, do
 	for( i=0; i<locnjob; i++ ) fprintf( hat2p, "%4d. %s\n", i+1, name[i] );
 	for( i=0; i<norg; i++ )
 	{
-		for( j=0; j<nadd; j++ ) 
+		for( j=0; j<nadd; j++ )
 		{
 			fprintf( hat2p, DFORMAT, mtx[i][j] );
 			if( (j+1) % 12 == 0 || j == nadd-1 ) fprintf( hat2p, "\n" );
@@ -3003,7 +3003,7 @@ void WriteHat2_pointer( FILE *hat2p, int locnjob, char **name, double **mtx )
 	for( i=0; i<locnjob; i++ ) fprintf( hat2p, "%4d. %s\n", i+1, name[i] );
 	for( i=0; i<locnjob-1; i++ )
 	{
-		for( j=i+1; j<locnjob; j++ ) 
+		for( j=i+1; j<locnjob; j++ )
 		{
 			fprintf( hat2p, DFORMAT, mtx[i][j] );
 			if( (j-i) % 12 == 0 || j == locnjob-1 ) fprintf( hat2p, "\n" );
@@ -3024,7 +3024,7 @@ void WriteHat2( FILE *hat2p, int locnjob, char name[M][B], double **mtx )
 	for( i=0; i<locnjob; i++ ) fprintf( hat2p, "%4d. %s\n", i+1, name[i] );
 	for( i=0; i<locnjob-1; i++ )
 	{
-		for( j=i+1; j<locnjob; j++ ) 
+		for( j=i+1; j<locnjob; j++ )
 		{
 			fprintf( hat2p, DFORMAT, mtx[i][j] );
 			if( (j-i) % 12 == 0 || j == locnjob-1 ) fprintf( hat2p, "\n" );
@@ -3041,7 +3041,7 @@ void WriteHat2plain( FILE *hat2p, int locnjob, double **mtx )
 	for( i=0; i<ilim; i++ )
 	{
 		fprintf( hat2p, "%d-%d d=%.3f\n", i+1, i+1, 0.0 );
-		for( j=i+1; j<locnjob; j++ ) 
+		for( j=i+1; j<locnjob; j++ )
 		{
 			fprintf( hat2p, "%d-%d d=%.3f\n", i+1, j+1, mtx[i][j] );
 		}
@@ -3096,7 +3096,7 @@ int ReadSsearch( FILE *fp, double *dis, int nseq, char name[M][B] )
         if( !strncmp( "+==========+", b, 12 ) )
         {
             junban[count] = atoi( b+12 );
-			sscanf( b+75, "%d", &opt ); 
+			sscanf( b+75, "%d", &opt );
             dis[junban[count]] = (double)opt;
             count++;
         }
@@ -3499,7 +3499,7 @@ int ReadFasta34noalign( FILE *fp, double *dis, int qmem, char **name, LocalHom *
             junban[count] = atoi( b+12 );
 
 			pt = strchr( b, ')' ) + 1;
-			sscanf( pt, "%d %lf %lf",  &opt, &bits, &z ); 
+			sscanf( pt, "%d %lf %lf",  &opt, &bits, &z );
             dis[junban[count]] = (double)opt;
             count++;
 
@@ -3538,7 +3538,7 @@ int ReadFasta34m10_nuc( FILE *fp, double *dis, int qmem, char **name, LocalHom *
 			if( strchr( b, 'r' ) ) continue;
 
 			pt = strchr( b, ']' ) + 1;
-			sscanf( pt, "%d %lf %lf",  &opt, &bits, &z ); 
+			sscanf( pt, "%d %lf %lf",  &opt, &bits, &z );
             dis[junban[count]] = (double)opt;
             count++;
 
@@ -3591,12 +3591,12 @@ int ReadFasta34m10_nuc( FILE *fp, double *dis, int qmem, char **name, LocalHom *
 		pt = qal;
 		while( (c = fgetc( fp )) )
 		{
-			if( c == '>' ) 
+			if( c == '>' )
 			{
 				ungetc( c, fp );
 				break;
 			}
-			if( isalpha( c ) || c == '-' ) 
+			if( isalpha( c ) || c == '-' )
 			*pt++ = c;
 		}
 		*pt = 0;
@@ -3619,12 +3619,12 @@ int ReadFasta34m10_nuc( FILE *fp, double *dis, int qmem, char **name, LocalHom *
 		pt = tal;
 		while( ( c = fgetc( fp ) ) )
 		{
-			if( c == '>' ) 
+			if( c == '>' )
 			{
 				ungetc( c, fp );
 				break;
 			}
-			if( isalpha( c ) || c == '-' ) 
+			if( isalpha( c ) || c == '-' )
 			*pt++ = c;
 		}
 		*pt = 0;
@@ -3675,7 +3675,7 @@ int ReadFasta34m10( FILE *fp, double *dis, int qmem, char **name, LocalHom *loca
             junban[count] = atoi( b+12 );
 
 			pt = strchr( b, ')' ) + 1;
-			sscanf( pt, "%d %lf %lf",  &opt, &bits, &z ); 
+			sscanf( pt, "%d %lf %lf",  &opt, &bits, &z );
             dis[junban[count]] = (double)opt;
             count++;
 
@@ -3728,12 +3728,12 @@ int ReadFasta34m10( FILE *fp, double *dis, int qmem, char **name, LocalHom *loca
 		pt = qal;
 		while( (c = fgetc( fp )) )
 		{
-			if( c == '>' ) 
+			if( c == '>' )
 			{
 				ungetc( c, fp );
 				break;
 			}
-			if( isalpha( c ) || c == '-' ) 
+			if( isalpha( c ) || c == '-' )
 			*pt++ = c;
 		}
 		*pt = 0;
@@ -3756,12 +3756,12 @@ int ReadFasta34m10( FILE *fp, double *dis, int qmem, char **name, LocalHom *loca
 		pt = tal;
 		while( ( c = fgetc( fp ) ) )
 		{
-			if( c == '>' ) 
+			if( c == '>' )
 			{
 				ungetc( c, fp );
 				break;
 			}
-			if( isalpha( c ) || c == '-' ) 
+			if( isalpha( c ) || c == '-' )
 			*pt++ = c;
 		}
 		*pt = 0;
@@ -3805,7 +3805,7 @@ int ReadFasta34m10_scoreonly_nucbk( FILE *fp, double *dis, int nin )
 
 //			pt = strchr( b, ')' ) + 1;
 			pt = strchr( b, ']' ) + 1;
-			sscanf( pt, "%d %lf %lf",  &opt, &bits, &z ); 
+			sscanf( pt, "%d %lf %lf",  &opt, &bits, &z );
             dis[pos] += (double)opt;
             count++;
 #if 0
@@ -3855,7 +3855,7 @@ int ReadFasta34m10_scoreonly_nuc( FILE *fp, double *dis, int nin )
 
 //			pt = strchr( b, ')' ) + 1;
 			pt = strchr( b, ']' ) + 1;
-			sscanf( pt, "%d %lf %lf",  &opt, &bits, &z ); 
+			sscanf( pt, "%d %lf %lf",  &opt, &bits, &z );
 			if( yonda[pos] == 0 )
 			{
 	            dis[pos] += (double)opt;
@@ -3913,7 +3913,7 @@ int ReadFasta34m10_scoreonly( FILE *fp, double *dis, int nin )
             pos = atoi( b+13 );
 
 			pt = strchr( b, ')' ) + 1;
-			sscanf( pt, "%d %lf %lf",  &opt, &bits, &z ); 
+			sscanf( pt, "%d %lf %lf",  &opt, &bits, &z );
 			if( yonda[pos] == 0 )
 			{
 	            dis[pos] += (double)opt;
@@ -3969,7 +3969,7 @@ int ReadFasta34( FILE *fp, double *dis, int nseq, char name[M][B], LocalHom *loc
             junban[count] = atoi( b+12 );
 
 			pt = strchr( b, ')' ) + 1;
-			sscanf( pt, "%d %lf %lf",  &opt, &bits, &z ); 
+			sscanf( pt, "%d %lf %lf",  &opt, &bits, &z );
             dis[junban[count]] = (double)opt;
             count++;
 
@@ -3994,10 +3994,10 @@ int ReadFasta34( FILE *fp, double *dis, int nseq, char name[M][B], LocalHom *loc
 			localhomlist[junban[count-1]].opt = atof( pt );
         	fgets( b, B-1, fp ); // Smith-Waterman score
 			pt = strstr( b, "ungapped) in " ) + 13;
-			sscanf( pt, "%d", &overlapaa ); 
+			sscanf( pt, "%d", &overlapaa );
 			fprintf( stderr, "pt = %s, overlapaa = %d\n", pt, overlapaa );
 			pt = strstr( b, "overlap (" ) + 8;
-			sscanf( pt, "(%d-%d:%d-%d)", &qstart, &qend, &tstart, &tend ); 
+			sscanf( pt, "(%d-%d:%d-%d)", &qstart, &qend, &tstart, &tend );
 			localhomlist[junban[count-1]].overlapaa = overlapaa;
 			localhomlist[junban[count-1]].start1 = qstart-1;
 			localhomlist[junban[count-1]].end1   = qend-1;
@@ -4032,7 +4032,7 @@ int ReadFasta3( FILE *fp, double *dis, int nseq, char name[M][B] )
             junban[count] = atoi( b+12 );
 
 			pt = strchr( b, ')' ) + 1;
-			sscanf( pt, "%d %d %d %lf", &initn, &init1, &opt, &z ); 
+			sscanf( pt, "%d %d %d %lf", &initn, &init1, &opt, &z );
             dis[junban[count]] = (double)opt;
             count++;
         }
@@ -4056,7 +4056,7 @@ int ReadFasta( FILE *fp, double *dis, int nseq, char name[M][B] )
         {
             junban[count] = atoi( b+12 );
 
-			sscanf( b+50, "%d %d %d", &initn, &init1, &opt ); 
+			sscanf( b+50, "%d %d %d", &initn, &init1, &opt );
             dis[junban[count]] = (double)opt;
             count++;
         }
@@ -4092,7 +4092,7 @@ int ReadOpt( FILE *fp, int opt[M], int nseq, char name[M][B] )
         if( !strncmp( "+==========+", b, 12 ) )
         {
             junban[count] = atoi( b+12 );
-			sscanf( b+50, "%d %d %d", &initn, &init1, &optt ); 
+			sscanf( b+50, "%d %d %d", &initn, &init1, &optt );
             opt[junban[count]] = (double)optt;
             count++;
         }
@@ -4128,7 +4128,7 @@ int writePre( int nseq, char **name, int nlen[M], char **aseq, int force )
 	int i, value;
 	if( !signalSM )
 	{
-		if( force ) 
+		if( force )
 		{
 			rewind( prep_g );
 			if( devide ) dvWrite( prep_g, nseq, name, nlen, aseq );
@@ -4147,9 +4147,9 @@ int writePre( int nseq, char **name, int nlen[M], char **aseq, int force )
 #endif
 		if( signalSM[SEMAPHORE]-- > 0 )
 		{
-#if 0 /* /tmp/pre の関係ではずした */
+#if 0 /* /tmp/pre 鐃塾関件申鐃叔はわ申鐃緒申鐃緒申 */
 			if( ferror( prep_g ) ) prep_g = fopen( "pre", "w" );
-			if( !prep_g ) ErrorExit( "Cannot re-open pre." ); 
+			if( !prep_g ) ErrorExit( "Cannot re-open pre." );
 #endif
 			rewind( prep_g );
 			signalSM[STATUS] = IMA_KAITERU;
@@ -4188,7 +4188,7 @@ int writePre( int nseq, char **name, int nlen[M], char **aseq, int force )
 	if( force && !value ) ErrorExit( "xced ga pre wo hanasanai \n" );
 	return( value );
 #else
-	if( force ) 
+	if( force )
 	{
 		rewind( prep_g );
 		writeData_pointer( prep_g, nseq, name, nlen, aseq );
@@ -4289,7 +4289,7 @@ void WriteForFasta( FILE *fp, int locnjob, char **name, int nlen[M], char **aseq
     {
         nalen[i] = strlen( aseq[i] );
         fprintf( fp, ">%s\n", name[i] );
-        for( j=0; j<nalen[i]; j=j+C ) 
+        for( j=0; j<nalen[i]; j=j+C )
         {
             strncpy( b, aseq[i]+j, C ); b[C] = 0;
             fprintf( fp, "%s\n",b );
@@ -4344,7 +4344,7 @@ void readlocalhomtable2_target( FILE*fp, int njob, LocalHom **localhomtable, cha
 				tmpptr1 = localhomtable[it]+j;
 //				fprintf( stderr, "### i,j = %d,%d, nokori=%d\n", i, j, localhomtable[i][j].nokori );
 			}
-	
+
 			tmpptr1->start1 = start1;
 			tmpptr1->start2 = start2;
 			tmpptr1->end1 = end1;
@@ -4373,7 +4373,7 @@ void readlocalhomtable2_target( FILE*fp, int njob, LocalHom **localhomtable, cha
 				tmpptr2 = localhomtable[jt]+i;
 //				fprintf( stderr, "### i,j = %d,%d, nokori=%d\n", j, i, localhomtable[j][i].nokori );
 			}
-	
+
 			tmpptr2->start2 = start1;
 			tmpptr2->start1 = start2;
 			tmpptr2->end2 = end1;
@@ -4383,7 +4383,7 @@ void readlocalhomtable2_target( FILE*fp, int njob, LocalHom **localhomtable, cha
 			tmpptr2->opt = ( opt + 0.00 ) / 5.8  * 600;
 			tmpptr2->overlapaa = overlapaa;
 			tmpptr2->korh = *infor;
-	
+
 //			fprintf( stderr, "i=%d, j=%d, st1=%d, en1=%d, opt = %f\n", i, j, tmpptr1->start1, tmpptr1->end1, opt );
 		}
 
@@ -4432,7 +4432,7 @@ void readlocalhomtable2_half( FILE*fp, int njob, LocalHom **localhomtable, char 
 				tmpptr1 = localhomtable[i]+j-i;
 //				fprintf( stderr, "### i,j = %d,%d, nokori=%d\n", i, j, localhomtable[i][j-i].nokori );
 			}
-	
+
 			tmpptr1->start1 = start1;
 			tmpptr1->start2 = start2;
 			tmpptr1->end1 = end1;
@@ -4484,7 +4484,7 @@ void readlocalhomtable2( FILE*fp, int njob, LocalHom **localhomtable, char *kozo
 				tmpptr1 = localhomtable[i]+j;
 //				fprintf( stderr, "### i,j = %d,%d, nokori=%d\n", i, j, localhomtable[i][j].nokori );
 			}
-	
+
 			tmpptr1->start1 = start1;
 			tmpptr1->start2 = start2;
 			tmpptr1->end1 = end1;
@@ -4512,7 +4512,7 @@ void readlocalhomtable2( FILE*fp, int njob, LocalHom **localhomtable, char *kozo
 				tmpptr2 = localhomtable[j]+i;
 //				fprintf( stderr, "### i,j = %d,%d, nokori=%d\n", j, i, localhomtable[j][i].nokori );
 			}
-	
+
 			tmpptr2->start2 = start1;
 			tmpptr2->start1 = start2;
 			tmpptr2->end2 = end1;
@@ -4522,7 +4522,7 @@ void readlocalhomtable2( FILE*fp, int njob, LocalHom **localhomtable, char *kozo
 			tmpptr2->opt = ( opt + 0.00 ) / 5.8  * 600;
 			tmpptr2->overlapaa = overlapaa;
 			tmpptr2->korh = *infor;
-	
+
 //			fprintf( stderr, "i=%d, j=%d, st1=%d, en1=%d, opt = %f\n", i, j, tmpptr1->start1, tmpptr1->end1, opt );
 		}
 
@@ -4577,7 +4577,7 @@ void readlocalhomtable_target( FILE*fp, int ntarget, int njob, LocalHom **localh
 				tmpptr1 = localhomtable[it]+j;
 //				fprintf( stderr, "nlocalhom[%d][%d] = %d\n", i, j, nlocalhom[i][j] );
 			}
-	
+
 			tmpptr1->start1 = start1; // CHUUI!!!!
 			tmpptr1->start2 = start2;
 			tmpptr1->end1 = end1; // CHUUI!!!!
@@ -4587,7 +4587,7 @@ void readlocalhomtable_target( FILE*fp, int ntarget, int njob, LocalHom **localh
 			tmpptr1->opt = ( opt + 0.00 ) / 5.8  * 600;
 			tmpptr1->overlapaa = overlapaa;
 			tmpptr1->korh = *infor;
-	
+
 //			fprintf( stderr, "i=%d, j=%d, opt = %f\n", i, j, opt );
 
 
@@ -4605,7 +4605,7 @@ void readlocalhomtable_target( FILE*fp, int ntarget, int njob, LocalHom **localh
 			}
 			else
 				tmpptr2 = localhomtable[jt]+i;
-	
+
 			tmpptr2->start2 = start1; // CHUUI!!!!
 			tmpptr2->start1 = start2;
 			tmpptr2->end2 = end1; // CHUUI!!!!
@@ -4667,7 +4667,7 @@ void readlocalhomtable_half( FILE*fp, int njob, LocalHom **localhomtable, char *
 				tmpptr1 = localhomtable[i]+j-i;
 //				fprintf( stderr, "nlocalhom[%d][%d] = %d\n", i, j, nlocalhom[i][j] );
 			}
-	
+
 			tmpptr1->start1 = start1; // CHUUI!!!!
 			tmpptr1->start2 = start2;
 			tmpptr1->end1 = end1; // CHUUI!!!!
@@ -4677,7 +4677,7 @@ void readlocalhomtable_half( FILE*fp, int njob, LocalHom **localhomtable, char *
 			tmpptr1->opt = ( opt + 0.00 ) / 5.8  * 600;
 			tmpptr1->overlapaa = overlapaa;
 			tmpptr1->korh = *infor;
-	
+
 //			fprintf( stderr, "i=%d, j=%d, opt = %f\n", i, j, opt );
 		}
 	}
@@ -4726,7 +4726,7 @@ void readlocalhomtable( FILE*fp, int njob, LocalHom **localhomtable, char *kozoa
 				tmpptr1 = localhomtable[i]+j;
 //				fprintf( stderr, "nlocalhom[%d][%d] = %d\n", i, j, nlocalhom[i][j] );
 			}
-	
+
 			tmpptr1->start1 = start1; // CHUUI!!!!
 			tmpptr1->start2 = start2;
 			tmpptr1->end1 = end1; // CHUUI!!!!
@@ -4736,7 +4736,7 @@ void readlocalhomtable( FILE*fp, int njob, LocalHom **localhomtable, char *kozoa
 			tmpptr1->opt = ( opt + 0.00 ) / 5.8  * 600;
 			tmpptr1->overlapaa = overlapaa;
 			tmpptr1->korh = *infor;
-	
+
 //			fprintf( stderr, "i=%d, j=%d, opt = %f\n", i, j, opt );
 		}
 //		else
@@ -4749,7 +4749,7 @@ void readlocalhomtable( FILE*fp, int njob, LocalHom **localhomtable, char *kozoa
 			}
 			else
 				tmpptr2 = localhomtable[j]+i;
-	
+
 			tmpptr2->start2 = start1; // CHUUI!!!!
 			tmpptr2->start1 = start2;
 			tmpptr2->end2 = end1; // CHUUI!!!!
@@ -4787,7 +4787,7 @@ void readlocalhomtable_two( FILE*fp, int norg, int nadd, LocalHom **localhomtabl
 	{
 //		fprintf( stderr, "\n" );
 		sscanf( buff, "%d %d %d %lf %d %d %d %d %s",  &i, &j, &overlapaa, &opt, &start1, &end1, &start2, &end2, infor );
-		if( *infor == 'k' ) 
+		if( *infor == 'k' )
 		{
 			fprintf( stderr, "Not supported!\n" );
 			exit( 1 );
@@ -4813,7 +4813,7 @@ void readlocalhomtable_two( FILE*fp, int norg, int nadd, LocalHom **localhomtabl
 				tmpptr1 = localhomtable[i]+j;
 //				fprintf( stderr, "nlocalhom[%d][%d] = %d\n", i, j, nlocalhom[i][j] );
 			}
-	
+
 			tmpptr1->start1 = start1; // CHUUI!!!!
 			tmpptr1->start2 = start2;
 			tmpptr1->end1 = end1; // CHUUI!!!!
@@ -4823,7 +4823,7 @@ void readlocalhomtable_two( FILE*fp, int norg, int nadd, LocalHom **localhomtabl
 			tmpptr1->opt = ( opt + 0.00 ) / 5.8  * 600;
 			tmpptr1->overlapaa = overlapaa;
 			tmpptr1->korh = *infor;
-	
+
 //			fprintf( stderr, "i=%d, j=%d, opt = %f\n", i, j, opt );
 		}
 
@@ -4836,7 +4836,7 @@ void readlocalhomtable_two( FILE*fp, int norg, int nadd, LocalHom **localhomtabl
 			}
 			else
 				tmpptr2 = localhomtablex[j]+i;
-	
+
 			tmpptr2->start2 = start1+1; // CHUUI!!!!
 			tmpptr2->start1 = start2;
 			tmpptr2->end2 = end1+1; // CHUUI!!!!
@@ -4871,7 +4871,7 @@ void readlocalhomtable_one( FILE*fp, int norg, int nadd, LocalHom **localhomtabl
 	{
 //		fprintf( stderr, "\n" );
 		sscanf( buff, "%d %d %d %lf %d %d %d %d %s",  &i, &j, &overlapaa, &opt, &start1, &end1, &start2, &end2, infor );
-		if( *infor == 'k' ) 
+		if( *infor == 'k' )
 		{
 			fprintf( stderr, "Not supported!\n" );
 			exit( 1 );
@@ -4897,7 +4897,7 @@ void readlocalhomtable_one( FILE*fp, int norg, int nadd, LocalHom **localhomtabl
 				tmpptr1 = localhomtable[i]+j;
 //				fprintf( stderr, "nlocalhom[%d][%d] = %d\n", i, j, nlocalhom[i][j] );
 			}
-	
+
 			tmpptr1->start1 = start1; // CHUUI!!!!
 			tmpptr1->start2 = start2;
 			tmpptr1->end1 = end1; // CHUUI!!!!
@@ -4907,7 +4907,7 @@ void readlocalhomtable_one( FILE*fp, int norg, int nadd, LocalHom **localhomtabl
 			tmpptr1->opt = ( opt + 0.00 ) / 5.8  * 600;
 			tmpptr1->overlapaa = overlapaa;
 			tmpptr1->korh = *infor;
-	
+
 //			fprintf( stderr, "i=%d, j=%d, opt = %f\n", i, j, opt );
 		}
 
@@ -4999,8 +4999,8 @@ void initlocalhom1( LocalHom *lh )
 {
 	lh->start1 = -1;
 	lh->end1 = -1;
-	lh->start2 = -1; 
-	lh->end2 = -1; 
+	lh->start2 = -1;
+	lh->end2 = -1;
 	lh->opt = -1.0;
 	lh->next = NULL;
 	lh->nokori = 0;
@@ -5017,15 +5017,15 @@ void freelocalhom1( LocalHom *lh )
 	for( ; tmpptr; tmpptr=ppp )
 	{
 		ppp = tmpptr->next;
-		if( tmpptr!=lh ) 
+		if( tmpptr!=lh )
 		{
 			free( tmpptr );
 			continue;
 		}
 		tmpptr->start1 = -1;
 		tmpptr->end1 = -1;
-		tmpptr->start2 = -1; 
-		tmpptr->end2 = -1; 
+		tmpptr->start2 = -1;
+		tmpptr->end2 = -1;
 		tmpptr->opt = -1.0;
 		tmpptr->next = NULL;
 		tmpptr->nokori = 0;
@@ -5036,11 +5036,11 @@ void freelocalhom1( LocalHom *lh )
 
 }
 
-void FreeLocalHomTable_part( LocalHom **localhomtable, int n, int m ) 
+void FreeLocalHomTable_part( LocalHom **localhomtable, int n, int m )
 {
 	int i, j;
 	LocalHom *ppp, *tmpptr;
-	for( i=0; i<n; i++ ) 
+	for( i=0; i<n; i++ )
 	{
 		for( j=0; j<m; j++ )
 		{
@@ -5049,10 +5049,10 @@ void FreeLocalHomTable_part( LocalHom **localhomtable, int n, int m )
 			for( ; tmpptr; tmpptr=ppp )
 			{
 #if DEBUG
-				fprintf( stderr, "i=%d, j=%d\n", i, j ); 
+				fprintf( stderr, "i=%d, j=%d\n", i, j );
 #endif
 				ppp = tmpptr->next;
-				if( tmpptr!=localhomtable[i]+j ) 
+				if( tmpptr!=localhomtable[i]+j )
 				{
 #if DEBUG
 					fprintf( stderr, "freeing %p\n", tmpptr );
@@ -5075,11 +5075,11 @@ void FreeLocalHomTable_part( LocalHom **localhomtable, int n, int m )
 #endif
 }
 
-void FreeLocalHomTable_two( LocalHom **localhomtable, int n, int m ) 
+void FreeLocalHomTable_two( LocalHom **localhomtable, int n, int m )
 {
 	int i, j;
 	LocalHom *ppp, *tmpptr;
-	for( i=0; i<n; i++ ) 
+	for( i=0; i<n; i++ )
 	{
 		for( j=0; j<m; j++ )
 		{
@@ -5088,10 +5088,10 @@ void FreeLocalHomTable_two( LocalHom **localhomtable, int n, int m )
 			for( ; tmpptr; tmpptr=ppp )
 			{
 #if DEBUG
-				fprintf( stderr, "i=%d, j=%d\n", i, j ); 
+				fprintf( stderr, "i=%d, j=%d\n", i, j );
 #endif
 				ppp = tmpptr->next;
-				if( tmpptr!=localhomtable[i]+j ) 
+				if( tmpptr!=localhomtable[i]+j )
 				{
 #if DEBUG
 					fprintf( stderr, "freeing %p\n", tmpptr );
@@ -5106,7 +5106,7 @@ void FreeLocalHomTable_two( LocalHom **localhomtable, int n, int m )
 		free( localhomtable[i] );
 	}
 
-	for( i=n; i<n+m; i++ ) 
+	for( i=n; i<n+m; i++ )
 	{
 		for( j=0; j<n; j++ )
 		{
@@ -5115,10 +5115,10 @@ void FreeLocalHomTable_two( LocalHom **localhomtable, int n, int m )
 			for( ; tmpptr; tmpptr=ppp )
 			{
 #if DEBUG
-				fprintf( stderr, "i=%d, j=%d\n", i, j ); 
+				fprintf( stderr, "i=%d, j=%d\n", i, j );
 #endif
 				ppp = tmpptr->next;
-				if( tmpptr!=localhomtable[i]+j ) 
+				if( tmpptr!=localhomtable[i]+j )
 				{
 #if DEBUG
 					fprintf( stderr, "freeing %p\n", tmpptr );
@@ -5141,11 +5141,11 @@ void FreeLocalHomTable_two( LocalHom **localhomtable, int n, int m )
 #endif
 }
 
-void FreeLocalHomTable_one( LocalHom **localhomtable, int n, int m ) 
+void FreeLocalHomTable_one( LocalHom **localhomtable, int n, int m )
 {
 	int i, j;
 	LocalHom *ppp, *tmpptr;
-	for( i=0; i<n; i++ ) 
+	for( i=0; i<n; i++ )
 	{
 		for( j=0; j<m; j++ )
 		{
@@ -5154,10 +5154,10 @@ void FreeLocalHomTable_one( LocalHom **localhomtable, int n, int m )
 			for( ; tmpptr; tmpptr=ppp )
 			{
 #if DEBUG
-				fprintf( stderr, "i=%d, j=%d\n", i, j ); 
+				fprintf( stderr, "i=%d, j=%d\n", i, j );
 #endif
 				ppp = tmpptr->next;
-				if( tmpptr!=localhomtable[i]+j ) 
+				if( tmpptr!=localhomtable[i]+j )
 				{
 #if DEBUG
 					fprintf( stderr, "freeing %p\n", tmpptr );
@@ -5181,11 +5181,11 @@ void FreeLocalHomTable_one( LocalHom **localhomtable, int n, int m )
 #endif
 }
 
-void FreeLocalHomTable_half( LocalHom **localhomtable, int n ) 
+void FreeLocalHomTable_half( LocalHom **localhomtable, int n )
 {
 	int i, j;
 	LocalHom *ppp, *tmpptr;
-	for( i=0; i<n; i++ ) 
+	for( i=0; i<n; i++ )
 	{
 		for( j=0; j<n-i; j++ )
 		{
@@ -5194,10 +5194,10 @@ void FreeLocalHomTable_half( LocalHom **localhomtable, int n )
 			for( ; tmpptr; tmpptr=ppp )
 			{
 #if DEBUG
-				fprintf( stderr, "i=%d, j=%d\n", i, j ); 
+				fprintf( stderr, "i=%d, j=%d\n", i, j );
 #endif
 				ppp = tmpptr->next;
-				if( tmpptr!=localhomtable[i]+j ) 
+				if( tmpptr!=localhomtable[i]+j )
 				{
 #if DEBUG
 					fprintf( stderr, "freeing %p\n", tmpptr );
@@ -5219,11 +5219,11 @@ void FreeLocalHomTable_half( LocalHom **localhomtable, int n )
 	fprintf( stderr, "freed\n" );
 #endif
 }
-void FreeLocalHomTable( LocalHom **localhomtable, int n ) 
+void FreeLocalHomTable( LocalHom **localhomtable, int n )
 {
 	int i, j;
 	LocalHom *ppp, *tmpptr;
-	for( i=0; i<n; i++ ) 
+	for( i=0; i<n; i++ )
 	{
 		for( j=0; j<n; j++ )
 		{
@@ -5232,10 +5232,10 @@ void FreeLocalHomTable( LocalHom **localhomtable, int n )
 			for( ; tmpptr; tmpptr=ppp )
 			{
 #if DEBUG
-				fprintf( stderr, "i=%d, j=%d\n", i, j ); 
+				fprintf( stderr, "i=%d, j=%d\n", i, j );
 #endif
 				ppp = tmpptr->next;
-				if( tmpptr!=localhomtable[i]+j ) 
+				if( tmpptr!=localhomtable[i]+j )
 				{
 #if DEBUG
 					fprintf( stderr, "freeing %p\n", tmpptr );
@@ -5260,10 +5260,10 @@ void FreeLocalHomTable( LocalHom **localhomtable, int n )
 
 char *progName( char *str )
 {
-    char *value; 
+    char *value;
     if( ( value = strrchr( str, '/' ) ) != NULL )
         return( value+1 );
-    else    
+    else
         return( str );
 }
 
@@ -5308,7 +5308,7 @@ void phylipout_pointer( FILE *fp, int nseq, int maxlen, char **seq, char **name,
 	pos = 0;
 
 	fprintf( fp, " %d %d\n", nseq, maxlen );
-	
+
 	while( pos < maxlen )
 	{
 		for( j=0; j<nseq; j++ )
@@ -5340,19 +5340,19 @@ void clustalout_pointer( FILE *fp, int nseq, int maxlen, char **seq, char **name
 		fprintf( fp, "CLUSTAL format alignment by MAFFT (v%s)\n\n", VERSION );
 	else
 		fprintf( fp, "CLUSTAL format alignment by MAFFT %s (v%s)\n\n", comment, VERSION );
-	
+
 	while( pos < maxlen )
 	{
 		fprintf( fp, "\n" );
 		for( j=0; j<nseq; j++ )
 		{
 			fprintf( fp, "%-*.*s ", namelen, namelen, extractfirstword( name[order[j]]+1 ) );
-			fprintf( fp, "%.60s\n", seq[order[j]]+pos ); // 長さが違うとだめ。
+			fprintf( fp, "%.60s\n", seq[order[j]]+pos ); // 長鐃緒申鐃緒申鐃純う鐃夙わ申鐃潤。
 		}
 		if( mark )
 		{
 			fprintf( fp, "%-*.*s ", namelen, namelen, "" );
-			fprintf( fp, "%.60s\n", mark + pos ); // 長さが違うとだめ。
+			fprintf( fp, "%.60s\n", mark + pos ); // 長鐃緒申鐃緒申鐃純う鐃夙わ申鐃潤。
 		}
 		pos += 60;
 	}
@@ -5459,7 +5459,7 @@ double *loadaamtx( int *rescalept )
 
 	inorder = calloc( 1000, sizeof( char ) );
 	line = calloc( 1000, sizeof( char ) );
-	
+
 
 	while( !feof( mf ) )
 	{
@@ -5521,7 +5521,7 @@ double *loadaamtx( int *rescalept )
 		fgets( line, 999, mf );
 
 		sscanf( line, "%s", key );
-		
+
 		if( !strcmp( key, "norescale" ) )
 		{
 			reporterr( "no rescale\n" );
@@ -5537,7 +5537,7 @@ double *loadaamtx( int *rescalept )
 			{
 				while( !isdigit( *ptr1 ) && *ptr1 != '-' && *ptr1 != '.' )
 					ptr1++;
-	
+
 				raw[20][j] = atof( ptr1 );
 //				fprintf( stderr, "raw[20][]=%f, %c %d\n", raw[20][j], inorder[i], j );
 				ptr1 = strchr( ptr1, ' ' );
@@ -5597,7 +5597,7 @@ static int readasubalignment( char *s, int *t, int *preservegaps )
 		}
 		else
 		{
-			if( status == 's' ) 
+			if( status == 's' )
 			{
 				if( *pt == '\n' || *pt == '#' ) break;
 				status = 'n';
@@ -5633,7 +5633,7 @@ static int countspace( char *s )
 		}
 		else
 		{
-			if( status == 's' ) 
+			if( status == 's' )
 			{
 				if( *pt == '\n' || *pt == '#' ) break;
 				v++;
@@ -6043,19 +6043,19 @@ void treeout_bin( FILE *fp, int n, int ***topol, double **len, Treedep *dep, int
 	char c = '\n';
 	for( i=0; i<n-1; i++ )
 	{
-		if( fwrite( topol[i][0], sizeof( int ), 1, fp ) != 1 || 
+		if( fwrite( topol[i][0], sizeof( int ), 1, fp ) != 1 ||
 		    fwrite( topol[i][1], sizeof( int ), 1, fp ) != 1 )
 		{
 			reporterr( "write error in treeout_bin(), topol, i=%d\n", i );
 			exit( 1 );
 		}
-		if( fwrite( len[i]+0, sizeof( double ), 1, fp ) != 1 || 
+		if( fwrite( len[i]+0, sizeof( double ), 1, fp ) != 1 ||
 		    fwrite( len[i]+1, sizeof( double ), 1, fp ) != 1 )
 		{
 			reporterr( "write error in treeout_bin(), len, i=%d\n", i );
 			exit( 1 );
 		}
-		if( fwrite( &(dep[i].child0), sizeof( int ), 1, fp ) != 1 || 
+		if( fwrite( &(dep[i].child0), sizeof( int ), 1, fp ) != 1 ||
 		    fwrite( &(dep[i].child1), sizeof( int ), 1, fp ) != 1 ||
 		    fwrite( &(nfilesfornode[i]), sizeof( int ), 1, fp ) != 1 ||
 		    fwrite( &(dep[i].distfromtip), sizeof( double ), 1, fp ) != 1 )
@@ -6085,19 +6085,19 @@ void treein_bin( FILE *fp, int n, int ***topol, double **len, Treedep *dep, int 
 		topol[i][0][1] = -1;
 		topol[i][1][1] = -1;
 
-		if( fread( topol[i][0], sizeof( int ), 1, fp ) != 1 || 
+		if( fread( topol[i][0], sizeof( int ), 1, fp ) != 1 ||
 		    fread( topol[i][1], sizeof( int ), 1, fp ) != 1 )
 		{
 			reporterr( "read error in treein_bin(), topol, i=%d\n", i );
 			exit( 1 );
 		}
-		if( fread( len[i]+0, sizeof( double ), 1, fp ) != 1 || 
+		if( fread( len[i]+0, sizeof( double ), 1, fp ) != 1 ||
 		    fread( len[i]+1, sizeof( double ), 1, fp ) != 1 )
 		{
 			reporterr( "read error in treein_bin(), len, i=%d\n", i );
 			exit( 1 );
 		}
-		if( fread( &(dep[i].child0), sizeof( int ), 1, fp ) != 1 || 
+		if( fread( &(dep[i].child0), sizeof( int ), 1, fp ) != 1 ||
 		    fread( &(dep[i].child1), sizeof( int ), 1, fp ) != 1 ||
 		    fread( &(nfilesfornode[i]), sizeof( int ), 1, fp ) != 1 ||
 		    fread( &(dep[i].distfromtip), sizeof( double ), 1, fp ) != 1 )
@@ -6122,7 +6122,7 @@ void treein_bin( FILE *fp, int n, int ***topol, double **len, Treedep *dep, int 
 void uselhout( FILE *fp, int n, int *uselh )
 {
 
-	if( fwrite( uselh, sizeof( int ), n, fp ) != n ) 
+	if( fwrite( uselh, sizeof( int ), n, fp ) != n )
 	{
 		reporterr( "write error in uselhout()\n" );
 		exit( 1 );
@@ -6131,7 +6131,7 @@ void uselhout( FILE *fp, int n, int *uselh )
 
 int uselhin( FILE *fp, int n, int *uselh )
 {
-	if( fread( uselh, sizeof( int ), n, fp ) != n ) 
+	if( fread( uselh, sizeof( int ), n, fp ) != n )
 	{
 		reporterr( "read error in uselhout()\n" );
 		exit( 1 );
@@ -6206,7 +6206,7 @@ void commongappick( int nseq, char **seq )
 
 	mapfromnewtoold = calloc( len+1, sizeof( int ) );
 
-	for( i=0, count=0; i<=len; i++ ) 
+	for( i=0, count=0; i<=len; i++ )
 	{
 		for( j=0; j<nseq; j++ )
 			if( seq[j][i] != '-' ) break;
@@ -6233,7 +6233,7 @@ void commongappick( int nseq, char **seq )
 	mapfromoldtonew = calloc( len+1, sizeof( int ) );
 	for( i=0; i<=len; i++ ) mapfromoldtonew[i] = -1;
 
-	for( i=0, count=0; i<=len; i++ ) 
+	for( i=0, count=0; i<=len; i++ )
 	{
 		for( j=0; j<nseq; j++ )
 			if( seq[j][i] != '-' ) break;
@@ -6245,7 +6245,7 @@ void commongappick( int nseq, char **seq )
 	}
 	for( j=0; j<nseq; j++ )
 	{
-		for( i=0; i<=len; i++ ) 
+		for( i=0; i<=len; i++ )
 		{
 			if( (pos=mapfromoldtonew[i]) != -1 )
 				seq[j][pos] = seq[j][i];
@@ -6254,11 +6254,11 @@ void commongappick( int nseq, char **seq )
 	free( mapfromoldtonew );
 --------------------------
 
-	for( i=0, count=0; i<=len; i++ ) 
+	for( i=0, count=0; i<=len; i++ )
 	{
 	/*
 		allgap = 1;
-		for( j=0; j<nseq; j++ ) 
+		for( j=0; j<nseq; j++ )
 			allgap *= ( seq[j][i] == '-' );
 		if( !allgap )
 	*/
@@ -6314,7 +6314,7 @@ void readexternalanchors( ExtAnch **extanch, int nseq, int *nogaplen )
 
 		((*extanch)+size)->i -= 1; // 1-origin -> 0-origin
 		((*extanch)+size)->j -= 1; // 1-origin -> 0-origin
-		((*extanch)+size)->starti -= 1; 
+		((*extanch)+size)->starti -= 1;
 		((*extanch)+size)->startj -= 1;
 		((*extanch)+size)->endi -= 1;
 		((*extanch)+size)->endj -= 1;

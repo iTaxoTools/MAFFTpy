@@ -1,5 +1,5 @@
  /* Tree-dependent-iteration */
- /* Devide to segments       */ 
+ /* Devide to segments       */
 
 #include "mltaln.h"
 
@@ -19,7 +19,7 @@ static void calcmaxdistclass( void )
 	double rep;
 	for( c=0; c<ndistclass; c++ )
 	{
-		rep = (double) 2 * c / ndistclass; // dist:0-2 for dist2offset 
+		rep = (double) 2 * c / ndistclass; // dist:0-2 for dist2offset
 //		fprintf( stderr, "c=%d, rep=%f, offset=%f\n", c, rep, dist2offset( rep )  );
 		if( dist2offset( rep ) == 0.0 )
 			break;
@@ -30,7 +30,7 @@ static void calcmaxdistclass( void )
 	return;
 }
 
-void arguments( int argc, char *argv[] )
+static void arguments( int argc, char *argv[] )
 {
 	int c;
 	char *argkey;
@@ -160,27 +160,27 @@ void arguments( int argc, char *argv[] )
 				case 'k':
 					kimuraR = myatoi( *++argv );
 					fprintf( stderr, "kappa = %d\n", kimuraR );
-					--argc; 
+					--argc;
 					goto nextoption;
 				case 'b':
 					nblosum = myatoi( *++argv );
 					scoremtx = 1;
 					fprintf( stderr, "blosum %d / kimura 200\n", nblosum );
-					--argc; 
+					--argc;
 					goto nextoption;
 				case 'j':
 					pamN = myatoi( *++argv );
 					scoremtx = 0;
 					TMorJTT = JTT;
 					fprintf( stderr, "jtt/kimura %d\n", pamN );
-					--argc; 
+					--argc;
 					goto nextoption;
 				case 'm':
 					pamN = myatoi( *++argv );
 					scoremtx = 0;
 					TMorJTT = TM;
 					fprintf( stderr, "tm %d\n", pamN );
-					--argc; 
+					--argc;
 					goto nextoption;
 				case 'l':
 					bunkatsu = 0;
@@ -200,7 +200,7 @@ void arguments( int argc, char *argv[] )
 				case 'C':
 					nthread = myatoi( *++argv );
 					fprintf( stderr, "nthread = %d\n", nthread );
-					--argc; 
+					--argc;
 					goto nextoption;
 				case 'H':
 					subalignment = 1;
@@ -210,7 +210,7 @@ void arguments( int argc, char *argv[] )
 				case 't':
 					randomseed = myatoi( *++argv );
 					fprintf( stderr, "randomseed = %d\n", randomseed );
-					--argc; 
+					--argc;
 					goto nextoption;
 				case 'p':
 					argkey = *++argv;
@@ -224,12 +224,12 @@ void arguments( int argc, char *argv[] )
 						exit( 1 );
 					}
 //					exit( 1 );
-					--argc; 
+					--argc;
 					goto nextoption;
 				case 's':
 					specificityconsideration = (double)myatof( *++argv );
 //					fprintf( stderr, "specificityconsideration = %f\n", specificityconsideration );
-					--argc; 
+					--argc;
 					goto nextoption;
 #if 0
 				case 'S' :
@@ -404,21 +404,21 @@ void arguments( int argc, char *argv[] )
 		cut = atof( (*argv) );
 		argc--;
 	}
-	if( argc != 0 ) 
+	if( argc != 0 )
 	{
 		fprintf( stderr, "options : Check source file!\n" );
 		exit( 1 );
 	}
 #if 0
-	if( alg == 'A' && weight == 0 ) 
-		ErrorExit( "ERROR : Algorithm A+ and un-weighted\n" ); 
+	if( alg == 'A' && weight == 0 )
+		ErrorExit( "ERROR : Algorithm A+ and un-weighted\n" );
 #endif
 }
 
 
-int main( int argc, char *argv[] )
+int dvtditr( int argc, char *argv[] )
 {
-    int identity;
+  int identity;
 	static int nlen[M];
 	static char **name, **seq, **aseq, **bseq;
 	static Segment *segment = NULL;
@@ -463,13 +463,13 @@ int main( int argc, char *argv[] )
 	if( inputfile )
 	{
 		infp = fopen( inputfile, "r" );
-		if( !infp ) 
+		if( !infp )
 		{
 			fprintf( stderr, "Cannot open %s\n", inputfile );
 			exit( 1 );
 		}
 	}
-	else    
+	else
 		infp = stdin;
 
 #if 0
@@ -483,18 +483,18 @@ int main( int argc, char *argv[] )
 
 
 
-	if( njob < 2 ) 
+	if( njob < 2 )
 	{
 		seq = AllocateCharMtx( 2, nlenmax*1+1 );
     	name = AllocateCharMtx( 2, B+1 );
-//	    nlen = AllocateIntVec( 2 ); 
+//	    nlen = AllocateIntVec( 2 );
 		readData_pointer( infp, name, nlen, seq );
 		fclose( infp );
 		initFiles();
 		gappick0( seq[1], seq[0] );
 //		writeData_pointer( prep_g, njob, name, nlen, seq+1 );
 		writeData_pointer( prep_g, njob, name, nlen, seq+1 );
-		reporterr( "Warning: Only %d sequence found.\n", njob ); 
+		reporterr( "Warning: Only %d sequence found.\n", njob );
 		FreeCharMtx( seq );
 		FreeCharMtx( name );
 //		free( nlen );
@@ -507,13 +507,13 @@ int main( int argc, char *argv[] )
 	{
 		seq = AllocateCharMtx( njob, nlenmax*1+1 );
     	name = AllocateCharMtx( njob, B+1 );
-//	    nlen = AllocateIntVec( 2 ); 
+//	    nlen = AllocateIntVec( 2 );
 		readData_pointer( infp, name, nlen, seq );
 		fclose( infp );
 		initFiles();
 		for( i=0; i<njob; i++ ) strcpy( seq[i], "" );
 		writeData_pointer( prep_g, njob, name, nlen, seq );
-		reporterr( "Warning: No sequence found.\n", njob ); 
+		reporterr( "Warning: No sequence found.\n", njob );
 		FreeCharMtx( seq );
 		FreeCharMtx( name );
 //		free( nlen );
@@ -609,10 +609,10 @@ int main( int argc, char *argv[] )
 				localhomtable[i][j].end1 = -1;
 				localhomtable[i][j].start2 = -1;
 				localhomtable[i][j].end2 = -1;
-				localhomtable[i][j].overlapaa = -1.0; 
+				localhomtable[i][j].overlapaa = -1.0;
 				localhomtable[i][j].opt = -1.0;
-				localhomtable[i][j].importance = -1.0; 
-				localhomtable[i][j].next = NULL; 
+				localhomtable[i][j].importance = -1.0;
+				localhomtable[i][j].next = NULL;
 				localhomtable[i][j].nokori = 0;
 				localhomtable[i][j].extended = -1;
 				localhomtable[i][j].last = localhomtable[i]+j;
@@ -626,7 +626,7 @@ int main( int argc, char *argv[] )
 		if( prep == NULL ) ErrorExit( "Make hat3." );
 		if( specifictarget ) readlocalhomtable2_target( prep, njob, localhomtable, kozoarivec, targetmap );
 		else readlocalhomtable2_half( prep, njob, localhomtable, kozoarivec );
-		fclose( prep ); 
+		fclose( prep );
 //		for( i=0; i<njob-1; i++ ) for( j=i+1; j<njob; j++ )
 //			fprintf( stdout, "%d %d %d %d %d %d %d\n", i, j, localhomtable[i][j].opt, localhomtable[i][j].start1, localhomtable[i][j].end1, localhomtable[i][j].start2, localhomtable[i][j].end2 );
 		fprintf( stderr, "done.\n" );
@@ -647,18 +647,18 @@ int main( int argc, char *argv[] )
 #if 0
 			if( constraint )
 			{
-				fprintf( stderr, "\nnlenmax=%d, nagasugi!\n", nlenmax ); 
+				fprintf( stderr, "\nnlenmax=%d, nagasugi!\n", nlenmax );
 				exit( 1 );
 			}
 			if( nevermemsave )
 			{
-				fprintf( stderr, "\nnevermemsave=1, nlenmax=%d, nagasugi!\n", nlenmax ); 
+				fprintf( stderr, "\nnevermemsave=1, nlenmax=%d, nagasugi!\n", nlenmax );
 				exit( 1 );
 			}
 #endif
 			if( !constraint && !nevermemsave && alg != 'M' )
 			{
-				fprintf( stderr, "\nnlenmax=%d, Switching to the memsave mode\n", nlenmax ); 
+				fprintf( stderr, "\nnlenmax=%d, Switching to the memsave mode\n", nlenmax );
 				alg = 'M';
 			}
 		}
@@ -672,11 +672,11 @@ int main( int argc, char *argv[] )
 	}
 
 	identity = 1;
-	for( i=0; i<njob; i++ ) 
+	for( i=0; i<njob; i++ )
 	{
 		identity *= ( nlen[i] == nlen[0] );
 	}
-	if( !identity ) 
+	if( !identity )
 	{
 		fprintf( stderr, "Input pre-aligned data\n" );
 		exit( 1 );
@@ -684,9 +684,9 @@ int main( int argc, char *argv[] )
 	constants( njob, seq_g );
 
 #if 0
-	fprintf( stderr, "penalty = %d\n", penalty ); 
-	fprintf( stderr, "penalty_ex = %d\n", penalty_ex ); 
-	fprintf( stderr, "offset = %d\n", offset ); 
+	fprintf( stderr, "penalty = %d\n", penalty );
+	fprintf( stderr, "penalty_ex = %d\n", penalty_ex );
+	fprintf( stderr, "offset = %d\n", offset );
 #endif
 
 	initSignalSM();
@@ -754,9 +754,9 @@ int main( int argc, char *argv[] )
 		fclose( prep );
 #if 0
 		fprintf( stderr, "eff = \n" );
-		for( i=0; i<njob-1; i++ ) 
+		for( i=0; i<njob-1; i++ )
 		{
-			for( j=i+1; j<njob; j++ ) 
+			for( j=i+1; j<njob; j++ )
 			{
 				fprintf( stderr, "%d-%d,  %f\n", i, j, eff[i][j] );
 			}
@@ -768,9 +768,9 @@ int main( int argc, char *argv[] )
 			veryfastsupg_double_loadtree( njob, eff, topol, len, name );
 #if 0
 			fprintf( stderr, "eff = \n" );
-			for( i=0; i<njob-1; i++ ) 
+			for( i=0; i<njob-1; i++ )
 			{
-				for( j=i+1; j<njob; j++ ) 
+				for( j=i+1; j<njob; j++ )
 				{
 					fprintf( stderr, "%d-%d,  %f\n", i, j, eff[i][j] );
 				}
@@ -787,10 +787,10 @@ exit( 1 );
 		}
 		else if( subalignment )
 			fixed_supg_double_treeout_constrained( njob, eff, topol, len, name, nsubalignments, subtable );
-		else if( treemethod == 'X' || treemethod == 'E' || treemethod == 'q' ) 
+		else if( treemethod == 'X' || treemethod == 'E' || treemethod == 'q' )
 //			veryfastsupg_double_outtree( njob, eff, topol, len, name );
 			fixed_musclesupg_double_treeout( njob, eff, topol, len, name );
-		else if( treemethod == 'n' ) 
+		else if( treemethod == 'n' )
 			nj( njob, eff, topol, len );
 		else if( treemethod == 's' )
 			spg( njob, eff, topol, len );
@@ -915,7 +915,7 @@ exit( 1 );
 		reftable = calloc( sizeof( int ), njob );
 		for( j=0; j<njob-nadd; j++ ) reftable[j] = j;
 		reftable[njob-nadd] = -1;
-		for( j=0; j<njob-1; j++ ) 
+		for( j=0; j<njob-1; j++ )
 		{
 #if 0
 				int k;
@@ -1057,13 +1057,13 @@ exit( 1 );
 		}
 #endif
 
-		for( i=0; i<njob; i++ ) 
+		for( i=0; i<njob; i++ )
 		{
 			if( insubtable[i] ) strcpy( bseq[i], seq[i] );
 			else gappick0( bseq[i], seq[i] );
 		}
 
-		for( i=0; i<nsubalignments; i++ ) 
+		for( i=0; i<nsubalignments; i++ )
 		{
 			for( j=0; subtable[i][j]!=-1; j++ ) subalnpt[i][j] = bseq[subtable[i][j]];
 			commongappick( j, subalnpt[i] );
@@ -1090,13 +1090,13 @@ exit( 1 );
 		{
 			strncpy( seq[j], seq_g[j], tmplen );
 			seq[j][tmplen]= 0;
-			seq_g[j] += tmplen;	
+			seq_g[j] += tmplen;
 
 		}
 		fprintf( stderr, "Segment %3d/%3d %4d-%4d\n", iseg+1, nseg-1, pos+1, pos+1+tmplen );
 		fflush( stderr );
 		fprintf( trap_g, "Segment %3d/%3d %4d-%4d\n", iseg+1, nseg-1, pos+1, pos+1+tmplen );
-	
+
 		cut = ocut;
 		returnvalue = TreeDependentIteration( njob, name, nlen, seq, bseq, topol, len, eff, skipthisbranch, alloclen, localhomtable, singlerna, nkozo, kozoarivec, ntarget, targetmap, targetmapr );
 
@@ -1109,18 +1109,18 @@ exit( 1 );
 	FreeDoubleMtx( eff );
 	FreeIntMtx( skipthisbranch );
 	free( kozoarivec );
-	if( constraint ) 
+	if( constraint )
 	{
 		if( specifictarget ) FreeLocalHomTable_part( localhomtable, ntarget, njob );
 		else FreeLocalHomTable_half( localhomtable, njob );
 	}
 	free( targetmap );
 	free( targetmapr );
-	if( rnakozo && rnaprediction == 'm' ) 
+	if( rnakozo && rnaprediction == 'm' )
 	{
 		if( singlerna ) // nen no tame
 		{
-			for( i=0; i<njob; i++ ) 
+			for( i=0; i<njob; i++ )
 			{
 				for( j=0; singlerna[i][j]!=NULL; j++ )
 				{
@@ -1143,18 +1143,25 @@ exit( 1 );
 	freeconstants();
 
 
-	devide = 0; 
+	devide = 0;
 	writePre( njob, name, nlen, res_g, 1 );
+	fclose( prep_g );
 #if 0
 	writeData( stdout, njob, name, nlen, res_g, 1 );
 #endif
-
 
 	if( spscoreout ) reporterr( "Unweighted sum-of-pairs score = %10.5f\n", sumofpairsscore( njob, res_g ) );
 
 	SHOWVERSION;
 	return( 0 );
 }
+
+#ifndef ismodule
+int main( int argc, char *argv[] )
+{
+  return dvtditr(argc, argv);
+}
+#endif
 
 #if 0
 signed int main( int argc, char *argv[] )
@@ -1180,14 +1187,14 @@ signed int main( int argc, char *argv[] )
 	while( i<njob )
 	{
 		gets( b );
-		if( !strncmp( b, a, 1 ) ) 
+		if( !strncmp( b, a, 1 ) )
 		{
 			gets( b ); nlen[i] = atoi( b );
 			if( nlen[i] > nlenmax ) nlenmax = nlen[i];
 			i++;
 		}
 	}
-	if( nlenmax > N || njob > M ) 
+	if( nlenmax > N || njob > M )
 	{
 		fprintf( stderr, "ERROR in main\n" );
 		exit( 1 );

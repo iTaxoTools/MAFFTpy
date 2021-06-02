@@ -3,6 +3,10 @@ Added python module: `mafftmodule.c`, `mafftmodule.h`
 Renamed `disttbfast.c` and `tbfast.c` main() functions
 and put ``#ifndef ismodule` around them.
 
+Modified arguments() as static in `tbfast.c`, `dvtditr.c`
+
+`dvtditr`: fclose( prep_g ); for flushing
+
 Changed for MSVC compatibility:
 
 diff `disttbfast.c`:

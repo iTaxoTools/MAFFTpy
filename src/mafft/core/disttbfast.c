@@ -147,7 +147,7 @@ typedef struct _distancematrixthread_arg
 #endif
 
 
-void arguments( int argc, char *argv[] )
+static void arguments( int argc, char *argv[] )
 {
     int c;
 
