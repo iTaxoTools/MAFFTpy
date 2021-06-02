@@ -290,6 +290,13 @@ mafft_dvtditr(PyObject *self, PyObject *args, PyObject *kwargs) {
 	return Py_None;
 }
 
+static PyObject *
+mafft_foo(PyObject *self, PyObject *args) {
+	fprintf(stdout, "BAR STDOUT\n");
+	fprintf(stderr, "BAR STDERR\n");
+	Py_INCREF(Py_None);
+	return Py_None;
+}
 static PyMethodDef MafftMethods[] = {
   {"disttbfast",  mafft_disttbfast, METH_VARARGS | METH_KEYWORDS,
    "Run mafft/disttbfast with given parameters."},
@@ -297,6 +304,9 @@ static PyMethodDef MafftMethods[] = {
    "Run mafft/tbfast with given parameters."},
   {"dvtditr",  mafft_dvtditr, METH_VARARGS | METH_KEYWORDS,
    "Run mafft/dvtditr with given parameters."},
+  {"dvtditr",  mafft_dvtditr, METH_VARARGS | METH_KEYWORDS,
+   "Run mafft/dvtditr with given parameters."},
+  {"foo",  mafft_foo, METH_VARARGS, "bar"},
   {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
