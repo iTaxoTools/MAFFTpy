@@ -44,7 +44,7 @@ def pushd(target):
         os.chdir(re)
 
 @contextmanager
-def redirect(file=sys.stdout, dest=os.devnull):
+def redirect(file=sys.stdout, dest=sys.stderr):
     """Used to redirect output to a file"""
     with os.fdopen(os.dup(file.fileno()), 'wb') as dup:
         file.flush()
@@ -54,23 +54,6 @@ def redirect(file=sys.stdout, dest=os.devnull):
         finally:
             file.flush()
             os.dup2(dup.fileno(), file.fileno())
-
-def call(function, *args, **kwargs):
-# def call(function, *args, _stdout=None, _stderr=None, **kwargs):
-    """Call function with kwargs as subprocess while redirecting output"""
-
-            # if True:
-            # with open('/dev/null', 'w') as fout, \
-            #      open(v.progressfile, 'a') as ferr, \
-            #      redirect(sys.stdout, fout), \
-            #      redirect(sys.stderr, ferr):
-                # mafft.dvtditr(
-    p = Process(target=function, args=args, kwargs=kwargs)
-    p.start()
-    p.join()
-    if p.exitcode != 0:
-        raise RuntimeError('MAFFT internal error, please check logs.')
-    return p.exitcode
 
 class MafftVars():
     """Variables used by MAFFT core"""
@@ -245,7 +228,6 @@ class MafftVars():
         """Parse params and update variables"""
 
         d = params.as_dictionary()
-        d['strategy'] = 'ginsi'
 
         if d['strategy'] == 'ginsi':
             self.fft = 1
@@ -315,9 +297,6 @@ class MultipleSequenceAlignment():
         if self.target is None:
             self._temp = tempfile.TemporaryDirectory(prefix='mafft_')
             self.target = pathlib.Path(self._temp.name).as_posix()
-
-        #! for testing!
-        self.target = "/tmp/"
 
         self._trim(self.file, pathlib.Path(self.target) / 'infile')
 
@@ -470,12 +449,10 @@ class MultipleSequenceAlignment():
         v.outputopt = "-f"
 
         if v.distance == "global" and v.memsavetree == 0:
-            if True:
-            # with open('/dev/null', 'w') as fout, \
-            #      open(v.progressfile, 'a') as ferr, \
-            #      redirect(sys.stdout, fout), \
-            #      redirect(sys.stderr, ferr):
-
+            with open(os.devnull, 'w') as fout, \
+                 open(v.progressfile, 'a') as ferr, \
+                 redirect(sys.stdout, fout), \
+                 redirect(sys.stderr, ferr):
                 mafft.tbfast(
                         i = 'infile',
                         pair = dict(
@@ -528,14 +505,10 @@ class MultipleSequenceAlignment():
                 pass
         # "$prefix/addsingle" -Q 100 $legacygapopt -W $tuplesize -O $outnum $addsinglearg $addarg $add2ndhalfarg -C $numthreads $memopt $weightopt $treeinopt $treeoutopt $distoutopt $seqtype $model -f "-"$gop  -h $aof  $param_fft $localparam   $algopt $treealg $scoreoutarg < infile   > /dev/null 2>>"$progressfile" || exit 1
             else:
-                if True:
-                # with open('pre', 'w') as fout, \
-                #      open(v.progressfile, 'a') as ferr, \
-                #      redirect(sys.stdout, fout), \
-                #      redirect(sys.stderr, ferr):
-                     # open('infile', 'r') as fin, \
-                     # redirect(sys.stdin, fin), \
-
+                with open('pre', 'w') as fout, \
+                     open(v.progressfile, 'a') as ferr, \
+                     redirect(sys.stdout, fout), \
+                     redirect(sys.stderr, ferr):
                     mafft.disttbfast(
                             i = 'infile',
                             q = v.npickup,
@@ -570,9 +543,6 @@ class MultipleSequenceAlignment():
                                 v.oneiterationopt,
                             ])
                         )
-        # print("v.cycletbfast", v.cycletbfast)
-        # shutil.copyfile('pre', 'pre2')
-        # return
 
         while v.cycletbfast > 1:
             if v.distance == "parttree":
@@ -592,11 +562,10 @@ class MultipleSequenceAlignment():
                 # "$prefix/dndpre" $seqtype $model -M 2 -C $numthreads < pre     > /dev/null 2>>"$progressfile" || exit 1
                 pass
 
-            if True:
-            # with open('/dev/null', 'w') as fout, \
-            #      open(v.progressfile, 'a') as ferr, \
-            #      redirect(sys.stdout, fout), \
-            #      redirect(sys.stderr, ferr):
+            with open(os.devnull, 'w') as fout, \
+                 open(v.progressfile, 'a') as ferr, \
+                 redirect(sys.stdout, fout), \
+                 redirect(sys.stderr, ferr):
                 mafft.dvtditr(
                         i = 'pre',
                         W = v.minimumweight,
@@ -629,32 +598,26 @@ class MultipleSequenceAlignment():
                             v.scoreoutarg,
                         ])
                     )
-            # "$prefix/dvtditr" -W $minimumweight $bunkatsuopt -E $fixthreshold -s $unalignlevel  $legacygapopt $mergearg $outnum -C $numthreadsit -t $randomseed $rnaoptit $memopt $scorecalcopt $localparam
-            # -z 50 $seqtype $model -f "-"$gop -Q $spfactor -h $aof  -I $iterate $weightopt $treeinopt $algoptit $treealg -p $parallelizationstrategy  $scoreoutarg
-            # -K $nadd < pre     > /dev/null 2>>"$progressfile" || exit 1
 
-        print(v.strategy)
-        print(v.explanation)
-        print(v.performance)
+        print('Strategy:', v.strategy)
+        print('Explanation:', v.explanation)
+        print('Performance:', v.performance)
 
         # call f2cl for windows
         # print file named "pre"
 
-        # kwargs = self.param.as_dictionary()
-        # kwargs['file'] = self.file
-        # kwargs['time'] = datetime.now().strftime(self.time_format)
-        # kwargs['a'] = None
-        # kwargs['1'] = 2
         # if self.target is not None:
         #     kwargs['out'] = self.target
         # mafft.disttbfast(i=self.file)
         self.results = self.target
 
+        print('Results:', self.results)
+
     def launch(self):
         """
         Should always use a seperate process to launch the MAFFT core,
-        as the script uses global I/O redirection  that could affect threaded
-        applications, while some internal functions may call exit().
+        as the script uses global I/O redirection, some internal functions
+        call exit(), while repeated calls may cause segfaults.
         Save results in a temporary directory, use fetch() to retrieve them.
         """
         # When the last reference of TemporaryDirectory is gone,
