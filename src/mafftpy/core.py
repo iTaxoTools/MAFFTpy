@@ -655,3 +655,23 @@ class MultipleSequenceAlignment():
             raise RuntimeError('MAFFT internal error, please check logs.')
         # Success, update analysis object for parent process
         self.results = self.target
+
+def quick(input=None, save=None, strategy='fftns1'):
+    """Quick analysis"""
+    a = MultipleSequenceAlignment(input)
+    a.params.general.strategy = strategy
+    a.launch()
+    if save is not None:
+        savefile = open(save, 'w')
+    else:
+        savefile = sys.stdout
+    with open(pathlib.Path(a.results) / 'pre') as result:
+        print(result.read(), file=savefile)
+    if save is not None:
+        savefile.close()
+
+def fftns1(input=None, save=None):
+    quick(input, save, 'fftns1')
+
+def ginsi(input=None, save=None):
+    quick(input, save, 'ginsi')
