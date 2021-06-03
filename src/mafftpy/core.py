@@ -44,58 +44,40 @@ def pushd(target):
         os.chdir(re)
 
 @contextmanager
-def _redirect(src=sys.stdout, dst=sys.stderr):
-    """Redirect output"""
-    with os.fdopen(os.dup(src.fileno()), 'wb') as dup:
-        src.flush()
-        os.dup2(dst.fileno(), src.fileno())
-        fileno = src.fileno
-        src.fileno = lambda: dst.fileno()
-        try:
-            yield src
-        finally:
-            src.flush()
-            src.fileno = fileno
-            os.dup2(dup.fileno(), src.fileno())
+def _redirect(stream='stdout', dest=None):
+    """Redirect system stream to file stream"""
+    # High-level redirection
+    original = getattr(sys, stream)
+    original.flush()
+    setattr(sys, stream, dest)
+    # Low-level redirection
+    duplicate = os.dup(original.fileno())
+    os.dup2(dest.fileno(), original.fileno())
+    try:
+        yield dest
+    finally:
+        # Restore stream
+        os.dup2(duplicate, original.fileno())
+        dest.flush()
+        setattr(sys, stream, original)
 
 @contextmanager
-def redirect(src=sys.stdout, tar=None, mode='wb'):
+def redirect(stream='stdout', dest=None, mode='w'):
     """
-    Used to redirect output:
-    - If tar is None: Do nothing
-    - If tar is a string: Assume filepath, open in mode and redirect there
-    - Else: Assume IOWrapper with open fileno
+    Redirect system stream according to `dest`:
+    - If None: Do nothing
+    - If String: Open file and redirect
+    - Else: Assume IOWrapper, redirect
     """
-    if tar is None:
-        yield src
-    elif isinstance(tar, str):
-        mode += 'b'
-        with open(tar, mode) as dst, _redirect(src, dst):
-            yield
+    if dest is None:
+        yield getattr(sys, stream)
+    elif isinstance(dest, str):
+        with open(dest, mode) as file, _redirect(stream, file) as f:
+            yield f
     else:
-        with _redirect(src, tar):
-            yield
+        with _redirect(src, tar) as f:
+            yield f
 
-@contextmanager
-def _redir(stream='stdout', filename=None, mode='w'):
-    if filename is None:
-        yield
-    else:
-        with open(filename, mode) as dest:
-            # High-level redirection
-            original = getattr(sys, stream)
-            original.flush()
-            setattr(sys, stream, dest)
-            # Low-level redirection
-            duplicate = os.dup(original.fileno())
-            os.dup2(dest.fileno(), original.fileno())
-            try:
-                yield
-            finally:
-                # Restore stream
-                os.dup2(duplicate, original.fileno())
-                dest.flush()
-                setattr(sys, stream, original)
 
 class MafftVars():
     """Variables used by MAFFT core"""
@@ -299,9 +281,9 @@ class MultipleSequenceAlignment():
         self.file = file
         self.target = None
         self.results = None
-        # self.time_format = '%x - %I:%M%p'
-        self.time_format = '%FT%T'
+        self.log = None
         self.params = param.ParamList(params.params)
+        self.vars = MafftVars(self.params)
 
     @staticmethod
     def _vars_to_kwargs(list):
@@ -323,7 +305,6 @@ class MultipleSequenceAlignment():
                 for line in fin:
                     fout.write(line.translate(tr))
 
-
     def fetch(self, destination):
         """Copy results as a new directory"""
         if self.results is None:
@@ -336,24 +317,22 @@ class MultipleSequenceAlignment():
         save results to a temporary directory.
         """
 
+        self.vars.update_from_params(self.params)
+
+        self.vars.progressfile = self.log
+        self.vars.infilename = 'infile'
+        self._trim(self.file, pathlib.Path(self.target) / self.vars.infilename)
+
         if self.target is None:
             self._temp = tempfile.TemporaryDirectory(prefix='mafft_')
             self.target = pathlib.Path(self._temp.name).as_posix()
-
-        self.target='.'
-
-        self._trim(self.file, pathlib.Path(self.target) / 'infile')
 
         with pushd(self.target):
             self._script()
 
     def _script(self):
 
-        self.params.general.strategy = 'ginsi'
-        v = MafftVars(self.params)
-
-        v.progressfile = 'err.log'
-        # v.progressfile = None
+        v = self.vars
 
         # if maxambiguous != 1: call filter()
 
@@ -367,8 +346,6 @@ class MultipleSequenceAlignment():
     # cat "$anchorfile"     | tr "\r" "\n" | grep -v "^$" > "$TMPFILE/_externalanchors"
 
         # check that files are ASCII, not utf-16-32
-
-        v.infilename = self.file
 
         # do something with seedfiles
 
@@ -495,13 +472,13 @@ class MultipleSequenceAlignment():
         v.outputopt = "-f"
 
         if v.distance == "global" and v.memsavetree == 0:
-            with _redir('stdout', os.devnull, 'w'), \
-                 _redir('stderr', v.progressfile, 'a'):
+            with redirect('stdout', os.devnull, 'w'), \
+                 redirect('stderr', v.progressfile, 'a'):
             # if True:
                 mafft.tbfast(
-                        i = 'infile',
+                        i = v.infilename,
                         pair = dict(
-                            i = 'infile',
+                            i = v.infilename,
                             u = v.unalignlevel,
                             C = v.numthreads,
                             g = v.pgexp,
@@ -552,10 +529,10 @@ class MultipleSequenceAlignment():
                 pass
         # "$prefix/addsingle" -Q 100 $legacygapopt -W $tuplesize -O $outnum $addsinglearg $addarg $add2ndhalfarg -C $numthreads $memopt $weightopt $treeinopt $treeoutopt $distoutopt $seqtype $model -f "-"$gop  -h $aof  $param_fft $localparam   $algopt $treealg $scoreoutarg < infile   > /dev/null 2>>"$progressfile" || exit 1
             else:
-                with redirect(sys.stdout, 'pre', 'w'), \
-                     redirect(sys.stderr, v.progressfile, 'a'):
+                with redirect('stdout', 'pre', 'w'), \
+                     redirect('stderr', v.progressfile, 'a'):
                     mafft.disttbfast(
-                            i = 'infile',
+                            i = v.infilename,
                             q = v.npickup,
                             E = v.cycledisttbfast,
                             V = '-' + v.gopdist,
@@ -611,8 +588,8 @@ class MultipleSequenceAlignment():
 
             # with redirect(sys.stdout, os.devnull, 'w'), \
             #      redirect(sys.stderr, v.progressfile, 'a'):
-            with _redir('stdout', os.devnull, 'w'), \
-                 _redir('stderr', v.progressfile, 'a'):
+            with redirect('stdout', os.devnull, 'w'), \
+                 redirect('stderr', v.progressfile, 'a'):
                 mafft.dvtditr(
                         i = 'pre',
                         W = v.minimumweight,
@@ -674,7 +651,6 @@ class MultipleSequenceAlignment():
         p = Process(target=self.run)
         p.start()
         p.join()
-        print('CODA', p.exitcode)
         if p.exitcode != 0:
             raise RuntimeError('MAFFT internal error, please check logs.')
         # Success, update analysis object for parent process

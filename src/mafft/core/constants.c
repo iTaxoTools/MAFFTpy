@@ -309,27 +309,27 @@ void constants( int nseq, char **seq )
 		}
 
 
-		if( kimuraR == 9999 ) 
+		if( kimuraR == 9999 )
 		{
-			for( i=0; i<4; i++ ) for( j=0; j<4; j++ ) 
+			for( i=0; i<4; i++ ) for( j=0; j<4; j++ )
 				pamx[i][j] = (double)locn_disn[i][j];
 #if NORMALIZE1
 			average = 0.0;
-			for( i=0; i<4; i++ ) for( j=0; j<4; j++ ) 
+			for( i=0; i<4; i++ ) for( j=0; j<4; j++ )
 				average += pamx[i][j];
 			average /= 16.0;
-	
+
    	     if( disp )
 				reporterr(       "average = %f\n", average );
-	
-			for( i=0; i<4; i++ ) for( j=0; j<4; j++ ) 
+
+			for( i=0; i<4; i++ ) for( j=0; j<4; j++ )
 				pamx[i][j] -= average;
-	
+
 			for( i=0; i<4; i++ ) for( j=0; j<4; j++ )
 				pamx[i][j] *= 600.0 / average;
-			
+
 			for( i=0; i<4; i++ ) for( j=0; j<4; j++ )
-				pamx[i][j] -= offset; 
+				pamx[i][j] -= offset;
 #endif
 		}
 		else
@@ -345,9 +345,9 @@ void constants( int nseq, char **seq )
 #else
 				generatenuc1pam( pam1, kimuraR, freq );
 #endif
-	
+
 				reporterr(       "generating a scoring matrix for nucleotide (dist=%d) ... ", pamN );
-	
+
 		       	if( disp )
    		    	{
    		     		reporterr(       " TPM \n" );
@@ -359,8 +359,8 @@ void constants( int nseq, char **seq )
    		        	}
    		        	reporterr(       "\n" );
    		     	}
-	
-	
+
+
 				MtxuntDouble( pamx, 4 );
 				for( x=0; x < pamN; x++ ) MtxmltDouble( pamx, pam1, 4 );
 
@@ -379,17 +379,17 @@ void constants( int nseq, char **seq )
 				for( i=0; i<4; i++ ) for( j=0; j<4; j++ )
 					pamx[i][j] /= freq[j];
 //					pamx[i][j] /= 0.25;
-	
+
 				for( i=0; i<4; i++ ) for( j=0; j<4; j++ )
 				{
-					if( pamx[i][j] == 0.0 ) 
+					if( pamx[i][j] == 0.0 )
 					{
 						reporterr(       "WARNING: pamx[i][j] = 0.0 ?\n" );
 						pamx[i][j] = 0.00001; /* by J. Thompson */
 					}
 					pamx[i][j] = log10( pamx[i][j] ) * 1000.0;
 				}
-	
+
    	    		if( disp )
    	    		{
    		     		reporterr(       " after log\n" );
@@ -404,7 +404,7 @@ void constants( int nseq, char **seq )
 
 
 // ?????
-			
+
 			average = 0.0;
 			for( i=0; i<4; i++ ) for( j=0; j<4; j++ )
 				average += pamx[i][j] * freq[i] * freq[j];
@@ -438,18 +438,18 @@ void constants( int nseq, char **seq )
         	}
 			reporterr(       "done\n" );
 		}
-	
-		for( i=0; i<5; i++ ) 
+
+		for( i=0; i<5; i++ )
 		{
 			pamx[4][i] = pamx[3][i];
 			pamx[i][4] = pamx[i][3];
-		}	
+		}
 
 		for( i=5; i<10; i++ ) for( j=5; j<10; j++ )
 		{
 			pamx[i][j] = pamx[i-5][j-5];
 		}
-	
+
        	if( disp )
        	{
        		reporterr(       " before dis\n" );
@@ -652,7 +652,7 @@ void constants( int nseq, char **seq )
 		for( i=0; i<26; i++ ) amino_n[(int)amino[i]] = i;
 #endif
 		for( i=0; i<0x100; i++ )amino_n[i] = -1;
-		for( i=0; i<nalphabets; i++) 
+		for( i=0; i<nalphabets; i++)
 		{
 			amino_n[(unsigned char)amino[i]] = i;
 //			reporterr(       "i=%d, amino = %c, amino_n = %d\n", i, amino[i], amino_n[amino[i]] );
@@ -669,7 +669,7 @@ void constants( int nseq, char **seq )
 		reporterr(       "raw scoreing matrix : \n" );
 		for( i=0; i<nalphabets; i++ )
 		{
-			for( j=0; j<nalphabets; j++ ) 
+			for( j=0; j<nalphabets; j++ )
 			{
 				fprintf( stdout, "%6.2f", n_distmp[i][j] );
 			}
@@ -681,7 +681,7 @@ void constants( int nseq, char **seq )
 		else
 		{
 			for( i=0; i<nalphabets; i++ )
-#if TEST 
+#if TEST
 				fprintf( stdout, "freq[%c] = %f, datafreq[%c] = %f, freq1[] = %f\n", amino[i], freq[i], amino[i], datafreq[i], freq1[i] );
 #endif
 			average = 0.0;
@@ -692,23 +692,23 @@ void constants( int nseq, char **seq )
 		if( disp ) fprintf( stdout, "####### average2  = %f\n", average );
 #endif
 
-		for( i=0; i<nalphabets; i++ ) for( j=0; j<nalphabets; j++ ) 
+		for( i=0; i<nalphabets; i++ ) for( j=0; j<nalphabets; j++ )
 			n_distmp[i][j] -= average;
 #if TEST
 		fprintf( stdout, "average2 = %f\n", average );
 		fprintf( stdout, "after average substruction : \n" );
 		for( i=0; i<nalphabets; i++ )
 		{
-			for( j=0; j<nalphabets; j++ ) 
+			for( j=0; j<nalphabets; j++ )
 			{
 				fprintf( stdout, "%6.2f", n_distmp[i][j] );
 			}
 			fprintf( stdout, "\n" );
 		}
 #endif
-		
+
 		average = 0.0;
-		for( i=0; i<nalphabets; i++ ) 
+		for( i=0; i<nalphabets; i++ )
 			average += n_distmp[i][i] * freq1[i];
 #if 1
 		if( disp ) fprintf( stdout, "####### average1  = %f\n", average );
@@ -720,7 +720,7 @@ void constants( int nseq, char **seq )
 			exit( 1 );
 		}
 
-		for( i=0; i<nalphabets; i++ ) for( j=0; j<nalphabets; j++ ) 
+		for( i=0; i<nalphabets; i++ ) for( j=0; j<nalphabets; j++ )
 			n_distmp[i][j] *= 600.0 / average;
 #if TEST
         fprintf( stdout, "after average division : \n" );
@@ -734,13 +734,13 @@ void constants( int nseq, char **seq )
         }
 #endif
 
-		for( i=0; i<nalphabets; i++ ) for( j=0; j<nalphabets; j++ ) 
-			n_distmp[i][j] -= offset;  
+		for( i=0; i<nalphabets; i++ ) for( j=0; j<nalphabets; j++ )
+			n_distmp[i][j] -= offset;
 #if TEST
 		fprintf( stdout, "after offset substruction (offset = %d): \n", offset );
 		for( i=0; i<nalphabets; i++ )
 		{
-			for( j=0; j<=i; j++ ) 
+			for( j=0; j<=i; j++ )
 			{
 				fprintf( stdout, "%7.1f", n_distmp[i][j] );
 			}
@@ -748,12 +748,12 @@ void constants( int nseq, char **seq )
 		}
 #endif
 #if 0
-/* Ãí°Õ ¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª */
+/* ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
 			penalty -= offset;
 #endif
 
 
-		for( i=0; i<nalphabets; i++ ) for( j=0; j<nalphabets; j++ ) 
+		for( i=0; i<nalphabets; i++ ) for( j=0; j<nalphabets; j++ )
 			n_distmp[i][j] = shishagonyuu( n_distmp[i][j] );
 
         if( disp )
@@ -783,7 +783,7 @@ void constants( int nseq, char **seq )
 			fprintf( stdout, "itch average = %f\n", average );
 			reporterr(       "parameters: %d, %d, %d\n", penalty, penalty_ex, offset );
 
-			
+
   			exit( 1 );
         }
 
@@ -881,7 +881,7 @@ void constants( int nseq, char **seq )
 		reporterr(       "raw scoreing matrix : \n" );
 		for( i=0; i<20; i++ )
 		{
-			for( j=0; j<20; j++ ) 
+			for( j=0; j<20; j++ )
 			{
 				fprintf( stdout, "%6.2f", n_distmp[i][j] );
 			}
@@ -892,7 +892,7 @@ void constants( int nseq, char **seq )
 			average = 0.0;
 		else
 		{
-#if TEST 
+#if TEST
 			for( i=0; i<20; i++ )
 				fprintf( stdout, "freq[%c] = %f, datafreq[%c] = %f, freq1[] = %f\n", amino[i], freq[i], amino[i], datafreq[i], freq1[i] );
 #endif
@@ -906,7 +906,7 @@ void constants( int nseq, char **seq )
 
 		if( rescale )
 		{
-			for( i=0; i<20; i++ ) for( j=0; j<20; j++ ) 
+			for( i=0; i<20; i++ ) for( j=0; j<20; j++ )
 				n_distmp[i][j] -= average;
 		}
 #if TEST
@@ -914,16 +914,16 @@ void constants( int nseq, char **seq )
 		fprintf( stdout, "after average subtraction : \n" );
 		for( i=0; i<20; i++ )
 		{
-			for( j=0; j<20; j++ ) 
+			for( j=0; j<20; j++ )
 			{
 				fprintf( stdout, "%6.2f", n_distmp[i][j] );
 			}
 			fprintf( stdout, "\n" );
 		}
 #endif
-		
+
 		average = 0.0;
-		for( i=0; i<20; i++ ) 
+		for( i=0; i<20; i++ )
 			average += n_distmp[i][i] * freq1[i];
 #if 1
 		if( disp ) fprintf( stdout, "####### average1  = %f\n", average );
@@ -931,12 +931,12 @@ void constants( int nseq, char **seq )
 
 		if( rescale )
 		{
-			for( i=0; i<20; i++ ) for( j=0; j<20; j++ ) 
+			for( i=0; i<20; i++ ) for( j=0; j<20; j++ )
 				n_distmp[i][j] *= 600.0 / average;
 		}
 		else
 		{
-			for( i=0; i<20; i++ ) for( j=0; j<20; j++ ) 
+			for( i=0; i<20; i++ ) for( j=0; j<20; j++ )
 				n_distmp[i][j] *= 600.0;
 		}
 #if TEST
@@ -951,13 +951,13 @@ void constants( int nseq, char **seq )
         }
 #endif
 
-		for( i=0; i<20; i++ ) for( j=0; j<20; j++ ) 
-			n_distmp[i][j] -= offset;  
+		for( i=0; i<20; i++ ) for( j=0; j<20; j++ )
+			n_distmp[i][j] -= offset;
 #if TEST
 		fprintf( stdout, "after offset substruction (offset = %d): \n", offset );
 		for( i=0; i<20; i++ )
 		{
-			for( j=0; j<=i; j++ ) 
+			for( j=0; j<=i; j++ )
 			{
 				fprintf( stdout, "%7.1f", n_distmp[i][j] );
 			}
@@ -965,12 +965,12 @@ void constants( int nseq, char **seq )
 		}
 #endif
 #if 0
-/* Ãí°Õ ¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª */
+/* ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
 			penalty -= offset;
 #endif
 
 
-		for( i=0; i<20; i++ ) for( j=0; j<20; j++ ) 
+		for( i=0; i<20; i++ ) for( j=0; j<20; j++ )
 			n_distmp[i][j] = shishagonyuu( n_distmp[i][j] );
 
         if( disp )
@@ -998,7 +998,7 @@ void constants( int nseq, char **seq )
 			fprintf( stderr, "itch average = %f, E=%f\n", iaverage, average/iaverage );
 			reporterr(       "parameters: %d, %d, %d\n", penalty, penalty_ex, offset );
 
-			
+
   			exit( 1 );
         }
 
@@ -1157,24 +1157,24 @@ void constants( int nseq, char **seq )
 		MtxuntDouble( pamx, 20 );
 		for( x=0; x < pamN; x++ ) MtxmltDouble( pamx, pam1, 20 );
 
-		for( i=0; i<20; i++ ) for( j=0; j<20; j++ ) 
+		for( i=0; i<20; i++ ) for( j=0; j<20; j++ )
 			pamx[i][j] /= freq1[j];
 
         for( i=0; i<20; i++ ) for( j=0; j<20; j++ )
 		{
-			if( pamx[i][j] == 0.0 ) 
+			if( pamx[i][j] == 0.0 )
 			{
 				reporterr(       "WARNING: pamx[%d][%d] = 0.0?\n", i, j );
 				pamx[i][j] = 0.00001; /* by J. Thompson */
 			}
             pamx[i][j] = log10( pamx[i][j] ) * 1000.0;
 		}
- 
+
 #if TEST
 		fprintf( stdout, "raw scoring matrix : \n" );
 		for( i=0; i<20; i++ )
 		{
-			for( j=0; j<20; j++ ) 
+			for( j=0; j<20; j++ )
 			{
 				fprintf( stdout, "%5.0f", pamx[i][j] );
 			}
@@ -1225,7 +1225,7 @@ void constants( int nseq, char **seq )
 
 		if( makeaverage0 )
 		{
-			for( i=0; i<20; i++ ) for( j=0; j<20; j++ ) 
+			for( i=0; i<20; i++ ) for( j=0; j<20; j++ )
 				pamx[i][j] -= average;
 		}
 #if TEST
@@ -1233,22 +1233,22 @@ void constants( int nseq, char **seq )
 		fprintf( stdout, "after average substruction : \n" );
 		for( i=0; i<20; i++ )
 		{
-			for( j=0; j<20; j++ ) 
+			for( j=0; j<20; j++ )
 			{
 				fprintf( stdout, "%5.0f", pamx[i][j] );
 			}
 			fprintf( stdout, "\n" );
 		}
 #endif
-		
+
 		average = 0.0;
-		for( i=0; i<20; i++ ) 
+		for( i=0; i<20; i++ )
 			average += pamx[i][i] * freq1[i];
 #if TEST
 		fprintf( stdout, "####### average1  = %f\n", average );
 #endif
 
-		for( i=0; i<20; i++ ) for( j=0; j<20; j++ ) 
+		for( i=0; i<20; i++ ) for( j=0; j<20; j++ )
 			pamx[i][j] *= 600.0 / average;
 #if TEST
         fprintf( stdout, "after average division : \n" );
@@ -1262,13 +1262,13 @@ void constants( int nseq, char **seq )
         }
 #endif
 
-		for( i=0; i<20; i++ ) for( j=0; j<20; j++ ) 
-			pamx[i][j] -= offset;  
+		for( i=0; i<20; i++ ) for( j=0; j<20; j++ )
+			pamx[i][j] -= offset;
 #if TEST
 		fprintf( stdout, "after offset substruction (offset = %d): \n", offset );
 		for( i=0; i<20; i++ )
 		{
-			for( j=0; j<=i; j++ ) 
+			for( j=0; j<=i; j++ )
 			{
 				fprintf( stdout, "%5.0f", pamx[i][j] );
 			}
@@ -1276,12 +1276,12 @@ void constants( int nseq, char **seq )
 		}
 #endif
 #if 0
-/* Ãí°Õ ¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª¡ª */
+/* ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
 			penalty -= offset;
 #endif
 
 
-		for( i=0; i<20; i++ ) for( j=0; j<20; j++ ) 
+		for( i=0; i<20; i++ ) for( j=0; j<20; j++ )
 			pamx[i][j] = shishagonyuu( pamx[i][j] );
 
 #else
@@ -1322,7 +1322,7 @@ void constants( int nseq, char **seq )
 			fprintf( stdout, "itch average = %f, E=%f\n", average, average/iaverage );
 			reporterr(       "parameters: %d, %d, %d\n", penalty, penalty_ex, offset );
 
-			
+
   			exit( 1 );
         }
 
@@ -1393,7 +1393,7 @@ void constants( int nseq, char **seq )
 		reporterr(       "amino_dis (offset = %d): \n", offset );
 		for( i=0; i<20; i++ )
 		{
-			for( j=0; j<20; j++ ) 
+			for( j=0; j<20; j++ )
 			{
 				reporterr(       "%5d", amino_dis[(int)amino[i]][(int)amino[j]] );
 			}
@@ -1403,7 +1403,7 @@ void constants( int nseq, char **seq )
 		reporterr(       "amino_disLN (offsetLN = %d): \n", offsetLN );
 		for( i=0; i<20; i++ )
 		{
-			for( j=0; j<20; j++ ) 
+			for( j=0; j<20; j++ )
 			{
 				reporterr(       "%5d", amino_disLN[(int)amino[i]][(int)amino[j]] );
 			}
@@ -1413,7 +1413,7 @@ void constants( int nseq, char **seq )
 		reporterr(       "n_dis (offset = %d): \n", offset );
 		for( i=0; i<26; i++ )
 		{
-			for( j=0; j<26; j++ ) 
+			for( j=0; j<26; j++ )
 			{
 				reporterr(       "%5d", n_dis[i][j] );
 			}
@@ -1423,7 +1423,7 @@ void constants( int nseq, char **seq )
 		reporterr(       "n_disFFT (offsetFFT = %d): \n", offsetFFT );
 		for( i=0; i<26; i++ )
 		{
-			for( j=0; j<26; j++ ) 
+			for( j=0; j<26; j++ )
 			{
 				reporterr(       "%5d", n_disFFT[i][j] );
 			}
@@ -1442,9 +1442,9 @@ exit( 1 );
 	}
 	if( fftWinSize == NOTSPECIFIED )
 	{
-		if( dorp == 'd' ) 
+		if( dorp == 'd' )
 			fftWinSize = FFT_WINSIZE_D;
-		else    
+		else
 			fftWinSize = FFT_WINSIZE_P;
 	}
 
@@ -1460,7 +1460,7 @@ exit( 1 );
 		sd /= 20.0; sd = sqrt( sd );
 		for( i=0; i<20; i++ ) polarity[i] -= av;
 		for( i=0; i<20; i++ ) polarity[i] /= sd;
-	
+
 		for( i=0; i<20; i++ ) volume[i] = volume_[i];
 		for( av=0.0, i=0; i<20; i++ ) av += volume[i];
 		av /= 20.0;

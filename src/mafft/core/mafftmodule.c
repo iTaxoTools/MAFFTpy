@@ -211,11 +211,11 @@ mafft_tbfast(PyObject *self, PyObject *args, PyObject *kwargs) {
 			PyErr_SetString(PyExc_TypeError, "mafft_tbfast: Pair argument must be a dictionary");
 			return NULL;
 		}
+		if (argsFromDict(pdict, &pargc, &pargv, "tbfast-pair")) return NULL;
 		if (PyDict_DelItemString(dict, pair_string)) {
 			PyErr_SetString(PyExc_TypeError, "mafft_tbfast: Unexpected error deleting pair key");
 			return NULL;
 		}
-		if (argsFromDict(pdict, &pargc, &pargv, "tbfast-pair")) return NULL;
 	}
 
 	if (argsFromDict(dict, &targc, &targv, "tbfast")) return NULL;
