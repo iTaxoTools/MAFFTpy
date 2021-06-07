@@ -235,7 +235,7 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        'pyqt5',
+        # 'pyqt5',
         ],
 
     # List additional groups of dependencies here (e.g. development
@@ -248,7 +248,7 @@ setup(
     # Similar to `install_requires` above, these must be valid existing
     # projects.
     extras_require={  # Optional
-        'dev': ['pyqt5ac'],
+        # 'dev': ['pyqt5ac'],
         },
 
     # If there are data files included in your packages that need to be
@@ -276,7 +276,9 @@ setup(
     entry_points={  # Optional
         'console_scripts': [
             'mafftpy=mafftpy.run:main',
-            'mafftpy-qt=mafftpy.qt.run:main',
+            'mafftpy-ginsi=mafftpy.run:ginsi',
+            'mafftpy-fftns1=mafftpy.run:fftns1',
+            # 'mafftpy-qt=mafftpy.qt.run:main',
         ],
     },
 

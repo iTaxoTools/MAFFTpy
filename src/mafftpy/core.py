@@ -26,7 +26,7 @@ import re
 import os
 import sys
 from datetime import datetime
-from contextlib import contextmanager, redirect_stdout
+from contextlib import contextmanager
 
 from . import mafft
 from . import param
