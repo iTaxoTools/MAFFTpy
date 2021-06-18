@@ -31,7 +31,7 @@ from contextlib import contextmanager
 from . import mafft
 from . import param
 from . import params
-
+from .utility import redirect
 
 @contextmanager
 def pushd(target):
@@ -42,42 +42,6 @@ def pushd(target):
         yield
     finally:
         os.chdir(re)
-
-@contextmanager
-def _redirect(stream='stdout', dest=None):
-    """Redirect system stream to file stream"""
-    # High-level redirection
-    original = getattr(sys, stream)
-    original.flush()
-    setattr(sys, stream, dest)
-    # Low-level redirection
-    duplicate = os.dup(original.fileno())
-    os.dup2(dest.fileno(), original.fileno())
-    try:
-        yield dest
-    finally:
-        # Restore stream
-        os.dup2(duplicate, original.fileno())
-        dest.flush()
-        setattr(sys, stream, original)
-
-@contextmanager
-def redirect(stream='stdout', dest=None, mode='w'):
-    """
-    Redirect system stream according to `dest`:
-    - If None: Do nothing
-    - If String: Open file and redirect
-    - Else: Assume IOWrapper, redirect
-    """
-    if dest is None:
-        yield getattr(sys, stream)
-    elif isinstance(dest, str):
-        with open(dest, mode) as file, _redirect(stream, file) as f:
-            yield f
-    else:
-        with _redirect(src, tar) as f:
-            yield f
-
 
 class MafftVars():
     """Variables used by MAFFT core"""
@@ -321,11 +285,12 @@ class MultipleSequenceAlignment():
 
         self.vars.progressfile = self.log
         self.vars.infilename = 'infile'
-        self._trim(self.file, pathlib.Path(self.target) / self.vars.infilename)
 
         if self.target is None:
             self._temp = tempfile.TemporaryDirectory(prefix='mafft_')
             self.target = pathlib.Path(self._temp.name).as_posix()
+
+        self._trim(self.file, pathlib.Path(self.target) / self.vars.infilename)
 
         with pushd(self.target):
             self._script()
@@ -472,8 +437,8 @@ class MultipleSequenceAlignment():
         v.outputopt = "-f"
 
         if v.distance == "global" and v.memsavetree == 0:
-            with redirect('stdout', os.devnull, 'w'), \
-                 redirect('stderr', v.progressfile, 'a'):
+            with redirect(mafft, 'stdout', os.devnull, 'w'), \
+                 redirect(mafft, 'stderr', v.progressfile, 'a'):
             # if True:
                 mafft.tbfast(
                         i = v.infilename,
@@ -529,8 +494,8 @@ class MultipleSequenceAlignment():
                 pass
         # "$prefix/addsingle" -Q 100 $legacygapopt -W $tuplesize -O $outnum $addsinglearg $addarg $add2ndhalfarg -C $numthreads $memopt $weightopt $treeinopt $treeoutopt $distoutopt $seqtype $model -f "-"$gop  -h $aof  $param_fft $localparam   $algopt $treealg $scoreoutarg < infile   > /dev/null 2>>"$progressfile" || exit 1
             else:
-                with redirect('stdout', 'pre', 'w'), \
-                     redirect('stderr', v.progressfile, 'a'):
+                with redirect(mafft, 'stdout', 'pre', 'w'), \
+                     redirect(mafft, 'stderr', v.progressfile, 'a'):
                     mafft.disttbfast(
                             i = v.infilename,
                             q = v.npickup,
@@ -588,8 +553,8 @@ class MultipleSequenceAlignment():
 
             # with redirect(sys.stdout, os.devnull, 'w'), \
             #      redirect(sys.stderr, v.progressfile, 'a'):
-            with redirect('stdout', os.devnull, 'w'), \
-                 redirect('stderr', v.progressfile, 'a'):
+            with redirect(mafft, 'stdout', os.devnull, 'w'), \
+                 redirect(mafft, 'stderr', v.progressfile, 'a'):
                 mafft.dvtditr(
                         i = 'pre',
                         W = v.minimumweight,

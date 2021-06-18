@@ -33,6 +33,11 @@
 #include <sys/shm.h> // shared memory
 #include <sys/mman.h> // shm_open
 #endif
+#ifdef ismodule
+#define PY_SSIZE_T_CLEAN
+#include <Python.h>
+#include "wrapio.h"
+#endif
 
 
 

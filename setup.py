@@ -61,6 +61,7 @@ class MafftExtension(Extension):
     def build_init(self, build):
         """Called by build_ext to compile and include pthread-win32 if needed"""
         if build.compiler.compiler_type == 'msvc':
+            self.define_macros += [('_CRT_SECURE_NO_WARNINGS', '1')]
             self.include_dirs += ['src/pthread-win32']
             self.library_dirs += ['src/pthread-win32']
             self.libraries += ['libpthreadVC3']
@@ -75,6 +76,7 @@ mafftmodule = MafftExtension('mafftpy.mafft',
         library_dirs  = [],
         libraries  = [],
         sources = [
+            'src/mafft/core/wrapio.c',
             'src/mafft/core/mafftmodule.c',
             'src/mafft/core/disttbfast.c',
             'src/mafft/core/tbfast.c',

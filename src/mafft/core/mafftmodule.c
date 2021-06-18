@@ -28,6 +28,7 @@ https://www.python.org/dev/peps/pep-0489/
 #include <stdlib.h>
 #include <stdio.h>
 #include "mafftmodule.h"
+#include "wrapio.h"
 
 // Set var = dict[str], do nothing if key does not exist.
 // On failure, sets error indicator and returns -1.
@@ -326,12 +327,14 @@ PyMODINIT_FUNC
 PyInit_mafft(void)
 {
 	PyObject *m = NULL;
-  m = PyModule_Create(&mafftmodule);
-	// if (m != NULL) {
-	// 	if (PyModule_AddStringConstant(m, "separator", "/")) {
-	// 		Py_XDECREF(m);
-	// 		m = NULL;
-	// 	}
-	// }
+
+	if (!(m = PyModule_Create(&mafftmodule)))
+		return NULL;
+
+	if (wrapio_init(m)) {
+		Py_XDECREF(m);
+		return NULL;
+	}
+
 	return m;
 }
