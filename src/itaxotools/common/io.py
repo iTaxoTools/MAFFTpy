@@ -1,6 +1,57 @@
+#-----------------------------------------------------------------------------
+# Commons - Utility classes for iTaxoTools modules
+# Copyright (C) 2021  Patmanidis Stefanos
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#-----------------------------------------------------------------------------
+
+
+"""IO redirection and file-likes"""
 
 from contextlib import contextmanager
 import io, os, sys
+
+
+@contextmanager
+def _redirect(module=sys, stream='stdout', dest=None):
+    """Redirect module stream to file stream"""
+    original = getattr(module, stream)
+    original.flush()
+    setattr(module, stream, dest)
+    try:
+        yield dest
+    finally:
+        dest.flush()
+        setattr(module, stream, original)
+
+@contextmanager
+def redirect(module=sys, stream='stdout', dest=None, mode='w'):
+    """
+    Redirect module's stream according to `dest`:
+    - If None: Do nothing
+    - If String: Open file and redirect
+    - Else: Assume IOWrapper, redirect
+    """
+    if dest is None:
+        yield getattr(module, stream)
+    elif isinstance(dest, str):
+        with open(dest, mode) as file, _redirect(module, stream, file) as f:
+            yield f
+    else:
+        with _redirect(module, stream, dest) as f:
+            yield f
+
 
 class PipeIO(io.IOBase):
     """File-like object that writes to a pipe connection"""
@@ -86,32 +137,31 @@ class PipeIO(io.IOBase):
             self.connection.send(self.buffer)
         self.buffer = ''
 
+class TextEditLoggerIO(io.IOBase):
+    """File-like object that writes to TextEditLogger"""
 
-@contextmanager
-def _redirect(module=sys, stream='stdout', dest=None):
-    """Redirect module stream to file stream"""
-    original = getattr(module, stream)
-    original.flush()
-    setattr(module, stream, dest)
-    try:
-        yield dest
-    finally:
-        dest.flush()
-        setattr(module, stream, original)
+    def __init__(self, widget):
+        super().__init__()
+        self.widget = widget
 
-@contextmanager
-def redirect(module=sys, stream='stdout', dest=None, mode='w'):
-    """
-    Redirect module's stream according to `dest`:
-    - If None: Do nothing
-    - If String: Open file and redirect
-    - Else: Assume IOWrapper, redirect
-    """
-    if dest is None:
-        yield getattr(module, stream)
-    elif isinstance(dest, str):
-        with open(dest, mode) as file, _redirect(module, stream, file) as f:
-            yield f
-    else:
-        with _redirect(module, stream, dest) as f:
-            yield f
+    def close(self):
+        pass
+
+    def flush(self):
+        pass
+
+    def readable(self):
+        return False
+
+    def writeable(self):
+        return True
+
+    def write(self, text):
+        self.widget.append(text)
+
+    def writeline(self, line):
+        self.write(line+'\n')
+
+    def writelines(self, lines):
+        for line in lines:
+            self.writeline(line)

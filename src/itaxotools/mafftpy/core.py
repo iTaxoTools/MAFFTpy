@@ -28,10 +28,11 @@ import sys
 from datetime import datetime
 from contextlib import contextmanager
 
+from itaxotools.common import param
+from itaxotools.common.io import redirect
+
 from . import mafft
-from . import param
 from . import params
-from .utility import redirect
 
 @contextmanager
 def pushd(target):

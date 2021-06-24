@@ -1,15 +1,11 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-Executable for PyInstaller
-$ python pyinstaller launcher.specs
-"""
+"""Launch the mafftpy GUI"""
 
-import sys
 import multiprocessing
-import src.mafftpy.qt
+from itaxotools.mafftpy.gui import run
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
-    src.mafftpy.qt.main.show()
+    run.main()

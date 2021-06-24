@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------
-# ASAPy - Assemble Species by Automatic Partitioning with ASAP
+# Pyr8s - Divergence Time Estimation
 # Copyright (C) 2021  Patmanidis Stefanos
 #
 # This program is free software: you can redistribute it and/or modify

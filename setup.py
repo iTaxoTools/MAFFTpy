@@ -2,31 +2,10 @@
 
 # Always prefer setuptools over distutils
 from setuptools import setup, find_namespace_packages, Command, Extension
-from setuptools.command.build_py import build_py as _build_py
 from setuptools.command.build_ext import build_ext as _build_ext
 import pathlib
 
 here = pathlib.Path(__file__).parent.resolve()
-
-class CommandQtAutoCompile(Command):
-    """Custom command for auto-compiling Qt resource files"""
-    description = 'run pyqt5ac on all resource files'
-    user_options = []
-    def initialize_options(self):
-        """virtual overload"""
-        pass
-    def finalize_options(self):
-        """virtual overload"""
-        pass
-    def run(self):
-        """build_qt"""
-        try:
-            import pyqt5ac
-            pyqt5ac.main(ioPaths=[
-                [str(here/'**/qt/*.qrc'), '%%DIRNAME%%/%%FILENAME%%.py'],
-                ])
-        except ModuleNotFoundError as exception:
-            raise ModuleNotFoundError('Missing Qt auto-compiler, please try: pip install pyqt5ac')
 
 class CommandPthread(Command):
     """Custom command for compiling the pthread-win32 library"""
@@ -41,12 +20,6 @@ class CommandPthread(Command):
     def run(self):
         """build_pthread"""
         print('PTHREAD COMPILATION PLACEHOLDER for VS cmd: nmake VC-static')
-
-class build_py(_build_py):
-    """Overrides setuptools build to autocompile first"""
-    def run(self):
-        self.run_command('build_qt')
-        _build_py.run(self)
 
 class build_ext(_build_ext):
     """Overrides setuptools build_ext to execute build_init commands"""
@@ -115,7 +88,7 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 
 setup(
     name='mafftpy',
-    version='0.0.2',
+    version='0.0.3',
     description='A Python wrapper for MAFFT',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -137,13 +110,15 @@ setup(
             'mafftpy = itaxotools.mafftpy.run:main',
             'mafftpy-ginsi = itaxotools.mafftpy.run:ginsi',
             'mafftpy-fftns1 = itaxotools.mafftpy.run:fftns1',
-            # 'mafftpy-qt=mafftpy.qt.run:main',
+            # 'mafftpy-qt = itaxotools.mafftpy.gui.run:main',
         ],
+        'pyinstaller40': [
+          'hook-dirs = itaxotools.__pyinstaller:get_hook_dirs',
+          'tests = itaxotools.__pyinstaller:get_PyInstaller_tests'
+        ]
     },
     cmdclass = {
-        'build_qt': CommandQtAutoCompile,
         'build_pthread': CommandPthread,
-        'build_py': build_py,
         'build_ext': build_ext,
     },
     classifiers = [
