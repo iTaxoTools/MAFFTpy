@@ -21,3 +21,6 @@ test.abgd.svg
 test.disthist.svg
 test.rank.svg
 distmat.txt
+
+Pipfile
+Pipfile.lock

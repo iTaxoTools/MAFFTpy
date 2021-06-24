@@ -35,8 +35,6 @@ int _puts ( const char * str );
 
 int _fflush ( FILE * stream );
 
-//TODO: REWIND?FOR INPUT ONLY?, FWRITE, FEOF, FERROR?
-
 // size_t fwrite ( const void * ptr, size_t size, size_t count, FILE * stream );
 // int feof ( FILE * stream );
 
