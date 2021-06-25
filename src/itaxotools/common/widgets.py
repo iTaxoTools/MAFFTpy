@@ -544,6 +544,7 @@ class Panel(QtWidgets.QWidget):
 
     @footer.setter
     def footer(self, footer):
+        self.labelFoot.setVisible(footer != '')
         self.labelFoot.setText(footer)
         self._foot = footer
 

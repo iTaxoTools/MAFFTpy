@@ -240,7 +240,7 @@ class MultipleSequenceAlignment():
     def __setstate__(self, state):
         self.__dict__ = state
 
-    def __init__(self, file):
+    def __init__(self, file=None):
         """
         """
         self.file = file
