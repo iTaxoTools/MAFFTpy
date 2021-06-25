@@ -29,6 +29,8 @@ from contextlib import contextmanager
 import sys, os
 import multiprocessing
 
+from . import io
+
 
 ##############################################################################
 ### Multiprocessing
@@ -113,9 +115,9 @@ class UWorker():
         This is executed as a new process.
         Alerts parent process via pipe.
         """
-        out = PipeIO(self.pipeOut, 'w')
-        err = PipeIO(self.pipeErr, 'w')
-        inp = PipeIO(self.pipeIn, 'r')
+        out = io.PipeIO(self.pipeOut, 'w')
+        err = io.PipeIO(self.pipeErr, 'w')
+        inp = io.PipeIO(self.pipeIn, 'r')
 
         # import sys
         sys.stdout = out
@@ -234,10 +236,13 @@ class UProcess(QtCore.QThread):
             self.pipeErr: self.handleErr,
             }
         while waitList and sentinel is not None:
-            for pipe in multiprocessing.connection.wait(waitList.keys()):
+            waitlist = multiprocessing.connection.wait(waitList.keys())
+            for pipe in waitlist:
                 if pipe == sentinel:
-                    # Process exited, break loop after handling pipes
-                    sentinel = None
+                    # Process exited, but must make sure
+                    # no other pipes are empty before quitting
+                    if len(waitlist) == 1:
+                        sentinel = None
                 else:
                     try:
                         data = pipe.recv()

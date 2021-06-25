@@ -36,6 +36,7 @@ from itaxotools.common import io
 
 from .. import core
 
+from time import sleep
 
 _resource_path = importlib.resources.files(resources)
 def get_resource(path):
@@ -70,16 +71,48 @@ class TextEditInput(QtWidgets.QTextEdit):
                 }
             """)
 
-
     def handleInputChange(self):
 
         if self.document().isEmpty():
             self.main.machine.postEvent(utility.NamedEvent('EMPTY'))
             self.notifyOnNextUpdate = True
         elif self.notifyOnNextUpdate == True:
-            self.main.machine.postEvent(utility.NamedEvent('UPDATE'))
             self.main.analysis.file = None
+            self.main.machine.postEvent(utility.NamedEvent('UPDATE'))
             self.notifyOnNextUpdate = False
+
+
+class TextEditOutput(QtWidgets.QTextEdit):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setLineWrapMode(QtWidgets.QTextEdit.LineWrapMode.NoWrap)
+        self.setAcceptRichText(False)
+        self.setFont(QtGui.QFontDatabase.systemFont(
+            QtGui.QFontDatabase.FixedFont))
+        self.document().setDocumentMargin(6)
+        self.setReadOnly(True)
+        self.setPlaceholderText(
+            "\n"
+            "  Nothing to show yet." + "\n\n"
+            )
+        self.setStyleSheet("""
+            QTextEdit {
+                background-color: palette(Base);
+                border: 1px solid palette(Mid);
+                }
+            """)
+
+
+class TextEditLogger(widgets.TextEditLogger):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.document().setDocumentMargin(6)
+        self.setStyleSheet("""
+            QTextEdit {
+                background-color: palette(Base);
+                border: 1px solid palette(Mid);
+                }
+            """)
 
 
 class Main(widgets.ToolDialog):
@@ -128,18 +161,22 @@ class Main(widgets.ToolDialog):
         self.state = {}
         self.state['idle'] = QtStateMachine.QState(
             QtStateMachine.QState.ChildMode.ParallelStates, self.machine)
-        self.state['idle.last'] = QtStateMachine.QHistoryState(self.state['idle'])
 
         self.state['idle/input'] = QtStateMachine.QState(self.state['idle'])
         self.state['idle/input.none'] = QtStateMachine.QState(self.state['idle/input'])
         self.state['idle/input.file'] = QtStateMachine.QState(self.state['idle/input'])
         self.state['idle/input.raw'] = QtStateMachine.QState(self.state['idle/input'])
+        self.state['idle/input.last'] = QtStateMachine.QHistoryState(self.state['idle/input'])
+        self.state['idle/input.last'].setDefaultState(self.state['idle/input.none'])
         self.state['idle/input'].setInitialState(self.state['idle/input.none'])
 
         self.state['idle/output'] = QtStateMachine.QState(self.state['idle'])
         self.state['idle/output.none'] = QtStateMachine.QState(self.state['idle/output'])
         self.state['idle/output.complete'] = QtStateMachine.QState(self.state['idle/output'])
+        self.state['idle/output.failed'] = QtStateMachine.QState(self.state['idle/output'])
         self.state['idle/output.updated'] = QtStateMachine.QState(self.state['idle/output'])
+        self.state['idle/output.last'] = QtStateMachine.QHistoryState(self.state['idle/output'])
+        self.state['idle/output.last'].setDefaultState(self.state['idle/output.failed'])
         self.state['idle/output'].setInitialState(self.state['idle/output.none'])
 
         self.state['running'] = QtStateMachine.QState(self.machine)
@@ -150,6 +187,11 @@ class Main(widgets.ToolDialog):
         state.assignProperty(self.action['run'], 'visible', True)
         state.assignProperty(self.action['stop'], 'visible', False)
         state.assignProperty(self.action['open'], 'enabled', True)
+        def onEntry(event):
+            print('idle')
+            self.textInput.setReadOnly(False)
+            self.stack.setCurrentWidget(self.textOutput)
+        state.onEntry = onEntry
 
         state = self.state['idle/input.none']
         state.assignProperty(self.action['run'], 'enabled', False)
@@ -163,6 +205,7 @@ class Main(widgets.ToolDialog):
         state.assignProperty(self.footer, 'text', 'Click "Run" to align.')
         def onEntry(event):
             self.textInput.notifyOnNextUpdate = True
+            print('idle/input.file')
         state.onEntry = onEntry
 
         state = self.state['idle/input.raw']
@@ -174,20 +217,47 @@ class Main(widgets.ToolDialog):
 
         state = self.state['idle/output.none']
         state.assignProperty(self.action['save'], 'enabled', False)
-        state.assignProperty(self.pane['output'], 'enabled', False)
         def onEntry(event):
+            self.pane['output'].title = 'Output'
+            self.pane['input'].flag = None
+            self.pane['output'].flag = None
+            self.pane['input'].flagTip = None
+            self.pane['output'].flagTip = None
+            self.stack.setCurrentWidget(self.textOutput)
             print('idle/output.none')
+        state.onEntry = onEntry
+
+        state = self.state['idle/output.failed']
+        state.assignProperty(self.action['save'], 'enabled', False)
+        tip = 'An error occured, please check the logs for details.'
+        state.assignProperty(self.footer, 'text', tip)
+        def onEntry(event):
+            self.pane['output'].title = 'Progress Log'
+            self.pane['input'].flag = None
+            self.pane['output'].flag = None
+            self.pane['input'].flagTip = None
+            self.pane['output'].flagTip = None
+            self.stack.setCurrentWidget(self.textLogger)
+            print('idle/output.failed')
         state.onEntry = onEntry
 
         state = self.state['idle/output.complete']
         state.assignProperty(self.action['save'], 'enabled', True)
+        state.assignProperty(self.footer, 'text', 'Sequence aligment was successful.')
         def onEntry(event):
+            strategy = self.analysis.params.general.strategy
+            self.pane['output'].title = 'Results [{}]'.format(strategy)
+            self.stack.setCurrentWidget(self.textOutput)
             print('idle/output.complete')
         state.onEntry = onEntry
 
         state = self.state['idle/output.updated']
         state.assignProperty(self.action['save'], 'enabled', True)
+        tip = 'Input has changed, run a new analysis to update results.'
+        state.assignProperty(self.footer, 'text', tip)
         def onEntry(event):
+            self.pane['output'].title += ' [outdated]'
+            self.stack.setCurrentWidget(self.textOutput)
             print('idle/output.updated')
         state.onEntry = onEntry
 
@@ -196,8 +266,18 @@ class Main(widgets.ToolDialog):
         state.assignProperty(self.action['stop'], 'visible', True)
         state.assignProperty(self.action['open'], 'enabled', False)
         state.assignProperty(self.action['save'], 'enabled', False)
+        state.assignProperty(self.footer, 'text', 'Aligning sequences, please wait...')
+        def onEntry(event):
+            self.pane['output'].title = 'Progress Log'
+            self.stack.setCurrentWidget(self.textLogger)
+            self.textInput.setReadOnly(True)
+            print('running')
+        state.onEntry = onEntry
+
+        internal = QtStateMachine.QAbstractTransition.TransitionType.InternalTransition
 
         transition = utility.NamedTransition('EMPTY')
+        transition.setTransitionType(internal)
         def onTransition(event):
             self.setWindowTitle(self.title)
             self.pane['input'].title = 'Input'
@@ -206,6 +286,7 @@ class Main(widgets.ToolDialog):
         self.state['idle/input'].addTransition(transition)
 
         transition = utility.NamedTransition('UPDATE')
+        transition.setTransitionType(internal)
         def onTransition(event):
             self.setWindowTitle(self.title + ' - From Text')
             self.pane['input'].title = 'Input - From Text'
@@ -213,48 +294,63 @@ class Main(widgets.ToolDialog):
         transition.setTargetState(self.state['idle/input.raw'])
         self.state['idle/input'].addTransition(transition)
 
+        transition = utility.NamedTransition('UPDATE')
+        transition.setTransitionType(internal)
+        transition.setTargetState(self.state['idle/output.updated'])
+        self.state['idle/output.complete'].addTransition(transition)
+
         transition = utility.NamedTransition('OPEN')
+        transition.setTransitionType(internal)
         def onTransition(event):
             fileInfo = QtCore.QFileInfo(event.kwargs['file'])
             fileName = fileInfo.fileName()
+            if len(fileName) > 40:
+                fileName = fileName[:37] + '...'
             self.setWindowTitle(self.title + ' - ' + fileName)
             self.pane['input'].title = 'Input - ' + fileName
         transition.onTransition = onTransition
-        transition.setTargetState(self.state['idle/input.file'])
-        self.state['idle/input'].addTransition(transition)
-        #
-        # transition = utility.NamedTransition('RUN')
-        # transition.setTargetState(self.state['running'])
-        # self.state['idle'].addTransition(transition)
-        #
-        # transition = utility.NamedTransition('DONE')
-        # def onTransition(event):
-        #     msgBox = QtWidgets.QMessageBox(self)
-        #     msgBox.setWindowTitle(self.windowTitle())
-        #     msgBox.setIcon(QtWidgets.QMessageBox.Information)
-        #     msgBox.setText('Analysis complete.')
-        #     msgBox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-        #     msgBox.setDefaultButton(QtWidgets.QMessageBox.Ok)
-        #     self.msgShow(msgBox)
-        # transition.onTransition = onTransition
-        # transition.setTargetState(self.state['idle.done.complete'])
-        # self.state['running'].addTransition(transition)
-        #
-        # transition = utility.NamedTransition('UPDATE')
-        # transition.setTargetState(self.state['idle.done.updated'])
-        # self.state['idle.done'].addTransition(transition)
-        #
-        # transition = utility.NamedTransition('FAIL')
-        # def onTransition(event):
-        #     self.pane['results'].setCurrentIndex(1)
-        #     self.fail(event.args[0])
-        # transition.onTransition = onTransition
-        # transition.setTargetState(self.state['idle.last'])
-        # self.state['running'].addTransition(transition)
-        #
-        # transition = utility.NamedTransition('CANCEL')
-        # transition.setTargetState(self.state['idle.last'])
-        # self.state['running'].addTransition(transition)
+        transition.setTargetStates([
+            self.state['idle/input.file'],
+            self.state['idle/output.none'],
+            ])
+        self.state['idle'].addTransition(transition)
+
+        transition = utility.NamedTransition('RUN')
+        transition.setTargetState(self.state['running'])
+        self.state['idle'].addTransition(transition)
+
+        transition = utility.NamedTransition('DONE')
+        def onTransition(event):
+            msgBox = QtWidgets.QMessageBox(self)
+            msgBox.setWindowTitle(self.windowTitle())
+            msgBox.setIcon(QtWidgets.QMessageBox.Information)
+            msgBox.setText('Alignment complete.')
+            msgBox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+            msgBox.setDefaultButton(QtWidgets.QMessageBox.Ok)
+            self.msgShow(msgBox)
+        transition.onTransition = onTransition
+        transition.setTargetStates([
+            self.state['idle/input.last'],
+            self.state['idle/output.complete'],
+            ])
+        self.state['running'].addTransition(transition)
+
+        transition = utility.NamedTransition('FAIL')
+        def onTransition(event):
+            self.fail(event.args[0])
+        transition.onTransition = onTransition
+        transition.setTargetStates([
+            self.state['idle/input.last'],
+            self.state['idle/output.failed'],
+            ])
+        self.state['running'].addTransition(transition)
+
+        transition = utility.NamedTransition('CANCEL')
+        transition.setTargetStates([
+            self.state['idle/input.last'],
+            self.state['idle/output.last'],
+            ])
+        self.state['running'].addTransition(transition)
 
         self.machine.start()
 
@@ -449,12 +545,18 @@ class Main(widgets.ToolDialog):
         self.pane['input'].body.addWidget(self.textInput)
         self.pane['input'].body.setContentsMargins(0, 0, 0, 0)
 
-        self.textOutput = QtWidgets.QTextEdit()
+        self.textOutput = TextEditOutput()
+        self.textLogger = TextEditLogger()
+        self.textLogIO = io.TextEditLoggerIO(self.textLogger)
+
+        self.stack = QtWidgets.QStackedLayout()
+        self.stack.addWidget(self.textOutput)
+        self.stack.addWidget(self.textLogger)
 
         self.pane['output'] = widgets.Panel(self)
         self.pane['output'].title = 'Output'
         self.pane['output'].footer = ''
-        self.pane['output'].body.addWidget(self.textOutput)
+        self.pane['output'].body.addLayout(self.stack)
         self.pane['output'].body.setContentsMargins(0, 0, 0, 0)
 
         self.splitter = QtWidgets.QSplitter(QtCore.Qt.Horizontal)
@@ -526,50 +628,28 @@ class Main(widgets.ToolDialog):
         self.header.toolbar.addAction(self.action['run'])
         self.header.toolbar.addAction(self.action['stop'])
 
-    # def createTabLogs(self):
-    #     tab = QtWidgets.QWidget()
-    #
-    #     self.logw = utility.TextEditLogger()
-    #     fixedFont = QtGui.QFontDatabase.systemFont(QtGui.QFontDatabase.FixedFont)
-    #     self.logw.setFont(fixedFont)
-    #     self.logio = utility.TextEditLoggerIO(self.logw)
-    #
-    #     layout = QtWidgets.QHBoxLayout()
-    #     layout.addWidget(self.logw)
-    #     layout.setContentsMargins(5, 5, 5, 5)
-    #     tab.setLayout(layout)
-    #
-    #     return tab
-
     def handleRunWork(self):
         """Runs on the UProcess, defined here for pickability"""
-        self.analysis.run()
-        return self.analysis.results
+        for x in range(1,4):
+            print(x)
+            sleep(0.5)
+        for x in range(3,10):
+            print(x)
+        return 42
+        # self.analysis.run()
+        # return self.analysis.results
 
     def handleRun(self):
         """Called by Run button"""
-        try:
-            self.paramWidget.applyParams()
-        except Exception as exception:
-            self.fail(exception)
-            return
+        for strategy in self.radio:
+            if self.radio[strategy].isChecked():
+                self.analysis.params.general.strategy = strategy
 
-        if self.analysis.param.general.scalar:
-            msgBox = QtWidgets.QMessageBox(self)
-            msgBox.setWindowTitle(self.windowTitle())
-            msgBox.setIcon(QtWidgets.QMessageBox.Question)
-            msgBox.setText('Scalar mode activated, all time constraints will be ignored.')
-            msgBox.setStandardButtons(QtWidgets.QMessageBox.Cancel | QtWidgets.QMessageBox.Ok)
-            msgBox.setDefaultButton(QtWidgets.QMessageBox.Ok)
-            confirm = self.msgShow(msgBox)
-            if confirm == QtWidgets.QMessageBox.Cancel:
-                return
+        self.textLogger.clear()
 
         def done(result):
-            with utility.redirect(sys, 'stdout', self.logio):
-                result.print()
-                print(result.chronogram.as_string(schema='newick'))
-            self.analysis.results = result
+            self.textOutput.setPlainText("DONE AND DONE")
+            self.textInput.notifyOnNextUpdate = True
             self.machine.postEvent(utility.NamedEvent('DONE', True))
 
         def fail(exception):
@@ -578,7 +658,7 @@ class Main(widgets.ToolDialog):
         self.process = utility.UProcess(self.handleRunWork)
         self.process.done.connect(done)
         self.process.fail.connect(fail)
-        self.process.setStream(self.logio)
+        self.process.setStream(self.textLogIO)
         self.process.start()
         self.machine.postEvent(utility.NamedEvent('RUN'))
 
@@ -592,7 +672,6 @@ class Main(widgets.ToolDialog):
         msgBox.setDefaultButton(QtWidgets.QMessageBox.No)
         confirm = self.msgShow(msgBox)
         if confirm == QtWidgets.QMessageBox.Yes:
-            self.logio.writeline('\nAnalysis aborted by user.')
             if self.process is not None:
                 self.process.quit()
             self.machine.postEvent(utility.NamedEvent('CANCEL'))
@@ -607,6 +686,7 @@ class Main(widgets.ToolDialog):
             return
         with open(fileName) as input:
             self.textInput.setPlainText(input.read())
+        self.textOutput.clear()
         self.machine.postEvent(utility.NamedEvent('OPEN',file=fileName))
         self.analysis.file = fileName
 
