@@ -25,7 +25,9 @@ from PySide6 import QtGui
 import sys
 import re
 import pickle
+import shutil
 import pathlib
+import tempfile
 import importlib.resources
 
 from itaxotools.common.param import qt as param_qt
@@ -77,7 +79,7 @@ class TextEditInput(QtWidgets.QTextEdit):
             self.main.machine.postEvent(utility.NamedEvent('EMPTY'))
             self.notifyOnNextUpdate = True
         elif self.notifyOnNextUpdate == True:
-            self.main.analysis.file = None
+            self.main.file = None
             self.main.machine.postEvent(utility.NamedEvent('UPDATE'))
             self.notifyOnNextUpdate = False
 
@@ -123,6 +125,9 @@ class Main(widgets.ToolDialog):
 
         self.title = 'MAFFTpy'
         self.analysis = core.MultipleSequenceAlignment()
+        self.file = None
+        self._temp = None
+        self.temp = None
 
         self.setWindowTitle(self.title)
         self.setWindowIcon(QtGui.QIcon(get_resource('logos/ico/mafft.ico')))
@@ -176,7 +181,7 @@ class Main(widgets.ToolDialog):
         self.state['idle/output.failed'] = QtStateMachine.QState(self.state['idle/output'])
         self.state['idle/output.updated'] = QtStateMachine.QState(self.state['idle/output'])
         self.state['idle/output.last'] = QtStateMachine.QHistoryState(self.state['idle/output'])
-        self.state['idle/output.last'].setDefaultState(self.state['idle/output.failed'])
+        self.state['idle/output.last'].setDefaultState(self.state['idle/output.none'])
         self.state['idle/output'].setInitialState(self.state['idle/output.none'])
 
         self.state['running'] = QtStateMachine.QState(self.machine)
@@ -187,8 +192,8 @@ class Main(widgets.ToolDialog):
         state.assignProperty(self.action['run'], 'visible', True)
         state.assignProperty(self.action['stop'], 'visible', False)
         state.assignProperty(self.action['open'], 'enabled', True)
+        state.assignProperty(self.subheader, 'enabled', True)
         def onEntry(event):
-            print('idle')
             self.textInput.setReadOnly(False)
             self.stack.setCurrentWidget(self.textOutput)
         state.onEntry = onEntry
@@ -196,24 +201,17 @@ class Main(widgets.ToolDialog):
         state = self.state['idle/input.none']
         state.assignProperty(self.action['run'], 'enabled', False)
         state.assignProperty(self.footer, 'text', 'Waiting for sequences.')
-        def onEntry(event):
-            print('idle/input.none')
-        state.onEntry = onEntry
 
         state = self.state['idle/input.file']
         state.assignProperty(self.action['run'], 'enabled', True)
         state.assignProperty(self.footer, 'text', 'Click "Run" to align.')
         def onEntry(event):
             self.textInput.notifyOnNextUpdate = True
-            print('idle/input.file')
         state.onEntry = onEntry
 
         state = self.state['idle/input.raw']
         state.assignProperty(self.action['run'], 'enabled', True)
         state.assignProperty(self.footer, 'text', 'Click "Run" to align.')
-        def onEntry(event):
-            print('idle/input.raw')
-        state.onEntry = onEntry
 
         state = self.state['idle/output.none']
         state.assignProperty(self.action['save'], 'enabled', False)
@@ -224,7 +222,6 @@ class Main(widgets.ToolDialog):
             self.pane['input'].flagTip = None
             self.pane['output'].flagTip = None
             self.stack.setCurrentWidget(self.textOutput)
-            print('idle/output.none')
         state.onEntry = onEntry
 
         state = self.state['idle/output.failed']
@@ -238,17 +235,14 @@ class Main(widgets.ToolDialog):
             self.pane['input'].flagTip = None
             self.pane['output'].flagTip = None
             self.stack.setCurrentWidget(self.textLogger)
-            print('idle/output.failed')
         state.onEntry = onEntry
 
         state = self.state['idle/output.complete']
         state.assignProperty(self.action['save'], 'enabled', True)
         state.assignProperty(self.footer, 'text', 'Sequence aligment was successful.')
         def onEntry(event):
-            strategy = self.analysis.params.general.strategy
-            self.pane['output'].title = 'Results [{}]'.format(strategy)
+            self.pane['output'].title = 'Results [{}]'.format(self.analysis.strategy)
             self.stack.setCurrentWidget(self.textOutput)
-            print('idle/output.complete')
         state.onEntry = onEntry
 
         state = self.state['idle/output.updated']
@@ -258,7 +252,6 @@ class Main(widgets.ToolDialog):
         def onEntry(event):
             self.pane['output'].title += ' [outdated]'
             self.stack.setCurrentWidget(self.textOutput)
-            print('idle/output.updated')
         state.onEntry = onEntry
 
         state = self.state['running']
@@ -266,12 +259,12 @@ class Main(widgets.ToolDialog):
         state.assignProperty(self.action['stop'], 'visible', True)
         state.assignProperty(self.action['open'], 'enabled', False)
         state.assignProperty(self.action['save'], 'enabled', False)
+        state.assignProperty(self.subheader, 'enabled', False)
         state.assignProperty(self.footer, 'text', 'Aligning sequences, please wait...')
         def onEntry(event):
             self.pane['output'].title = 'Progress Log'
             self.stack.setCurrentWidget(self.textLogger)
             self.textInput.setReadOnly(True)
-            print('running')
         state.onEntry = onEntry
 
         internal = QtStateMachine.QAbstractTransition.TransitionType.InternalTransition
@@ -610,7 +603,7 @@ class Main(widgets.ToolDialog):
         self.action['save'].setIcon(widgets.VectorIcon(get_icon('save.svg'), self.colormap))
         self.action['save'].setShortcut(QtGui.QKeySequence.Save)
         self.action['save'].setStatusTip('Save analysis state')
-        self.action['save'].triggered.connect(self.handleSaveAnalysis)
+        self.action['save'].triggered.connect(self.handleSave)
 
         self.action['run'] = QtGui.QAction('&Run', self)
         self.action['run'].setIcon(widgets.VectorIcon(get_icon('run.svg'), self.colormap))
@@ -630,29 +623,42 @@ class Main(widgets.ToolDialog):
 
     def handleRunWork(self):
         """Runs on the UProcess, defined here for pickability"""
-        for x in range(1,4):
-            print(x)
-            sleep(0.5)
-        for x in range(3,10):
-            print(x)
-        return 42
-        # self.analysis.run()
-        # return self.analysis.results
+        self.analysis.log = sys.stdout
+        self.analysis.run()
+        return self.analysis.results
 
     def handleRun(self):
         """Called by Run button"""
         for strategy in self.radio:
             if self.radio[strategy].isChecked():
                 self.analysis.params.general.strategy = strategy
-
+        try:
+            self._temp = tempfile.TemporaryDirectory(prefix='mafftpy_')
+            target = pathlib.Path(self._temp.name)
+            self.analysis.target = target.as_posix()
+            if self.file is not None:
+                self.analysis.file = self.file
+            else:
+                temp = target / 'from_text'
+                with open(str(temp), 'w') as file:
+                    file.write(self.textInput.toPlainText())
+                self.analysis.file = str(temp)
+        except Exception as exception:
+            self.fail(exception)
+            return
         self.textLogger.clear()
 
         def done(result):
-            self.textOutput.setPlainText("DONE AND DONE")
+            self.temp = self._temp
+            self.analysis.results = result
+            self.analysis.strategy = self.analysis.params.general.strategy
+            with open(pathlib.Path(result) / 'pre') as output:
+                self.textOutput.setPlainText(output.read())
             self.textInput.notifyOnNextUpdate = True
             self.machine.postEvent(utility.NamedEvent('DONE', True))
 
         def fail(exception):
+            self.textInput.notifyOnNextUpdate = True
             self.machine.postEvent(utility.NamedEvent('FAIL', exception))
 
         self.process = utility.UProcess(self.handleRunWork)
@@ -674,6 +680,7 @@ class Main(widgets.ToolDialog):
         if confirm == QtWidgets.QMessageBox.Yes:
             if self.process is not None:
                 self.process.quit()
+            self.textInput.notifyOnNextUpdate = True
             self.machine.postEvent(utility.NamedEvent('CANCEL'))
 
     def handleOpen(self):
@@ -688,26 +695,30 @@ class Main(widgets.ToolDialog):
             self.textInput.setPlainText(input.read())
         self.textOutput.clear()
         self.machine.postEvent(utility.NamedEvent('OPEN',file=fileName))
-        self.analysis.file = fileName
+        self.file = fileName
 
-    def handleSaveAnalysis(self):
+    def handleSave(self):
         """Pickle and save current analysis"""
+        if self.file is not None:
+            outName = pathlib.Path(self.file).stem
+        else:
+            outName = "sequence"
+        outName += '_' + self.analysis.strategy
+        outName += '.fas'
         (fileName, _) = QtWidgets.QFileDialog.getSaveFileName(self,
-            'MAFFTpy - Save Analysis',
-            QtCore.QDir.currentPath() + '/' + self.analysis.tree.label + '.r8s',
-            'Rates Analysis (*.r8s)')
+            self.title + ' - Save Analysis',
+            QtCore.QDir.currentPath() + '/' + outName,
+            'Fasta sequence (*.fas)')
         if len(fileName) == 0:
             return
         try:
-            self.paramWidget.applyParams()
-            with open(fileName, 'wb') as file:
-                pickle.dump(self.analysis, file)
+            source = pathlib.Path(self.analysis.results) / 'pre'
+            shutil.copyfile(source, fileName)
         except Exception as exception:
             self.fail(exception)
         else:
-            self.logio.writeline(
-                'Saved analysis to file: {}\n'.format(fileName))
-        pass
+            self.footer.setText(
+                'Saved aligned sequence to file: {}'.format(fileName))
 
 
 def show():
