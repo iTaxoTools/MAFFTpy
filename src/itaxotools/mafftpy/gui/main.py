@@ -44,6 +44,44 @@ def get_icon(path):
     return str(_resource_path / 'icons/svg' / path)
 
 
+class TextEditInput(QtWidgets.QTextEdit):
+    def __init__(self, main, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.main = main
+        self.notifyOnNextUpdate = True
+        self.setLineWrapMode(QtWidgets.QTextEdit.LineWrapMode.NoWrap)
+        self.setAcceptRichText(False)
+        self.setFont(QtGui.QFontDatabase.systemFont(
+            QtGui.QFontDatabase.FixedFont))
+        self.document().setDocumentMargin(6)
+        self.textChanged.connect(self.handleInputChange)
+        self.setPlaceholderText(
+            "\n"
+            "  Please enter the sequences in fasta format:" + "\n\n"
+            "    - Open a file, or" + "\n\n"
+            "    - Drag and drop a file, or" + "\n\n"
+            "    - Paste plain text" + "\n\n"
+            "  Then select a strategy and click on \"Run\"."
+            )
+        self.setStyleSheet("""
+            QTextEdit {
+                background-color: palette(Base);
+                border: 1px solid palette(Mid);
+                }
+            """)
+
+
+    def handleInputChange(self):
+
+        if self.document().isEmpty():
+            self.main.machine.postEvent(utility.NamedEvent('EMPTY'))
+            self.notifyOnNextUpdate = True
+        elif self.notifyOnNextUpdate == True:
+            self.main.machine.postEvent(utility.NamedEvent('UPDATE'))
+            self.main.analysis.file = None
+            self.notifyOnNextUpdate = False
+
+
 class Main(widgets.ToolDialog):
     """Main window, handles everything"""
 
@@ -88,16 +126,24 @@ class Main(widgets.ToolDialog):
         self.machine = QtStateMachine.QStateMachine(self)
 
         self.state = {}
-        self.state['idle'] = QtStateMachine.QState(self.machine)
+        self.state['idle'] = QtStateMachine.QState(
+            QtStateMachine.QState.ChildMode.ParallelStates, self.machine)
         self.state['idle.last'] = QtStateMachine.QHistoryState(self.state['idle'])
-        self.state['idle.none'] = QtStateMachine.QState(self.state['idle'])
-        self.state['idle.open'] = QtStateMachine.QState(self.state['idle'])
-        self.state['idle.done'] = QtStateMachine.QState(self.state['idle'])
-        self.state['idle.done.complete'] = QtStateMachine.QState(self.state['idle.done'])
-        self.state['idle.done.updated'] = QtStateMachine.QState(self.state['idle.done'])
-        self.state['idle.done'].setInitialState(self.state['idle.done.complete'])
-        self.state['idle'].setInitialState(self.state['idle.none'])
+
+        self.state['idle/input'] = QtStateMachine.QState(self.state['idle'])
+        self.state['idle/input.none'] = QtStateMachine.QState(self.state['idle/input'])
+        self.state['idle/input.file'] = QtStateMachine.QState(self.state['idle/input'])
+        self.state['idle/input.raw'] = QtStateMachine.QState(self.state['idle/input'])
+        self.state['idle/input'].setInitialState(self.state['idle/input.none'])
+
+        self.state['idle/output'] = QtStateMachine.QState(self.state['idle'])
+        self.state['idle/output.none'] = QtStateMachine.QState(self.state['idle/output'])
+        self.state['idle/output.complete'] = QtStateMachine.QState(self.state['idle/output'])
+        self.state['idle/output.updated'] = QtStateMachine.QState(self.state['idle/output'])
+        self.state['idle/output'].setInitialState(self.state['idle/output.none'])
+
         self.state['running'] = QtStateMachine.QState(self.machine)
+
         self.machine.setInitialState(self.state['idle'])
 
         state = self.state['idle']
@@ -105,17 +151,45 @@ class Main(widgets.ToolDialog):
         state.assignProperty(self.action['stop'], 'visible', False)
         state.assignProperty(self.action['open'], 'enabled', True)
 
-        state = self.state['idle.none']
+        state = self.state['idle/input.none']
         state.assignProperty(self.action['run'], 'enabled', False)
-        state.assignProperty(self.action['save'], 'enabled', False)
+        state.assignProperty(self.footer, 'text', 'Waiting for sequences.')
+        def onEntry(event):
+            print('idle/input.none')
+        state.onEntry = onEntry
 
-        state = self.state['idle.open']
+        state = self.state['idle/input.file']
         state.assignProperty(self.action['run'], 'enabled', True)
-        state.assignProperty(self.action['save'], 'enabled', False)
+        state.assignProperty(self.footer, 'text', 'Click "Run" to align.')
+        def onEntry(event):
+            self.textInput.notifyOnNextUpdate = True
+        state.onEntry = onEntry
 
-        state = self.state['idle.done']
+        state = self.state['idle/input.raw']
         state.assignProperty(self.action['run'], 'enabled', True)
+        state.assignProperty(self.footer, 'text', 'Click "Run" to align.')
+        def onEntry(event):
+            print('idle/input.raw')
+        state.onEntry = onEntry
+
+        state = self.state['idle/output.none']
+        state.assignProperty(self.action['save'], 'enabled', False)
+        state.assignProperty(self.pane['output'], 'enabled', False)
+        def onEntry(event):
+            print('idle/output.none')
+        state.onEntry = onEntry
+
+        state = self.state['idle/output.complete']
         state.assignProperty(self.action['save'], 'enabled', True)
+        def onEntry(event):
+            print('idle/output.complete')
+        state.onEntry = onEntry
+
+        state = self.state['idle/output.updated']
+        state.assignProperty(self.action['save'], 'enabled', True)
+        def onEntry(event):
+            print('idle/output.updated')
+        state.onEntry = onEntry
 
         state = self.state['running']
         state.assignProperty(self.action['run'], 'visible', False)
@@ -123,58 +197,64 @@ class Main(widgets.ToolDialog):
         state.assignProperty(self.action['open'], 'enabled', False)
         state.assignProperty(self.action['save'], 'enabled', False)
 
-        state = self.state['idle.done.complete']
-        def onEntry(event):
-            print('idle.done.complete')
-        state.onEntry = onEntry
+        transition = utility.NamedTransition('EMPTY')
+        def onTransition(event):
+            self.setWindowTitle(self.title)
+            self.pane['input'].title = 'Input'
+        transition.onTransition = onTransition
+        transition.setTargetState(self.state['idle/input.none'])
+        self.state['idle/input'].addTransition(transition)
 
-        state = self.state['idle.done.updated']
-        def onEntry(event):
-            print('idle.done.updated')
-        state.onEntry = onEntry
+        transition = utility.NamedTransition('UPDATE')
+        def onTransition(event):
+            self.setWindowTitle(self.title + ' - From Text')
+            self.pane['input'].title = 'Input - From Text'
+        transition.onTransition = onTransition
+        transition.setTargetState(self.state['idle/input.raw'])
+        self.state['idle/input'].addTransition(transition)
 
         transition = utility.NamedTransition('OPEN')
         def onTransition(event):
             fileInfo = QtCore.QFileInfo(event.kwargs['file'])
-            labelText = fileInfo.baseName()
-            self.setWindowTitle(self.title + ' - ' + labelText)
-            self.labelTree.setText(labelText)
+            fileName = fileInfo.fileName()
+            self.setWindowTitle(self.title + ' - ' + fileName)
+            self.pane['input'].title = 'Input - ' + fileName
         transition.onTransition = onTransition
-        transition.setTargetState(self.state['idle.open'])
-        self.state['idle'].addTransition(transition)
-
-        transition = utility.NamedTransition('RUN')
-        transition.setTargetState(self.state['running'])
-        self.state['idle'].addTransition(transition)
-
-        transition = utility.NamedTransition('DONE')
-        def onTransition(event):
-            msgBox = QtWidgets.QMessageBox(self)
-            msgBox.setWindowTitle(self.windowTitle())
-            msgBox.setIcon(QtWidgets.QMessageBox.Information)
-            msgBox.setText('Analysis complete.')
-            msgBox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-            msgBox.setDefaultButton(QtWidgets.QMessageBox.Ok)
-            self.msgShow(msgBox)
-        transition.onTransition = onTransition
-        transition.setTargetState(self.state['idle.done.complete'])
-        self.state['running'].addTransition(transition)
-
-        transition = utility.NamedTransition('UPDATE')
-        transition.setTargetState(self.state['idle.done.updated'])
-        self.state['idle.done'].addTransition(transition)
-
-        transition = utility.NamedTransition('FAIL')
-        def onTransition(event):
-            self.pane['results'].setCurrentIndex(1)
-            self.fail(event.args[0])
-        transition.onTransition = onTransition
-        transition.setTargetState(self.state['idle.last'])
-        self.state['running'].addTransition(transition)
-
-        transition = utility.NamedTransition('CANCEL')
-        transition.setTargetState(self.state['idle.last'])
-        self.state['running'].addTransition(transition)
+        transition.setTargetState(self.state['idle/input.file'])
+        self.state['idle/input'].addTransition(transition)
+        #
+        # transition = utility.NamedTransition('RUN')
+        # transition.setTargetState(self.state['running'])
+        # self.state['idle'].addTransition(transition)
+        #
+        # transition = utility.NamedTransition('DONE')
+        # def onTransition(event):
+        #     msgBox = QtWidgets.QMessageBox(self)
+        #     msgBox.setWindowTitle(self.windowTitle())
+        #     msgBox.setIcon(QtWidgets.QMessageBox.Information)
+        #     msgBox.setText('Analysis complete.')
+        #     msgBox.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        #     msgBox.setDefaultButton(QtWidgets.QMessageBox.Ok)
+        #     self.msgShow(msgBox)
+        # transition.onTransition = onTransition
+        # transition.setTargetState(self.state['idle.done.complete'])
+        # self.state['running'].addTransition(transition)
+        #
+        # transition = utility.NamedTransition('UPDATE')
+        # transition.setTargetState(self.state['idle.done.updated'])
+        # self.state['idle.done'].addTransition(transition)
+        #
+        # transition = utility.NamedTransition('FAIL')
+        # def onTransition(event):
+        #     self.pane['results'].setCurrentIndex(1)
+        #     self.fail(event.args[0])
+        # transition.onTransition = onTransition
+        # transition.setTargetState(self.state['idle.last'])
+        # self.state['running'].addTransition(transition)
+        #
+        # transition = utility.NamedTransition('CANCEL')
+        # transition.setTargetState(self.state['idle.last'])
+        # self.state['running'].addTransition(transition)
 
         self.machine.start()
 
@@ -329,8 +409,9 @@ class Main(widgets.ToolDialog):
 
         self.radio = {}
         self.radio['auto'] = QtWidgets.QRadioButton('Auto')
-        self.radio['auto'].setChecked(True)
+        self.radio['auto'].setEnabled(False)
         self.radio['fftns1'] = QtWidgets.QRadioButton('FFT-NS-1')
+        self.radio['fftns1'].setChecked(True)
         self.radio['ginsi'] = QtWidgets.QRadioButton('G-INS-i')
 
         def search(what):
@@ -360,8 +441,7 @@ class Main(widgets.ToolDialog):
 
         self.pane = {}
 
-        self.textInput = QtWidgets.QTextEdit()
-        # myTextEdit->document()->isEmpty()
+        self.textInput = TextEditInput(self)
 
         self.pane['input'] = widgets.Panel(self)
         self.pane['input'].title = 'Input'
@@ -520,16 +600,15 @@ class Main(widgets.ToolDialog):
     def handleOpen(self):
         """Called by toolbar action"""
         (fileName, _) = QtWidgets.QFileDialog.getOpenFileName(self,
-            'MAFFTpy - Open File',
+            self.title + ' - Open File',
             QtCore.QDir.currentPath(),
-            'All Files (*) ;; Newick (*.nwk) ;; Rates Analysis (*.r8s)')
+            'All Files (*)')
         if len(fileName) == 0:
             return
-        suffix = QtCore.QFileInfo(fileName).suffix()
-        if suffix == 'r8s':
-            self.handleOpenAnalysis(fileName)
-        else:
-            self.handleOpenFile(fileName)
+        with open(fileName) as input:
+            self.textInput.setPlainText(input.read())
+        self.machine.postEvent(utility.NamedEvent('OPEN',file=fileName))
+        self.analysis.file = fileName
 
     def handleSaveAnalysis(self):
         """Pickle and save current analysis"""
