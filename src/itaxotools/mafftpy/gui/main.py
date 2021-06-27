@@ -131,7 +131,7 @@ class Main(widgets.ToolDialog):
 
         self.setWindowTitle(self.title)
         self.setWindowIcon(QtGui.QIcon(get_resource('logos/ico/mafft.ico')))
-        self.resize(854,480)
+        self.resize(960,540)
 
         self.process = None
         self.machine = None
@@ -432,28 +432,13 @@ class Main(widgets.ToolDialog):
             }
         self.colormap_icon =  {
             '#000': color['black'],
-            '#ff0000': color['red'],
-            '#ffa500': color['pink'],
+            '#f00': color['red'],
+            '#f88': color['pink'],
             }
         self.colormap_icon_light =  {
             '#000': color['iron'],
             '#ff0000': color['red'],
             '#ffa500': color['pink'],
-            }
-        self.colormap_graph =  {
-            'abgd': {
-                'black':   color['black'],
-                '#D82424': color['red'],
-                '#EBE448': color['gray'],
-                },
-            'disthist': {
-                'black':   color['black'],
-                '#EBE448': color['beige'],
-                },
-            'rank': {
-                'black':   color['black'],
-                '#D82424': color['red'],
-                },
             }
 
     def draw(self):

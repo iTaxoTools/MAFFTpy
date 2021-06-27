@@ -335,7 +335,7 @@ class Header(QtWidgets.QFrame):
         layout = QtWidgets.QHBoxLayout()
         layout.addSpacing(8)
         layout.addWidget(self.labelLogoTool)
-        layout.addSpacing(2)
+        layout.addSpacing(6)
         layout.addWidget(VLineSeparator())
         layout.addSpacing(12)
         layout.addLayout(labels, 0)

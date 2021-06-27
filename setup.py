@@ -103,9 +103,12 @@ setup(
     ext_modules = [mafft_module],
     python_requires='>=3.9, <4',
     install_requires=[
-        'pyside6',
+        'pyside6>=6.1.1',
         ],
-    entry_points={
+    extras_require = {
+        'dev': ['pyinstaller==5.0.dev0'],
+    },
+    entry_points = {
         'console_scripts': [
             'mafftpy = itaxotools.mafftpy.run:main',
             'mafftpy-ginsi = itaxotools.mafftpy.run:ginsi',
