@@ -4,6 +4,8 @@
 from setuptools import setup, find_namespace_packages, Command, Extension
 from setuptools.command.build_ext import build_ext as _build_ext
 import pathlib
+import subprocess
+import os
 
 here = pathlib.Path(__file__).parent.resolve()
 
@@ -19,7 +21,15 @@ class CommandPthread(Command):
         pass
     def run(self):
         """build_pthread"""
-        print('PTHREAD COMPILATION PLACEHOLDER for VS cmd: nmake VC-static')
+        path = 'src/pthread-win32'
+        if not os.listdir(path):
+            raise FileNotFoundError('pthread-win32 directory is empty: please fetch the latest sources from git')
+        try:
+            subprocess.check_call(['nmake', 'VC-static'], cwd=path)
+        except FileNotFoundError as exception:
+            raise RuntimeError("Cannot find nmake, please make sure path and environment is set properly (eg. run setup.py from within the \"x64/x86 Native Tools Command Prompt for VS\")") from exception
+        except Exception as exception:
+            raise RuntimeError("nmake failed, abort") from exception
 
 class build_ext(_build_ext):
     """Overrides setuptools build_ext to execute build_init commands"""

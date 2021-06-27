@@ -100,7 +100,6 @@ class SearchWidget(QtWidgets.QLineEdit):
         self.returnPressed.connect(action.trigger)
         self.addAction(action, QtWidgets.QLineEdit.TrailingPosition)
 
-
     def focusInEvent(self, event):
         super().focusInEvent(event)
         QtCore.QTimer.singleShot(0, self.selectAll)
