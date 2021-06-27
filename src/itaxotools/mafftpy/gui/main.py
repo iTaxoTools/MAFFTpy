@@ -83,6 +83,24 @@ class TextEditInput(QtWidgets.QTextEdit):
             self.main.machine.postEvent(utility.NamedEvent('UPDATE'))
             self.notifyOnNextUpdate = False
 
+    def canInsertFromMimeData(self, source):
+        if source.hasUrls():
+            urls = source.urls()
+            if len(urls) > 1:
+                return False
+            return bool(urls[0].toLocalFile())
+        elif source.hasText():
+            return True
+        else:
+            return False
+
+    def insertFromMimeData(self, source):
+        if source.hasUrls():
+            url = source.urls()[0]
+            self.main.handleOpen(url.toLocalFile())
+        elif source.hasText():
+            super().insertFromMimeData(source)
+
 
 class TextEditOutput(QtWidgets.QTextEdit):
     def __init__(self, *args, **kwargs):
@@ -691,12 +709,13 @@ class Main(widgets.ToolDialog):
             self.textInput.notifyOnNextUpdate = True
             self.machine.postEvent(utility.NamedEvent('CANCEL'))
 
-    def handleOpen(self):
+    def handleOpen(self, fileName=None):
         """Called by toolbar action"""
-        (fileName, _) = QtWidgets.QFileDialog.getOpenFileName(self,
-            self.title + ' - Open File',
-            QtCore.QDir.currentPath(),
-            'All Files (*)')
+        if fileName is None:
+            (fileName, _) = QtWidgets.QFileDialog.getOpenFileName(self,
+                self.title + ' - Open File',
+                QtCore.QDir.currentPath(),
+                'All Files (*)')
         if len(fileName) == 0:
             return
         with open(fileName) as input:
