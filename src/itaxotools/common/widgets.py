@@ -278,8 +278,11 @@ class Header(QtWidgets.QFrame):
             """)
 
         labels = QtWidgets.QVBoxLayout()
+        labels.addStretch(1)
         labels.addWidget(self.labelDescription)
         labels.addWidget(self.labelCitation)
+        labels.addStretch(1)
+        labels.addSpacing(4)
         labels.setSpacing(4)
 
         self.labelLogoTool = QtWidgets.QLabel()

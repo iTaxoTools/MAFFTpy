@@ -467,11 +467,10 @@ class Main(widgets.ToolDialog):
             colormap=self.colormap_icon)
         self.header.logoProject = QtGui.QPixmap(get_resource('logos/png/itaxotools-micrologo.png'))
         self.header.description = (
-            'Multiple alignment program' + '\n'
-            'for amino acid or nucleotide sequences'
+            'Multiple sequence alignment'
             )
         self.header.citation = (
-            'MAFFT by Kazutaka Katoh (...)' + '\n'
+            'MAFFT by Kazutaka Katoh' + '\n'
             'GUI by Stefanos Patmanidis'
         )
 
@@ -738,7 +737,7 @@ class Main(widgets.ToolDialog):
             outName = pathlib.Path(self.file).stem
         else:
             outName = "sequence"
-        outName += '_' + self.analysis.strategy
+        outName += '-' + self.analysis.strategy
         outName += '.fas'
         (fileName, _) = QtWidgets.QFileDialog.getSaveFileName(self,
             self.title + ' - Save Analysis',
