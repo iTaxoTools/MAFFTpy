@@ -670,6 +670,7 @@ class Main(widgets.ToolDialog):
                 temp = target / 'from_text'
                 with open(str(temp), 'w') as file:
                     file.write(self.textInput.toPlainText())
+                    file.write('\n')
                 self.analysis.file = str(temp)
         except Exception as exception:
             self.fail(exception)
