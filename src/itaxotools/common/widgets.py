@@ -84,15 +84,26 @@ class TabWidget(QtWidgets.QGroupBox):
 
 class SearchWidget(QtWidgets.QLineEdit):
     """Embedded line edit with search button"""
-    def setSearchAction(self, pixmap, function):
-        """Icon is the path to a black solid image"""
-        def search():
-            function(self.text())
 
-        searchAction = QtGui.QAction(QtGui.QIcon(pixmap), 'Search', self)
-        searchAction.triggered.connect(search)
-        self.returnPressed.connect(search)
-        self.addAction(searchAction, QtWidgets.QLineEdit.TrailingPosition)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setStyleSheet(
+        """
+        SearchWidget {
+            min-width: 200px;
+            padding-left: 2px;
+            }
+        """)
+
+    def setSearchAction(self, action):
+        """Bind a QAction to the widget"""
+        self.returnPressed.connect(action.trigger)
+        self.addAction(action, QtWidgets.QLineEdit.TrailingPosition)
+
+
+    def focusInEvent(self, event):
+        super().focusInEvent(event)
+        QtCore.QTimer.singleShot(0, self.selectAll)
 
 
 ##############################################################################

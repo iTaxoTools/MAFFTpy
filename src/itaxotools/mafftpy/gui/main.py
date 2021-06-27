@@ -488,17 +488,7 @@ class Main(widgets.ToolDialog):
         self.radio['fftns1'].setChecked(True)
         self.radio['ginsi'] = QtWidgets.QRadioButton('G-INS-i')
 
-        def search(what):
-            print('SEARCH', what)
         self.searchWidget = widgets.SearchWidget()
-        pixmap = widgets.VectorPixmap(get_icon('search.svg'),
-            colormap=self.colormap_icon_light)
-        self.searchWidget.setSearchAction(pixmap, search)
-        self.searchWidget.setStyleSheet("""
-            SearchWidget {
-                min-width: 200px;
-                }
-            """)
 
         layout = QtWidgets.QHBoxLayout()
         layout.addSpacing(4)
@@ -587,24 +577,57 @@ class Main(widgets.ToolDialog):
         self.action['save'] = QtGui.QAction('&Save', self)
         self.action['save'].setIcon(widgets.VectorIcon(get_icon('save.svg'), self.colormap))
         self.action['save'].setShortcut(QtGui.QKeySequence.Save)
-        self.action['save'].setStatusTip('Save analysis state')
+        self.action['save'].setStatusTip('Save results')
         self.action['save'].triggered.connect(self.handleSave)
 
         self.action['run'] = QtGui.QAction('&Run', self)
         self.action['run'].setIcon(widgets.VectorIcon(get_icon('run.svg'), self.colormap))
         self.action['run'].setShortcut('Ctrl+R')
-        self.action['run'].setStatusTip('Run rate analysis')
+        self.action['run'].setStatusTip('Align sequences')
         self.action['run'].triggered.connect(self.handleRun)
 
         self.action['stop'] = QtGui.QAction('&Stop', self)
         self.action['stop'].setIcon(widgets.VectorIcon(get_icon('stop.svg'), self.colormap))
-        self.action['stop'].setStatusTip('Cancel analysis')
+        self.action['stop'].setStatusTip('Cancel alignment')
         self.action['stop'].triggered.connect(self.handleStop)
+
+        self.action['find'] = QtGui.QAction('&Find', self)
+        self.action['find'].setShortcut(QtGui.QKeySequence.Find)
+        self.action['find'].setStatusTip('Find a sequence or name')
+        self.action['find'].triggered.connect(self.handleFind)
+
+        self.action['find_next'] = QtGui.QAction('&Find Next', self)
+        pixmap = widgets.VectorPixmap(get_icon('search.svg'),
+            colormap=self.colormap_icon_light)
+        self.action['find_next'].setIcon(pixmap)
+        self.action['find_next'].setShortcut(QtGui.QKeySequence.FindNext)
+        self.action['find_next'].setStatusTip('Find next')
+        self.action['find_next'].triggered.connect(self.handleFindNext)
+
 
         self.header.toolbar.addAction(self.action['open'])
         self.header.toolbar.addAction(self.action['save'])
         self.header.toolbar.addAction(self.action['run'])
         self.header.toolbar.addAction(self.action['stop'])
+
+        self.addAction(self.action['find'])
+        self.searchWidget.setSearchAction(self.action['find_next'])
+
+    def handleFind(self):
+        self.searchWidget.setFocus()
+        self.searchWidget.selectAll()
+
+    def handleFindNext(self):
+        what = self.searchWidget.text()
+        def findLoop(widget, what):
+            x = widget.find(what)
+            if not x:
+                cursor = widget.textCursor()
+                cursor.movePosition(QtGui.QTextCursor.Start)
+                widget.setTextCursor(cursor)
+                widget.find(what)
+        findLoop(self.textInput, what)
+        findLoop(self.textOutput, what)
 
     def handleRunWork(self):
         """Runs on the UProcess, defined here for pickability"""
