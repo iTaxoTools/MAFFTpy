@@ -113,7 +113,7 @@ class TextEditOutput(QtWidgets.QTextEdit):
         self.setReadOnly(True)
         self.setPlaceholderText(
             "\n"
-            "  Nothing to show yet." + "\n\n"
+            "  Aligned sequences will be displayed here." + "\n\n"
             )
         self.setStyleSheet("""
             QTextEdit {
@@ -501,10 +501,12 @@ class Main(widgets.ToolDialog):
 
         self.radio = {}
         self.radio['auto'] = QtWidgets.QRadioButton('Auto')
-        self.radio['auto'].setEnabled(False)
+        self.radio['auto'].setChecked(True)
+        self.radio['auto'].setToolTip("Select strategy based on data size")
         self.radio['fftns1'] = QtWidgets.QRadioButton('FFT-NS-1')
-        self.radio['fftns1'].setChecked(True)
+        self.radio['fftns1'].setToolTip("Very fast; recommended for >2,000 sequences; progressive method")
         self.radio['ginsi'] = QtWidgets.QRadioButton('G-INS-i')
+        self.radio['ginsi'].setToolTip("Very slow; recommended for <200 sequences with global homology")
 
         self.searchWidget = widgets.SearchWidget()
 
@@ -651,7 +653,7 @@ class Main(widgets.ToolDialog):
         """Runs on the UProcess, defined here for pickability"""
         self.analysis.log = sys.stdout
         self.analysis.run()
-        return self.analysis.results
+        return (self.analysis.results, self.analysis.strategy)
 
     def handleRun(self):
         """Called by Run button"""
@@ -674,10 +676,11 @@ class Main(widgets.ToolDialog):
             return
         self.textLogger.clear()
 
-        def done(result):
+        def done(tuple):
+            result, strategy = tuple
             self.temp = self._temp
             self.analysis.results = result
-            self.analysis.strategy = self.analysis.params.general.strategy
+            self.analysis.strategy = strategy
             with open(pathlib.Path(result) / 'pre') as output:
                 self.textOutput.setPlainText(output.read())
             self.textInput.notifyOnNextUpdate = True

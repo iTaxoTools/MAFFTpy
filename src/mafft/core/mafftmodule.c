@@ -28,6 +28,7 @@ https://www.python.org/dev/peps/pep-0489/
 #include <stdlib.h>
 #include <stdio.h>
 #include "mafftmodule.h"
+#include "mltaln.h"
 #include "wrapio.h"
 
 // Set var = dict[str], do nothing if key does not exist.
@@ -292,12 +293,40 @@ mafft_dvtditr(PyObject *self, PyObject *args, PyObject *kwargs) {
 }
 
 static PyObject *
+mafft_countlen(PyObject *self, PyObject *args) {
+
+	FILE *infp;
+	int nlenmin;
+	double nfreq;
+
+	if (!PyArg_ParseTuple(args, "s", &inputfile))
+		return NULL;
+
+	infp = fopen( inputfile, "r" );
+	if( !infp )
+	{
+		PyErr_Format(PyExc_TypeError, "mafft_countlen: Cannot open %s", inputfile);
+		return NULL;
+	}
+
+	dorp = NOTSPECIFIED;
+	getnumlen_nogap_countn( infp, &nlenmin, &nfreq );
+	fprintf(stderr, "%d x %d - %d %c nfreq=%f\n", njob, nlenmax, nlenmin, dorp, nfreq );
+
+	fclose(infp);
+
+	return Py_BuildValue("(iiiCd)", njob, nlenmax, nlenmin, dorp, nfreq);
+}
+
+
+static PyObject *
 mafft_foo(PyObject *self, PyObject *args) {
 	fprintf(stdout, "BAR STDOUT\n");
 	fprintf(stderr, "BAR STDERR\n");
 	Py_INCREF(Py_None);
 	return Py_None;
 }
+
 static PyMethodDef MafftMethods[] = {
   {"disttbfast",  mafft_disttbfast, METH_VARARGS | METH_KEYWORDS,
    "Run mafft/disttbfast with given parameters."},
@@ -305,8 +334,8 @@ static PyMethodDef MafftMethods[] = {
    "Run mafft/tbfast with given parameters."},
   {"dvtditr",  mafft_dvtditr, METH_VARARGS | METH_KEYWORDS,
    "Run mafft/dvtditr with given parameters."},
-  {"dvtditr",  mafft_dvtditr, METH_VARARGS | METH_KEYWORDS,
-   "Run mafft/dvtditr with given parameters."},
+  {"countlen",  mafft_countlen, METH_VARARGS,
+   "Run mafft/getnumlen_nogap_countn."},
   {"foo",  mafft_foo, METH_VARARGS, "bar"},
   {NULL, NULL, 0, NULL}        /* Sentinel */
 };

@@ -6,10 +6,10 @@ params = {
                 "label":    "Strategy",
                 "doc":      "Strategy.",
                 "type":     "list",
-                "default":  "fftns1",
+                "default":  "auto",
                 "data": {
-                    "items":  ["fftns1","ginsi"],
-                    "labels": ["FFT-NS-1","G-INS-i"]
+                    "items":  ["auto","fftns1","ginsi"],
+                    "labels": ["Auto","FFT-NS-1","G-INS-i"]
                 }
             },
         },

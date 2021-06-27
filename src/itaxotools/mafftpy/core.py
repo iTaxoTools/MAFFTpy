@@ -218,6 +218,8 @@ class MafftVars():
 
         d = params.as_dictionary()
 
+        if d['strategy'] == 'auto':
+            self.auto = 1
         if d['strategy'] == 'ginsi':
             self.fft = 1
             self.cycle = 1
@@ -322,7 +324,19 @@ class MultipleSequenceAlignment():
 
         v.nadd = "0"
 
-        # check auto strats here
+        if v.auto:
+            with redirect(mafft, 'stdout', os.devnull, 'w'), \
+                 redirect(mafft, 'stderr', v.progressfile, 'a'):
+                 (nseq, nlen, _, _, _) = mafft.countlen(v.infilename)
+            if nlen < 10000 and nseq < 200:
+                v.fft = 1
+                v.cycle = 1
+                v.iterate = 1000
+                v.distance = "global"
+            else:
+                v.fft = 1
+                v.cycle = 1
+                v.distance = "ktuples"
 
         # fragments
 
@@ -432,7 +446,7 @@ class MultipleSequenceAlignment():
         else:
             v.strategy += str(v.cycle)
 
-        v.explanation = '?'
+        v.explanation = 'Not available.'
         v.performance = 'Not tested.'
 
         v.outputopt = "-f"
@@ -600,6 +614,7 @@ class MultipleSequenceAlignment():
         #     kwargs['out'] = self.target
         # mafft.disttbfast(i=self.file)
         self.results = self.target
+        self.strategy = v.strategy
 
         print('Results:', self.results)
 
