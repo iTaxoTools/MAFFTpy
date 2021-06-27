@@ -25,11 +25,17 @@ class CommandPthread(Command):
         if not os.listdir(path):
             raise FileNotFoundError('pthread-win32 directory is empty: please fetch the latest sources from git')
         try:
-            subprocess.check_call(['nmake', 'VC-static'], cwd=path)
-        except FileNotFoundError as exception:
-            raise RuntimeError("Cannot find nmake, please make sure path and environment is set properly (eg. run setup.py from within the \"x64/x86 Native Tools Command Prompt for VS\")") from exception
+            try:
+                subprocess.check_call(['nmake', 'VC-static'], cwd=path)
+            except FileNotFoundError as exception:
+                raise RuntimeError('Cannot find nmake, please make sure path and environment is set properly (eg. run setup.py from within the "x64/x86 Native Tools Command Prompt for VS")') from exception
+            except Exception as exception:
+                raise RuntimeError('nmake failed, abort') from exception
         except Exception as exception:
-            raise RuntimeError("nmake failed, abort") from exception
+            if os.path.exists(os.path.join(path, 'libpthreadVC3.lib')):
+                print('nmake failed, falling back to existing pthread library...')
+            else:
+                raise exception
 
 class build_ext(_build_ext):
     """Overrides setuptools build_ext to execute build_init commands"""
