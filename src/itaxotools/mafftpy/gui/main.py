@@ -97,7 +97,7 @@ class TextEditInput(QtWidgets.QTextEdit):
     def insertFromMimeData(self, source):
         if source.hasUrls():
             url = source.urls()[0]
-            self.main.handleOpen(url.toLocalFile())
+            self.main.handleOpen(fileName=url.toLocalFile())
         elif source.hasText():
             super().insertFromMimeData(source)
 
@@ -709,8 +709,9 @@ class Main(widgets.ToolDialog):
             self.textInput.notifyOnNextUpdate = True
             self.machine.postEvent(utility.NamedEvent('CANCEL'))
 
-    def handleOpen(self, fileName=None):
+    def handleOpen(self, checked=False, fileName=None):
         """Called by toolbar action"""
+        # `checked` kwarg provided by default trigger event
         if fileName is None:
             (fileName, _) = QtWidgets.QFileDialog.getOpenFileName(self,
                 self.title + ' - Open File',
@@ -718,8 +719,11 @@ class Main(widgets.ToolDialog):
                 'All Files (*)')
         if len(fileName) == 0:
             return
-        with open(fileName) as input:
-            self.textInput.setPlainText(input.read())
+        try:
+            with open(fileName) as input:
+                self.textInput.setPlainText(input.read())
+        except Exception as e:
+            self.fail(e)
         self.textOutput.clear()
         self.machine.postEvent(utility.NamedEvent('OPEN',file=fileName))
         self.file = fileName
@@ -753,7 +757,7 @@ def show():
     def init():
         if len(sys.argv) >= 2:
             file = pathlib.Path(sys.argv[1])
-            main.handleOpen(str(file))
+            main.handleOpen(fileName=str(file))
 
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
