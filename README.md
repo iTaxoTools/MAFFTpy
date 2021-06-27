@@ -43,7 +43,7 @@ Setuptools will automatically compile the library. Use the Native Tools
 Command Prompt to automatically configure the path and build environment.
 Alternatively, run the corresponding batch script before installing.
 Please make sure to match the architecture you are compiling for (x64/x86).
-The use setuptools to install as usual:
+Then use setuptools to install as usual:
 
 ```
 $ "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
@@ -52,6 +52,7 @@ $ pip install .
 
 ## Packaging
 
+It is advised to do this inside a virtual environment using venv/pipenv.
 The GUI module uses PySide6, for which the PyInstaller hooks are provided
 with the latest version on GitHub. Clone and install PyInstaller from there.
 Then call pyinstaller on the provided spec file:
