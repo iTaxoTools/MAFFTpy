@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Commons - Utility classes for iTaxoTools modules
 # Copyright (C) 2021  Patmanidis Stefanos
 #
@@ -14,13 +14,14 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#-----------------------------------------------------------------------------
-
+# -----------------------------------------------------------------------------
 
 """IO redirection and file-likes"""
 
 from contextlib import contextmanager
-import io, os, sys
+import sys
+import os
+import io
 
 
 @contextmanager
@@ -34,6 +35,7 @@ def _redirect(module=sys, stream='stdout', dest=None):
     finally:
         dest.flush()
         setattr(module, stream, original)
+
 
 @contextmanager
 def redirect(module=sys, stream='stdout', dest=None, mode='w'):
@@ -55,8 +57,8 @@ def redirect(module=sys, stream='stdout', dest=None, mode='w'):
 
 class PipeIO(io.IOBase):
     """File-like object that writes to a pipe connection"""
-    #? There are possibly better ways to do this
-    #? Todo- implement read
+    # ? There are possibly better ways to do this
+    # ? Todo- implement read
     def __init__(self, connection, mode):
         super().__init__()
         self._pid = os.getpid()
@@ -136,6 +138,7 @@ class PipeIO(io.IOBase):
         if self.buffer != '':
             self.connection.send(self.buffer)
         self.buffer = ''
+
 
 class TextEditLoggerIO(io.IOBase):
     """File-like object that writes to TextEditLogger"""

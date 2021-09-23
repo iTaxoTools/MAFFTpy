@@ -30,10 +30,12 @@ import pathlib
 import tempfile
 import importlib.resources
 
+from itaxotools import common
 from itaxotools.common.param import qt as param_qt
 from itaxotools.common import utility
 from itaxotools.common import widgets
 from itaxotools.common import resources
+from itaxotools.common import threads
 from itaxotools.common import io
 
 from .. import core
@@ -147,8 +149,10 @@ class Main(widgets.ToolDialog):
         self._temp = None
         self.temp = None
 
+        icon = QtGui.QIcon(common.resources.get(
+            'itaxotools.mafftpy.gui', 'logos/mafft.ico'))
+        self.setWindowIcon(icon)
         self.setWindowTitle(self.title)
-        self.setWindowIcon(QtGui.QIcon(get_resource('logos/ico/mafft.ico')))
         self.resize(960,540)
 
         self.process = None
@@ -412,7 +416,7 @@ class Main(widgets.ToolDialog):
                 QtGui.QPalette.WindowText: 'iron',
                 QtGui.QPalette.Base: 'white',
                 QtGui.QPalette.AlternateBase: 'light',
-                QtGui.QPalette.PlaceholderText: 'green',
+                QtGui.QPalette.PlaceholderText: 'iron',
                 QtGui.QPalette.Text: 'iron',
                 QtGui.QPalette.Button: 'light',
                 QtGui.QPalette.ButtonText: 'gray',
@@ -462,10 +466,13 @@ class Main(widgets.ToolDialog):
     def draw(self):
         """Draw all widgets"""
 
-        self.header = widgets.Header()
-        self.header.logoTool = widgets.VectorPixmap(get_resource('logos/svg/mafft.svg'),
+        self.header = widgets.HeaderOld()
+        self.header.logoTool = widgets.VectorPixmap(
+            common.resources.get(
+                    'itaxotools.mafftpy.gui', 'logos/mafft.svg'),
             colormap=self.colormap_icon)
-        self.header.logoProject = QtGui.QPixmap(get_resource('logos/png/itaxotools-micrologo.png'))
+        self.header.logoProject = QtGui.QPixmap(
+            common.resources.get('logos/itaxotools-micrologo.png'))
         self.header.description = (
             'Multiple sequence alignment'
             )
@@ -690,7 +697,7 @@ class Main(widgets.ToolDialog):
             self.textInput.notifyOnNextUpdate = True
             self.machine.postEvent(utility.NamedEvent('FAIL', exception))
 
-        self.process = utility.UProcess(self.handleRunWork)
+        self.process = threads.Process(self.handleRunWork)
         self.process.done.connect(done)
         self.process.fail.connect(fail)
         self.process.setStream(self.textLogIO)
