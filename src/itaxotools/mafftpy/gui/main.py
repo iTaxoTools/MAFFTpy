@@ -42,11 +42,9 @@ from .. import core
 
 from time import sleep
 
-_resource_path = importlib.resources.files(resources)
-def get_resource(path):
-    return str(_resource_path / path)
+
 def get_icon(path):
-    return str(_resource_path / 'icons/svg' / path)
+    return resources.get_common(pathlib.Path('icons/svg') / path)
 
 
 class TextEditInput(QtWidgets.QTextEdit):
