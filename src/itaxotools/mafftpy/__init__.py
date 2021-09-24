@@ -1,2 +1,1 @@
-from .core import MultipleSequenceAlignment, fftns1, ginsi
-from . import mafft
+from .core import MultipleSequenceAlignment, quick, fftns1, ginsi

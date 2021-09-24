@@ -9,12 +9,12 @@ from . import core
 #! This should be expanded to accept all arguments
 def main():
     """Anayze given file"""
-    if len(sys.argv) == 2:
-        print(' ')
-        a=core.MultipleSequenceAlignment(sys.argv[1])
-        a.launch()
+    if len(sys.argv) >= 2:
+        input = sys.argv[1]
+        save = sys.argv[2] if len(sys.argv) >= 3 else None
+        a = core.quick(input, save)
     else:
-        print('Usage: mafftpy FILE')
+        print('Usage: mafftpy INPUT_FILE [SAVE_FILE]')
         print('Ex:    mafftpy tests/sample')
 
 def ginsi():

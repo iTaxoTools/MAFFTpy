@@ -637,7 +637,7 @@ class MultipleSequenceAlignment():
         # Success, update analysis object for parent process
         self.results = self.target
 
-def quick(input=None, save=None, strategy='fftns1'):
+def quick(input=None, save=None, strategy='auto'):
     """Quick analysis"""
     a = MultipleSequenceAlignment(input)
     a.params.general.strategy = strategy
