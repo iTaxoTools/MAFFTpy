@@ -1406,9 +1406,9 @@ int TreeDependentIteration( int locnjob, char **name, int nlen[M],
 		{
 			counteff_simple( locnjob, topol, len, effarrforlocalhom );
 			if( ntarget < locnjob )
-				calcimportance_target( locnjob, ntarget, effarrforlocalhom, aseq, localhomtable, targetmap, targetmapr );
+				calcimportance_target( locnjob, ntarget, effarrforlocalhom, aseq, localhomtable, targetmap, targetmapr, alloclen );
 			else
-				calcimportance_half( locnjob, effarrforlocalhom, aseq, localhomtable );
+				calcimportance_half( locnjob, effarrforlocalhom, aseq, localhomtable, alloclen );
 		}
 
 		if( weight == 2 ) 
@@ -1631,9 +1631,9 @@ int TreeDependentIteration( int locnjob, char **name, int nlen[M],
 				{
 					counteff_simple( locnjob, topol, len, effarrforlocalhom );
 					if( ntarget < locnjob )
-						calcimportance_target( locnjob, ntarget, effarrforlocalhom, aseq, localhomtable, targetmap, targetmapr );
+						calcimportance_target( locnjob, ntarget, effarrforlocalhom, aseq, localhomtable, targetmap, targetmapr, alloclen );
 					else
-						calcimportance_half( locnjob, effarrforlocalhom, aseq, localhomtable );
+						calcimportance_half( locnjob, effarrforlocalhom, aseq, localhomtable, alloclen );
 				}
 			}
 	

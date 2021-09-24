@@ -1248,7 +1248,8 @@ void treebase( int *nlen, char **aseq, int nadd, char *mergeoralign, char **mseq
 	int nfiles;
 	double ***cpmxhist = NULL;
 	int **memhist = NULL;
-	double **cpmxchild0, **cpmxchild1;
+	double ***cpmxchild0 = NULL;
+	double ***cpmxchild1 = NULL;
 	double orieff1, orieff2;
 #if REPORTCOSTS
 	time_t starttime, startclock;
@@ -1337,10 +1338,10 @@ void treebase( int *nlen, char **aseq, int nadd, char *mergeoralign, char **mseq
 	if( constraint && compacttree != 3 )
 	{
 		if( specifictarget )
-			calcimportance_target( njob, ntarget, effarr, aseq, localhomtable, targetmap, targetmapr );
+			calcimportance_target( njob, ntarget, effarr, aseq, localhomtable, targetmap, targetmapr, *alloclen );
 //			dontcalcimportance_target( njob, effarr, aseq, localhomtable, ntarget ); //CHUUI
 		else
-			calcimportance_half( njob, effarr, aseq, localhomtable );
+			calcimportance_half( njob, effarr, aseq, localhomtable, *alloclen );
 //			dontcalcimportance_half( njob, effarr, aseq, localhomtable ); //CHUUI
 	}
 	else if( constraint && nseed ) // ie, compacttree == 3 && constraint > 0
@@ -1365,8 +1366,8 @@ void treebase( int *nlen, char **aseq, int nadd, char *mergeoralign, char **mseq
 		else
 		{
 //			reporterr( "l=%d, dep[l].child0=%d, dep[l].child1=%d\n", l, dep[l].child0, dep[l].child1 );
-			if( dep[l].child0 == -1 ) cpmxchild0 = NULL; else cpmxchild0 = cpmxhist[dep[l].child0];
-			if( dep[l].child1 == -1 ) cpmxchild1 = NULL; else cpmxchild1 = cpmxhist[dep[l].child1];
+			if( dep[l].child0 == -1 ) cpmxchild0 = NULL; else cpmxchild0 = cpmxhist+dep[l].child0;
+			if( dep[l].child1 == -1 ) cpmxchild1 = NULL; else cpmxchild1 = cpmxhist+dep[l].child1;
 //			reporterr( "cpmxchild0=%p, cpmxchild1=%p\n", cpmxchild0, cpmxchild1 );
 		}
 
@@ -1717,12 +1718,27 @@ void treebase( int *nlen, char **aseq, int nadd, char *mergeoralign, char **mseq
 	reporterr( "user = %f min\n", (float)(clock()-startclock)/CLOCKS_PER_SEC/60);
 #endif
 
+#if 1 // 2021/Jun/25
+	if( cpmxhist )
+	{
+		for( i=0; i<njob-1; i++ )
+		{
+			if( cpmxhist[i] )
+			{
+//				reporterr( "freeing cpmxhist[%d]\n", i );
+				FreeDoubleMtx( cpmxhist[i] ); cpmxhist[i] = NULL;
+			}
+		}
+		free( cpmxhist ); cpmxhist = NULL;
+	}
+#else
 	if( cpmxhist[njob-2] )
 	{
 //		reporterr( "freeing cpmxhist[njob-2]\n" );
 		FreeDoubleMtx( cpmxhist[njob-2] ); cpmxhist[njob-2] = NULL;
 	}
 	free( cpmxhist ); cpmxhist = NULL;
+#endif
 	free( memhist ); memhist = NULL;
 
 #if SCOREOUT
@@ -1868,8 +1884,9 @@ int tbfast( int argc, char *argv[] )
 	static double **iscore = NULL, **iscore_kozo = NULL;
 	int **skiptable;
 	static double *eff = NULL, *eff_kozo = NULL, *eff_kozo_mapped = NULL;
-	int i, j, ien, ik, jk;
+	int i, j, k, ien, ik, jk;
 	static int ***topol = NULL, ***topol_kozo = NULL;
+	double **expdist = NULL;
 	static int *addmem;
 	static Treedep *dep = NULL;
 	static double **len = NULL, **len_kozo = NULL;
@@ -2041,6 +2058,45 @@ int tbfast( int argc, char *argv[] )
 	readData_pointer( infp, name, nlen, seq );
 	fclose( infp );
 #endif
+	if( treein )
+	{
+#if 1 // pairlocalalign() yori mae ni hitsuyou, specificityconsideration>0.0 && usertree no toki.
+		loadtree( njob, topol, len, name, nlen, dep, treeout );
+//		loadtop( njob, topol, len, name, NULL, dep ); // 2015/Jan/13, not yet checked
+		fprintf( stderr, "\ndone.\n\n" );
+//		for( i=0; i<njob-1; i++ ) reporterr( "%d-%d, %f-%f\n", topol[i][0][0], topol[i][1][0], len[i][0], len[i][1] );
+		if( callpairlocalalign && specificityconsideration>0.0 )
+		{
+			int *mem0 = calloc( sizeof( int ), njob );
+			int *mem1 = calloc( sizeof( int ), njob );
+			expdist = AllocateDoubleMtx( njob, njob );
+			for( i=0; i<njob-1; i++ )
+			{
+				topolorderz( mem0, topol, dep, i, 0 );
+				topolorderz( mem1, topol, dep, i, 1 );
+#if 0
+				reporterr( "mem0=\n" );
+				for( j=0; mem0[j]!=-1; j++ ) reporterr( "%d ", mem0[j] );
+				reporterr( "\n" );
+				reporterr( "mem1=\n" );
+				for( j=0; mem1[j]!=-1; j++ ) reporterr( "%d ", mem1[j] );
+				reporterr( "\n" );
+#endif
+				for( j=0; mem0[j]!=-1; j++ ) for( k=0; mem1[k]!=-1; k++ )
+				{
+					expdist[mem0[j]][mem1[k]] += ( len[i][0] + len[i][1] );
+					expdist[mem1[k]][mem0[j]] += ( len[i][0] + len[i][1] );
+				}
+			}
+#if 0
+			for( i=0; i<njob; i++ ) for( j=0; j<njob; j++ )
+				reporterr( "expdist[%d][%d] = %f\n", i, j, expdist[i][j] );
+#endif
+			free( mem0 );
+			free( mem1 );
+		}
+#endif
+	}
 
 	if( specifictarget && compacttree != 3 ) // compacttree == 3 no toki ha hat3dir/uselh no joho wo tsukau, 2016/Jan
 	{
@@ -2107,9 +2163,10 @@ int tbfast( int argc, char *argv[] )
 //		reporterr( "pav[0]=%s\n", pav[0] );
 		if( callpairlocalalign )
 		{
-			pairlocalalign( njob, nlenmax, name, seq, iscore, localhomtable, pac, pav );
+			pairlocalalign( njob, nlenmax, name, seq, iscore, localhomtable, pac, pav, expdist );
 			arguments( tac, tav, NULL, NULL, NULL, NULL ); // anzen no tame
 			callpairlocalalign = 1; // wakarinikui.
+			if( expdist ) FreeDoubleMtx( expdist ); expdist = NULL;
 			if( fastathreshold < 0.0001 ) constraint = 0;
 //			fprintf( stderr, "blosum %d / kimura 200\n", nblosum );
 //			fprintf( stderr, "scoremtx=%d\n", scoremtx );
@@ -2261,9 +2318,10 @@ int tbfast( int argc, char *argv[] )
 	{
 		if( callpairlocalalign )
 		{
-			pairlocalalign( njob, nlenmax, name, seq, iscore, NULL, pac, pav );
+			pairlocalalign( njob, nlenmax, name, seq, iscore, NULL, pac, pav, expdist );
 			arguments( tac, tav, NULL, NULL, NULL, NULL ); // anzen no tame
 			callpairlocalalign = 1; // wakarinikui.
+			if( expdist ) FreeDoubleMtx( expdist ); expdist = NULL;
 			if( fastathreshold < 0.0001 ) constraint = 0;
 			fprintf( stderr, "blosum %d / kimura 200\n", nblosum );
 			fprintf( stderr, "scoremtx=%d\n", scoremtx );
@@ -2448,16 +2506,13 @@ int tbfast( int argc, char *argv[] )
 
 	if( treein )
 	{
-#if 0
-		if( nkozo )
-		{
-			fprintf( stderr, "Both structure and user tree have been given. Not yet supported!\n" );
-			exit( 1 );
-		}
-#endif
+#if 0 // pairlocalalign() yori mae ni idou, 2021/Jun.
 		loadtree( njob, topol, len, name, nlen, dep, treeout );
 //		loadtop( njob, topol, len, name, NULL, dep ); // 2015/Jan/13, not yet checked
 		fprintf( stderr, "\ndone.\n\n" );
+		for( i=0; i<njob-1; i++ ) reporterr( "%d-%d, %f-%f\n", topol[i][0][0], topol[i][1][0], len[i][0], len[i][1] );
+		exit( 1 );
+#endif
 	}
 	else
 	{
@@ -3320,10 +3375,10 @@ int tbfast( int argc, char *argv[] )
 		if( constraint && compacttree != 3 )
 		{
 			if( specifictarget )
-				calcimportance_target( njob, ntarget, eff, bseq, localhomtable, targetmap, targetmapr );
+				calcimportance_target( njob, ntarget, eff, bseq, localhomtable, targetmap, targetmapr, alloclen );
 //				dontcalcimportance_target( njob, eff, bseq, localhomtable, ntarget ); // CHUUI
 			else
-				calcimportance_half( njob, eff, bseq, localhomtable );
+				calcimportance_half( njob, eff, bseq, localhomtable, alloclen );
 //				dontcalcimportance_half( njob, eff, bseq, localhomtable ); // CHUUI
 		}
 

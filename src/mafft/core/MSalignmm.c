@@ -2091,9 +2091,10 @@ static void freearrays(
 	free( mgt2 );
 }
 
-double MSalignmm( double **n_dynamicmtx, char **seq1, char **seq2, double *eff1, double *eff2, int icyc, int jcyc, int alloclen, char *sgap1, char *sgap2, char *egap1, char *egap2, int *chudanpt, int chudanref, int *chudanres, int headgp, int tailgp, double **cpmxchild0, double **cpmxchild1, double ***cpmxresult, double orieff1, double orieff2 )
+double MSalignmm( double **n_dynamicmtx, char **seq1, char **seq2, double *eff1, double *eff2, int icyc, int jcyc, int alloclen, char *sgap1, char *sgap2, char *egap1, char *egap2, int *chudanpt, int chudanref, int *chudanres, int headgp, int tailgp, double ***cpmxchild0, double ***cpmxchild1, double ***cpmxresult, double orieff1, double orieff2 )
 /* score no keisan no sai motokaraaru gap no atukai ni mondai ga aru */
 {
+
 //	int k;
 	int i, j;
 	int ll1, ll2;
@@ -2192,14 +2193,14 @@ double MSalignmm( double **n_dynamicmtx, char **seq1, char **seq2, double *eff1,
 		}
 
 
-		if( cpmxchild0 )
+		if( cpmxchild0 && *cpmxchild0 )
 		{
 //			reporterr( "\nUse cpmxhist for child 0!\n" );
-			cpmx1pt = cpmxchild0;
+			cpmx1pt = *cpmxchild0;
 #if ATO
-			gapfreq1pt = cpmxchild0[nalphabets];
-			ogcp1opt = cpmxchild0[nalphabets+1];
-			fgcp1opt = cpmxchild0[nalphabets+2];
+			gapfreq1pt = (*cpmxchild0)[nalphabets];
+			ogcp1opt = (*cpmxchild0)[nalphabets+1];
+			fgcp1opt = (*cpmxchild0)[nalphabets+2];
 #endif
 		}
 		else
@@ -2219,14 +2220,14 @@ double MSalignmm( double **n_dynamicmtx, char **seq1, char **seq2, double *eff1,
 #endif
 		}
 	
-		if( cpmxchild1 )
+		if( cpmxchild1 && *cpmxchild1 )
 		{
 //			reporterr( "\nUse cpmxhist for child 1!\n" );
-			cpmx2pt = cpmxchild1;
+			cpmx2pt = *cpmxchild1;
 #if ATO
-			gapfreq2pt = cpmxchild1[nalphabets];
-			ogcp2opt = cpmxchild1[nalphabets+1];
-			fgcp2opt = cpmxchild1[nalphabets+2];
+			gapfreq2pt = (*cpmxchild1)[nalphabets];
+			ogcp2opt = (*cpmxchild1)[nalphabets+1];
+			fgcp2opt = (*cpmxchild1)[nalphabets+2];
 #endif
 		}
 		else
@@ -2478,15 +2479,17 @@ double MSalignmm( double **n_dynamicmtx, char **seq1, char **seq2, double *eff1,
 #endif
 
 // matomete free
-	if( cpmx1pt != cpmx1 ) 
+	if( cpmx1pt != cpmx1 && cpmxchild0 && *cpmxchild0 ) 
 	{
 //		reporterr( "freeing cpmxchild0\n" );
-		FreeDoubleMtx( cpmxchild0 );
+		FreeDoubleMtx( *cpmxchild0 );
+		*cpmxchild0 = NULL;
 	}
-	if( cpmx2pt != cpmx2 ) 
+	if( cpmx2pt != cpmx2 && cpmxchild1 && *cpmxchild1 ) 
 	{
 //		reporterr( "freeing cpmxchild1\n" );
-		FreeDoubleMtx( cpmxchild1 );
+		FreeDoubleMtx( *cpmxchild1 );
+		*cpmxchild1 = NULL;
 	}
 
 

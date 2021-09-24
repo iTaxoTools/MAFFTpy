@@ -432,7 +432,10 @@ void putlocalhom3( char *al1, char *al2, LocalHom *localhompt, int off1, int off
 			if( divpairscore )
 			{
 				tmppt->overlapaa   = end2-start2+1;
-				tmppt->opt = score / tmppt->overlapaa * 5.8 / 600;
+				if( tmppt->overlapaa>0)
+					tmppt->opt = score / tmppt->overlapaa * 5.8 / 600;
+				else
+					tmppt->opt = -1.0;
 			}
 			else
 			{
@@ -489,7 +492,10 @@ void putlocalhom3( char *al1, char *al2, LocalHom *localhompt, int off1, int off
 		if( divpairscore )
 		{
 			tmppt->overlapaa   = end2-start2+1;
-			tmppt->opt = score / tmppt->overlapaa * 5.8 / 600;
+			if( tmppt->overlapaa>0)
+				tmppt->opt = score / tmppt->overlapaa * 5.8 / 600;
+			else
+				tmppt->opt = -1.0;
 		}
 		else
 		{
@@ -516,7 +522,10 @@ void putlocalhom3( char *al1, char *al2, LocalHom *localhompt, int off1, int off
 		for( tmppt=subnosento; tmppt; tmppt=tmppt->next )
 		{
 			tmppt->overlapaa = sumoverlap;
-			tmppt->opt = sumscore * 5.8 / 600 / sumoverlap;
+			if( tmppt->overlapaa>0)
+				tmppt->opt = sumscore * 5.8 / 600 / sumoverlap;
+			else
+				tmppt->opt = -1.0;
 			fprintf( stderr, "tmpptr->opt = %f\n", tmppt->opt );
 		}
 	}
@@ -568,7 +577,10 @@ void putlocalhom_ext( char *al1, char *al2, LocalHom *localhompt, int off1, int 
 			if( divpairscore )
 			{
 				tmppt->overlapaa   = end2-start2+1;
-				tmppt->opt = (double)iscore / tmppt->overlapaa * 5.8 / 600;
+				if( tmppt->overlapaa>0)
+					tmppt->opt = (double)iscore / tmppt->overlapaa * 5.8 / 600;
+				else
+					tmppt->opt = -1.0;
 			}
 			else
 			{
@@ -623,7 +635,10 @@ void putlocalhom_ext( char *al1, char *al2, LocalHom *localhompt, int off1, int 
 		if( divpairscore )
 		{
 			tmppt->overlapaa   = end2-start2+1;
-			tmppt->opt = (double)iscore / tmppt->overlapaa * 5.8 / 600;
+			if( tmppt->overlapaa>0)
+				tmppt->opt = (double)iscore / tmppt->overlapaa * 5.8 / 600;
+			else
+				tmppt->opt = -1.0;
 		}
 		else
 		{
@@ -755,7 +770,10 @@ void putlocalhom2( char *al1, char *al2, LocalHom *localhompt, int off1, int off
 			if( divpairscore )
 			{
 				tmppt->overlapaa   = end2-start2+1;
-				tmppt->opt = (double)iscore / tmppt->overlapaa * 5.8 / 600;
+				if(tmppt->overlapaa>0)
+					tmppt->opt = (double)iscore / tmppt->overlapaa * 5.8 / 600;
+				else
+					tmppt->opt = -1.0;
 			}
 			else
 			{
@@ -812,7 +830,10 @@ void putlocalhom2( char *al1, char *al2, LocalHom *localhompt, int off1, int off
 		if( divpairscore )
 		{
 			tmppt->overlapaa   = end2-start2+1;
-			tmppt->opt = (double)iscore / tmppt->overlapaa * 5.8 / 600;
+			if(tmppt->overlapaa>0)
+				tmppt->opt = (double)iscore / tmppt->overlapaa * 5.8 / 600;
+			else
+				tmppt->opt = -1.0;
 		}
 		else
 		{
@@ -836,8 +857,11 @@ void putlocalhom2( char *al1, char *al2, LocalHom *localhompt, int off1, int off
 		for( tmppt=localhompt; tmppt; tmppt=tmppt->next )
 		{
 			tmppt->overlapaa = sumoverlap;
-			tmppt->opt = (double)isumscore * 5.8 / ( 600 * sumoverlap );
-//			fprintf( stderr, "tmpptr->opt = %f\n", tmppt->opt );
+			if(tmppt->overlapaa>0)
+				tmppt->opt = (double)isumscore * 5.8 / ( 600 * sumoverlap );
+			else
+				tmppt->opt = -1.0;
+//			fprintf( stderr, "tmpptr->opt = %f, sumoverlap=%d\n", tmppt->opt, sumoverlap );
 		}
 	}
 }

@@ -9,6 +9,7 @@
 #include "wrapio.h"
 #endif
 
+
 void MtxuntDouble( double **mtx, int n )
 {
     int i, j;
@@ -525,7 +526,10 @@ void FreeDoubleMtx( double **mtx )
 {
 	int i;
 	for( i=0; mtx[i]; i++ )
+	{
 		FreeDoubleVec( mtx[i] );
+		mtx[i] = NULL;
+	}
 	free( mtx );
 }
 

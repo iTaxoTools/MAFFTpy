@@ -1553,6 +1553,23 @@ system( "less seqVec2 < /dev/tty > /dev/tty" );
 		if( chudanres && *chudanres )
 		{
 //			fprintf( stderr, "\n\n## CHUUDAN!!! at Falign_localhom\n" );
+//			Added 2021/Jul/25.
+			FreeCharMtx( result1 );
+			FreeCharMtx( result2 );
+			FreeCharMtx( tmpres1 );
+			FreeCharMtx( tmpres2 );
+			FreeCharMtx( tmpseq1 );
+			FreeCharMtx( tmpseq2 );
+			free( sgap1 );
+			free( egap1 );
+			free( sgap2 );
+			free( egap2 );
+			free( tmpptr1 );
+			free( tmpptr2 );
+#if RND
+			FreeCharMtx( rndseq1 );
+			FreeCharMtx( rndseq2 );
+#endif
 			return( -1.0 );
 		}
 #endif

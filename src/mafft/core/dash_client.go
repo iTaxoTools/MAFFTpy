@@ -20,7 +20,7 @@ var VersionNumber = 1.1
 var Debug = false
 var NumberOfQueryTries = 12
 var HTTPClient = &http.Client{}
-var SequenceLimit = 750
+var SequenceLimit = 3000
 var AlignmentLimit = 10000
 
 //URL's

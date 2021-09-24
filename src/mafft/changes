@@ -1,13 +1,15 @@
+
+The following changes were made to the original (version 7.487):
+
 Added python module: `mafftmodule.c`, `mafftmodule.h`
+Added output wrapper: `wrapio.c`, `wrapio.h`
 
 Renamed `disttbfast.c` and `tbfast.c` main() functions
 and put ``#ifndef ismodule` around them.
 
-
-Modified arguments() as static in `tbfast.c`, `dvtditr.c`
+Modified arguments() as static in `tbfast.c`, `disttbfast.c`, `dvtditr.c`
 
 `dvtditr`: fclose( prep_g ); for flushing
-
 
 Added section to the following files: fft.h mltaln.h mtxutl.c
 ```
@@ -43,14 +45,10 @@ diff `dp.h`:
 > #define TLS
 
 diff `mltaln.h`:
-339,341d338
+344,346d338
 < #ifdef _MSC_VER
 < #define TLS __declspec(thread)
 < #else
-343d339
+348d339
 < #endif
-345c341
-< #define TLS
----
-> #define TLS
 ```

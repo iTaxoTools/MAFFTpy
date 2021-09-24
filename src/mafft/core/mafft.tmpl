@@ -1,7 +1,7 @@
 #! /bin/bash 
 er=0;
 myself=`dirname "$0"`/`basename "$0"`; export myself
-version="v7.475 (2020/Nov/23)"; export version
+version="v7.487 (2021/Jul/25)"; export version
 LANG=C; export LANG
 os=`uname`
 progname=`basename "$0"`
@@ -294,6 +294,7 @@ enrich=0        # ato de kezuru
 enrichseq=0     # ato de kezuru
 enrichstr=0     # ato de kezuru
 seektarget=""   # ato de kezuru
+dashserver="https://sysimm.org/dash/REST1.0/"
 newdash=0
 newdash_originalsequenceonly=0
 exclude_ho=0
@@ -952,6 +953,9 @@ if [ $# -gt 0 ]; then
 			newdash=1
 			distance="global" # can be override
 			iterate=3         # can be override
+		elif [ "$1" = "--dashserver" ]; then
+			shift
+			dashserver="$1"
 		elif [ "$1" = "--originalseqonly" ]; then
 			newdash_originalsequenceonly=1
 		elif [ "$1" = "--excludehomologs" ]; then # works with --dash only
@@ -1034,7 +1038,7 @@ if [ $# -gt 0 ]; then
 		TMPFILE=`cygpath -w "$TMPFILE"`  # necessary to pass path to f2cl on cyswin, somehow unnecessary in msys.
 	fi
 
-	umask 077
+#	umask 077  # 2021/Jan
 #	mkdir  "$TMPFILE"  || er=1
 
 
@@ -2369,11 +2373,11 @@ $ownlist"
 			fi
 			
 			echo "Calling DASH (https://sysimm.org/dash/)" 1>>"$progressfile"
-			"$prefix/dash_client" -i dashin -sequences dashsequences -hat3 hat3.seed 1>>"$progressfile"
+			"$prefix/dash_client" -url "$dashserver" -i dashin -sequences dashsequences -hat3 hat3.seed 1>>"$progressfile"
 			dashres="$?"
 			if [ $dashres -ne "0" ]; then
 				echo "Error in DASH" 1>>"$progressfile"
-				echo "To use this feature, compiled with" 1>>"$progressfile"
+				echo "To enable this feature, compile with DASH_CLIENT=dash_client. Go compiler is necessary." 1>>"$progressfile"
 				exit 1;
 			fi
 
@@ -2945,8 +2949,8 @@ BEGIN {
 		while( 1 )
 		{
 			go = 0;
-			printf( "OK?\n" ) > "/dev/tty";
-			printf( "@ [Y] " ) > "/dev/tty";
+			printf( "Type Y or just enter to run this command.\n" ) > "/dev/tty";
+			printf( "@ " ) > "/dev/tty";
 			res = getline < "/dev/tty";
 			close( "/dev/tty" );
 			if( res == 0 )

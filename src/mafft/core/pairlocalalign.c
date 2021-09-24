@@ -71,6 +71,7 @@ typedef struct _thread_arg
 	Lastresx **lastresx;
 	int alloclen;
 	int *targetmap;
+	double **expdist;
 	pthread_mutex_t *mutex_counter;
 	pthread_mutex_t *mutex_stdout;
 } thread_arg_t;
@@ -1972,6 +1973,7 @@ static void *athread( void *arg ) // alg='R', alg='r' -> tsukawarenai.
 	Lastresx **lastresx = targ->lastresx;
 	int alloclen = targ->alloclen;
 	int *targetmap = targ->targetmap;
+	double **expdist = targ->expdist;
 
 //	fprintf( stderr, "thread %d start!\n", thread_no );
 
@@ -2137,7 +2139,10 @@ static void *athread( void *arg ) // alg='R', alg='r' -> tsukawarenai.
 #if 1
 								if( specificityconsideration > 0.0 )
 								{
-									dist = score2dist( pscore, selfscore[i], selfscore[j] );
+									if( expdist ) 
+										dist = expdist[i][j];
+									else
+										dist = score2dist( pscore, selfscore[i], selfscore[j] );
 									if( ( scoreoffset = dist2offset( dist ) ) < 0.0 )
 									{
 										makedynamicmtx( dynamicmtx, n_dis_consweight_multi, 0.5 * dist ); // upgma ni awaseru.
@@ -2192,8 +2197,11 @@ static void *athread( void *arg ) // alg='R', alg='r' -> tsukawarenai.
 #if 1
 							if( specificityconsideration > 0.0 )
 							{
-								dist = score2dist( pscore, selfscore[i], selfscore[j] );
-//								dist = score2dist( L__align11_noalign( n_dis_consweight_multi, distseq1, distseq2 ), selfscore[i], selfscore[j] ); // 2014/Feb/20
+								if( expdist ) 
+									dist = expdist[i][j];
+								else
+									dist = score2dist( pscore, selfscore[i], selfscore[j] );
+//									dist = score2dist( L__align11_noalign( n_dis_consweight_multi, distseq1, distseq2 ), selfscore[i], selfscore[j] ); // 2014/Feb/20
 								if( dist2offset( dist ) < 0.0 )
 								{
 									makedynamicmtx( dynamicmtx, n_dis_consweight_multi, 0.5 * dist ); // upgma ni awaseru.
@@ -2204,6 +2212,7 @@ static void *athread( void *arg ) // alg='R', alg='r' -> tsukawarenai.
 								}
 //								pscore = (double)naivepairscore11( *mseq1, *mseq2, 0.0 );
 							}
+//
 #endif
 						}
 						else
@@ -2230,7 +2239,10 @@ static void *athread( void *arg ) // alg='R', alg='r' -> tsukawarenai.
 #if 1
 						if( specificityconsideration > 0.0 )
 						{
-							dist = score2dist( pscore, selfscore[i], selfscore[j] );
+							if( expdist ) 
+								dist = expdist[i][j];
+							else
+								dist = score2dist( pscore, selfscore[i], selfscore[j] );
 							if( dist2offset( dist ) < 0.0 )
 							{
 								makedynamicmtx( dynamicmtx, n_dis_consweight_multi, 0.5 * dist ); // upgma ni awaseru.
@@ -2373,7 +2385,7 @@ static void *athread( void *arg ) // alg='R', alg='r' -> tsukawarenai.
 }
 #endif
 
-static void pairalign( char **name, int *nlen, char **seq, char **aseq, char **dseq, int *thereisxineachseq, char **mseq1, char **mseq2, int alloclen, Lastresx **lastresx, double **distancemtx, LocalHom **localhomtable, int ngui )
+static void pairalign( char **name, int *nlen, char **seq, char **aseq, char **dseq, int *thereisxineachseq, char **mseq1, char **mseq2, int alloclen, Lastresx **lastresx, double **distancemtx, LocalHom **localhomtable, double **expdist, int ngui )
 {
 	int i, j, ilim, jst, jj;
 	int off1, off2, dum1, dum2, thereisx;
@@ -2616,6 +2628,7 @@ static void pairalign( char **name, int *nlen, char **seq, char **aseq, char **d
 			targ[i].bpp = bpp; 
 			targ[i].lastresx = lastresx;
 			targ[i].alloclen = alloclen;
+			targ[i].expdist = expdist;
 			targ[i].targetmap = targetmap;
 			targ[i].mutex_counter = &mutex_counter;
 			targ[i].mutex_stdout = &mutex_stdout;
@@ -2724,8 +2737,12 @@ static void pairalign( char **name, int *nlen, char **seq, char **aseq, char **d
 #if 1
 									if( specificityconsideration > 0.0 )
 									{
-										dist = score2dist( pscore, selfscore[i], selfscore[j] );
+										if( expdist ) 
+											dist = expdist[i][j];
+										else
+											dist = score2dist( pscore, selfscore[i], selfscore[j] );
 //										dist = score2dist( L__align11_noalign( n_dis_consweight_multi, distseq1, distseq2 ), selfscore[i], selfscore[j] ); // 2014/Feb/20
+//										reporterr( "dist(%d,%d)=%f\n", i, j, dist );
 										if( dist2offset( dist ) < 0.0 )
 										{
 											makedynamicmtx( dynamicmtx, n_dis_consweight_multi, 0.5 * dist ); // upgma ni awaseru.
@@ -2762,7 +2779,10 @@ static void pairalign( char **name, int *nlen, char **seq, char **aseq, char **d
 								if( specificityconsideration > 0.0 )
 								{
 //									fprintf( stderr, "dist = %f\n", score2dist( pscore, selfscore[i], selfscore[j] ) );
-									dist = score2dist( pscore, selfscore[i], selfscore[j] );
+									if( expdist ) 
+										dist = expdist[i][j];
+									else
+										dist = score2dist( pscore, selfscore[i], selfscore[j] );
 									if( dist2offset( dist ) < 0.0 )
 									{
 										makedynamicmtx( dynamicmtx, n_dis_consweight_multi, 0.5 * dist ); // upgma ni awaseru.
@@ -2806,7 +2826,10 @@ static void pairalign( char **name, int *nlen, char **seq, char **aseq, char **d
 #if 1
 										if( specificityconsideration > 0.0 )
 										{
-											dist = score2dist( pscore, selfscore[i], selfscore[j] );
+											if( expdist ) 
+												dist = expdist[i][j];
+											else
+												dist = score2dist( pscore, selfscore[i], selfscore[j] );
 											if( ( scoreoffset = dist2offset( dist ) ) < 0.0 )
 											{
 												makedynamicmtx( dynamicmtx, n_dis_consweight_multi, 0.5 * dist ); // upgma ni awaseru.
@@ -3065,7 +3088,7 @@ static void pairalign( char **name, int *nlen, char **seq, char **aseq, char **d
 }
 
 
-int pairlocalalign( int ngui, int lgui, char **namegui, char **seqgui, double **distancemtx, LocalHom **localhomtable, int argc, char **argv )
+int pairlocalalign( int ngui, int lgui, char **namegui, char **seqgui, double **distancemtx, LocalHom **localhomtable, int argc, char **argv, double **expdist )
 {
 	int  *nlen, *thereisxineachseq;
 	char **name, **seq;
@@ -3211,8 +3234,7 @@ int pairlocalalign( int ngui, int lgui, char **namegui, char **seqgui, double **
 
 //	writePre( njob, name, nlen, seq, 0 );
 
-
-
+	//reporterr( "expdist=%p\n", expdist );
 
 	if( dorp == 'p' && scoremtx == 1 && nblosum > 0 ) // protein, not text.  hitsuyou?
 	{
@@ -3232,7 +3254,7 @@ int pairlocalalign( int ngui, int lgui, char **namegui, char **seqgui, double **
 		}
 	}
 
-	pairalign( name, nlen, bseq, aseq, dseq, thereisxineachseq, mseq1, mseq2, alloclen, lastresx, distancemtx, localhomtable, ngui );
+	pairalign( name, nlen, bseq, aseq, dseq, thereisxineachseq, mseq1, mseq2, alloclen, lastresx, distancemtx, localhomtable, expdist, ngui );
 
 	fprintf( trap_g, "done.\n" );
 #if DEBUG

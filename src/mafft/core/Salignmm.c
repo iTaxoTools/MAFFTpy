@@ -605,7 +605,7 @@ static void Atracking_localhom( double *impwmpt, double *lasthorizontalw, double
 	}
 }
 
-static void createcpmxresult( double **cpmxresult, int limk, double eff1, double eff2, double **cpmx1, double **cpmx2, char *gaptable1, char *gaptable2, int usehist1, int usehist2 ) // allocate, free ryouhou suru.
+static void createcpmxresult( double **cpmxresult, int limk, double eff1, double eff2, double ***cpmx1, double ***cpmx2, char *gaptable1, char *gaptable2, int usehist1, int usehist2 ) // allocate, free ryouhou suru.
 {
 	int i, j, p;
 	int alen = strlen( gaptable1 );
@@ -623,7 +623,7 @@ static void createcpmxresult( double **cpmxresult, int limk, double eff1, double
 				;
 				//if( amino_n['-'] == i ) cpmxresult[amino_n['-']][j] = eff1; // tsukawanai
 			else
-				cpmxresult[i][j] += cpmx1[i][p++] * eff1;
+				cpmxresult[i][j] += (*cpmx1)[i][p++] * eff1;
 		}
 
 		for( j=0,p=0; j<alen; j++ ) 
@@ -632,16 +632,32 @@ static void createcpmxresult( double **cpmxresult, int limk, double eff1, double
 				;
 				//if( amino_n['-'] == i ) cpmxresult[amino_n['-']][j] = eff2; // tsukawanai
 			else
-				cpmxresult[i][j] += cpmx2[i][p++] * eff2;
+				cpmxresult[i][j] += (*cpmx2)[i][p++] * eff2;
 		}
 
-		if( usehist1 ) free( cpmx1[i] );
-//		cpmx1[i] = NULL;
-		if( usehist2 ) free( cpmx2[i] );
-//		cpmx2[i] = NULL;
+		if( usehist1 ) 
+		{
+			free( (*cpmx1)[i] );
+			(*cpmx1)[i] = NULL;
+		}
+		if( usehist2 ) 
+		{
+			free( (*cpmx2)[i] );
+			(*cpmx2)[i] = NULL;
+		}
 	}
-	if( usehist1 ) free( cpmx1 );
-	if( usehist2 ) free( cpmx2 );
+#if 1
+	if( usehist1 ) 
+	{
+		free( *cpmx1 );
+		*cpmx1 = NULL;
+	}
+	if( usehist2 )
+	{
+		free( *cpmx2 );
+		*cpmx2 = NULL;
+	}
+#endif
 #endif
 }
 
@@ -1067,7 +1083,7 @@ static double Atracking( double *lasthorizontalw, double *lastverticalw,
 	return( wm );
 }
 
-double A__align( double **n_dynamicmtx, int penalty_l, int penalty_ex_l, char **seq1, char **seq2, double *eff1, double *eff2, int icyc, int jcyc, int alloclen, int constraint, double *impmatch, char *sgap1, char *sgap2, char *egap1, char *egap2, int *chudanpt, int chudanref, int *chudanres, int headgp, int tailgp, int firstmem, int calledbyfulltreebase, double **cpmxchild0, double **cpmxchild1, double ***cpmxresult, double orieff1, double orieff2 )
+double A__align( double **n_dynamicmtx, int penalty_l, int penalty_ex_l, char **seq1, char **seq2, double *eff1, double *eff2, int icyc, int jcyc, int alloclen, int constraint, double *impmatch, char *sgap1, char *sgap2, char *egap1, char *egap2, int *chudanpt, int chudanref, int *chudanres, int headgp, int tailgp, int firstmem, int calledbyfulltreebase, double ***cpmxchild0, double ***cpmxchild1, double ***cpmxresult, double orieff1, double orieff2 )
 /* score no keisan no sai motokaraaru gap no atukai ni mondai ga aru */
 {
 
@@ -1112,9 +1128,9 @@ double A__align( double **n_dynamicmtx, int penalty_l, int penalty_ex_l, char **
 	static TLS double *fgcp2, *fgcp2o;
 	double *ogcp1opt, *ogcp2opt, *fgcp1opt, *fgcp2opt;
 	static TLS double **cpmx1;
-	double **cpmx1pt;
+	double ***cpmx1pt = NULL;
 	static TLS double **cpmx2;
-	double **cpmx2pt;
+	double ***cpmx2pt = NULL;
 	static TLS int **intwork;
 	static TLS double **doublework;
 	static TLS int orlgth1 = 0, orlgth2 = 0;
@@ -1461,19 +1477,19 @@ double A__align( double **n_dynamicmtx, int penalty_l, int penalty_ex_l, char **
 		}
 
 
-		if( cpmxchild0 )
+		if( cpmxchild0 && *cpmxchild0 )
 		{
 //			reporterr( "\nUse cpmxhist for child 0!\n" );
-			cpmx1pt = cpmxchild0;
-			gapfreq1pt = cpmxchild0[nalphabets];
-			ogcp1opt = cpmxchild0[nalphabets+1];
-			fgcp1opt = cpmxchild0[nalphabets+2];
+			cpmx1pt = (cpmxchild0);
+			gapfreq1pt = (*cpmxchild0)[nalphabets];
+			ogcp1opt = (*cpmxchild0)[nalphabets+1];
+			fgcp1opt = (*cpmxchild0)[nalphabets+2];
 		}
 		else
 		{
 //			reporterr( "\nDo not use cpmxhist for child 0!\n" );
-			cpmx1pt = cpmx1;
-			cpmx_calc_new( seq1, cpmx1pt, eff1, lgth1, icyc );
+			cpmx1pt = &cpmx1;
+			cpmx_calc_new( seq1, *cpmx1pt, eff1, lgth1, icyc );
 
 			gapfreq1pt = gapfreq1;
 			gapcountf( gapfreq1pt, seq1, icyc, eff1, lgth1 );
@@ -1485,19 +1501,19 @@ double A__align( double **n_dynamicmtx, int penalty_l, int penalty_ex_l, char **
 			st_FinalGapCount( fgcp1opt, icyc, seq1, eff1, lgth1 );
 		}
 	
-		if( cpmxchild1 )
+		if( cpmxchild1 && *cpmxchild1 )
 		{
 //			reporterr( "\nUse cpmxhist for child 1!\n" );
-			cpmx2pt = cpmxchild1;
-			gapfreq2pt = cpmxchild1[nalphabets];
-			ogcp2opt = cpmxchild1[nalphabets+1];
-			fgcp2opt = cpmxchild1[nalphabets+2];
+			cpmx2pt = (cpmxchild1);
+			gapfreq2pt = (*cpmxchild1)[nalphabets];
+			ogcp2opt = (*cpmxchild1)[nalphabets+1];
+			fgcp2opt = (*cpmxchild1)[nalphabets+2];
 		}
 		else
 		{
 //			reporterr( "\nDo not use cpmxhist for child 1!\n" );
-			cpmx2pt = cpmx2;
-			cpmx_calc_new( seq2, cpmx2pt, eff2, lgth2, jcyc );
+			cpmx2pt = &cpmx2;
+			cpmx_calc_new( seq2, *cpmx2pt, eff2, lgth2, jcyc );
 
 			gapfreq2pt = gapfreq2;
 			gapcountf( gapfreq2pt, seq2, jcyc, eff2, lgth2 );
@@ -1518,8 +1534,8 @@ double A__align( double **n_dynamicmtx, int penalty_l, int penalty_ex_l, char **
 	}
 	else
 	{
-		cpmx1pt = cpmx1;
-		cpmx2pt = cpmx2;
+		cpmx1pt = &cpmx1;
+		cpmx2pt = &cpmx2;
 		gapfreq1pt = gapfreq1;
 		gapfreq2pt = gapfreq2;
 		ogcp1opt = ogcp1o;
@@ -1530,14 +1546,14 @@ double A__align( double **n_dynamicmtx, int penalty_l, int penalty_ex_l, char **
 		if( reuseprofiles )
 		{
 //			reporterr( "reuse" );
-			cpmx_calc_add( seq1, cpmx1pt, eff1, lgth1, icyc );
+			cpmx_calc_add( seq1, *cpmx1pt, eff1, lgth1, icyc );
 		}
 		else
 		{
 //			reporterr( "new profile" );
-			cpmx_calc_new( seq1, cpmx1pt, eff1, lgth1, icyc );
+			cpmx_calc_new( seq1, *cpmx1pt, eff1, lgth1, icyc );
 		}
-		cpmx_calc_new( seq2, cpmx2pt, eff2, lgth2, jcyc );
+		cpmx_calc_new( seq2, *cpmx2pt, eff2, lgth2, jcyc );
 
 		if( sgap1 )
 		{
@@ -1614,7 +1630,7 @@ double A__align( double **n_dynamicmtx, int penalty_l, int penalty_ex_l, char **
 	{
 		reporterr( "%3d ", i );
 		for( j=0; j<nalphabets; j++ ) 
-			reporterr( "%4.2f ", cpmx1pt[j][i] );
+			reporterr( "%4.2f ", (*cpmx1pt)[j][i] );
 		reporterr( "\n" );
 	}
 #endif
@@ -1628,7 +1644,7 @@ double A__align( double **n_dynamicmtx, int penalty_l, int penalty_ex_l, char **
 	{
 		reporterr( "%3d ", i );
 		for( j=0; j<nalphabets; j++ ) 
-			reporterr( "%4.2f ", cpmx2pt[j][i] );
+			reporterr( "%4.2f ", (*cpmx2pt)[j][i] );
 		reporterr( "\n" );
 	}
 	reporterr( "\ngapfreq1 = " );
@@ -1681,11 +1697,11 @@ double A__align( double **n_dynamicmtx, int penalty_l, int penalty_ex_l, char **
 	currentw = w1;
 	previousw = w2;
 
-	match_calc( n_dynamicmtx, initverticalw, cpmx2pt, cpmx1pt, 0, lgth1, doublework, intwork, 1 );
+	match_calc( n_dynamicmtx, initverticalw, *cpmx2pt, *cpmx1pt, 0, lgth1, doublework, intwork, 1 );
 	if( constraint )
 		imp_match_out_vead_tate( initverticalw, 0, lgth1 ); // 060306
 
-	match_calc( n_dynamicmtx, currentw, cpmx1pt, cpmx2pt, 0, lgth2, doublework, intwork, 1 );
+	match_calc( n_dynamicmtx, currentw, *cpmx1pt, *cpmx2pt, 0, lgth2, doublework, intwork, 1 );
 	if( constraint )
 		imp_match_out_vead( currentw, 0, lgth2 ); // 060306
 #if 0 // -> tbfast.c // impossible
@@ -1810,7 +1826,7 @@ for( i=0; i<lgth2; i++ )
 
 		previousw[0] = initverticalw[i-1];
 
-		match_calc( n_dynamicmtx, currentw, cpmx1pt, cpmx2pt, i, lgth2, doublework, intwork, 0 );
+		match_calc( n_dynamicmtx, currentw, *cpmx1pt, *cpmx2pt, i, lgth2, doublework, intwork, 0 );
 #if XXXXXXX
 fprintf( stderr, "\n" );
 fprintf( stderr, "i=%d\n", i );
@@ -2092,18 +2108,18 @@ fprintf( stderr, "\n" );
 #endif
 	
 			*cpmxresult = AllocateDoubleMtx( nalphabets+3, 0 ); // gapcount, opg, fng no bun
-			createcpmxresult( *cpmxresult, limk, totaleff1, totaleff2, cpmx1pt, cpmx2pt, gt1, gt2, (cpmx1!=cpmx1pt), (cpmx2!=cpmx2pt) ); // naka de free
+			createcpmxresult( *cpmxresult, limk, totaleff1, totaleff2, cpmx1pt, cpmx2pt, gt1, gt2, (cpmx1!=*cpmx1pt), (cpmx2!=*cpmx2pt) ); // naka de free
 			creategapfreqresult( *cpmxresult+nalphabets, limk, totaleff1, totaleff2, gapfreq1pt, gapfreq2pt, gt1, gt2 ); // naka deha free shinai
 			// gapfreq1, gapfreq2 ha mada tsukau
 			createogresult( *cpmxresult+nalphabets+1, limk, totaleff1, totaleff2, ogcp1opt, ogcp2opt, gapfreq1pt, gapfreq2pt, gt1, gt2 ); // naka deha free shinai
-			if( cpmx1!=cpmx1pt ) free( ogcp1opt );
-			if( cpmx2!=cpmx2pt ) free( ogcp2opt );
+			if( cpmx1!=*cpmx1pt ) free( ogcp1opt );
+			if( cpmx2!=*cpmx2pt ) free( ogcp2opt );
 			createfgresult( *cpmxresult+nalphabets+2, limk, totaleff1, totaleff2, fgcp1opt, fgcp2opt, gapfreq1pt, gapfreq2pt, gt1, gt2 ); // naka deha free shinai
-			if( cpmx1!=cpmx1pt ) free( fgcp1opt );
-			if( cpmx2!=cpmx2pt ) free( fgcp2opt );
+			if( cpmx1!=*cpmx1pt ) free( fgcp1opt );
+			if( cpmx2!=*cpmx2pt ) free( fgcp2opt );
 
-			if( cpmx1!=cpmx1pt ) free( gapfreq1pt );
-			if( cpmx2!=cpmx2pt ) free( gapfreq2pt );
+			if( cpmx1!=*cpmx1pt ) free( gapfreq1pt );
+			if( cpmx2!=*cpmx2pt ) free( gapfreq2pt );
 #if 0
 			reporterr( "\n" );
 			for( j=0; j<nalphabets; j++ ) 
@@ -2124,16 +2140,24 @@ fprintf( stderr, "\n" );
 
 	free( gt1bk );
 	free( gt2bk );
-#if 0
-	if( cpmx1pt != cpmx1 ) 
+#if 0 // 2021/Jun/24
+	if( *cpmx1pt != cpmx1 ) 
 	{
-//		reporterr( "freeing cpmxchild0\n" );
-		FreeDoubleMtx( cpmxchild0 );
+		if( cpmxchild0 && *cpmxchild0 )
+		{
+			reporterr( "freeing *cpmxchild0\n" );
+			FreeDoubleMtx( *cpmxchild0 );
+			*cpmxchild0 = NULL;
+		}
 	}
-	if( cpmx2pt != cpmx2 ) 
+	if( *cpmx2pt != cpmx2 ) 
 	{
-//		reporterr( "freeing cpmxchild1\n" );
-		FreeDoubleMtx( cpmxchild1 );
+		if( cpmxchild1 && *cpmxchild1 )
+		{
+			reporterr( "freeing *cpmxchild1\n" );
+			FreeDoubleMtx( *cpmxchild1 );
+			*cpmxchild1 = NULL;
+		}
 	}
 #endif
 

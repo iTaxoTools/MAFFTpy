@@ -1150,6 +1150,7 @@ exit( 1 );
 	writeData( stdout, njob, name, nlen, res_g, 1 );
 #endif
 
+
 	if( spscoreout ) reporterr( "Unweighted sum-of-pairs score = %10.5f\n", sumofpairsscore( njob, res_g ) );
 
 	SHOWVERSION;

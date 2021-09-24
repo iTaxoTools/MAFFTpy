@@ -1927,7 +1927,7 @@ static void *treebasethread( void *arg )
 	int ssi, ssm, bunbo;
 	int tm, ti;
 	int **localmem = NULL;
-	double **cpmxchild0, **cpmxchild1;
+	double ***cpmxchild0, ***cpmxchild1;
 	double orieff1, orieff2;
 	ExtAnch *pairanch = NULL;
 #if SKIP
@@ -2078,8 +2078,8 @@ static void *treebasethread( void *arg )
 
 
 //		reporterr( "l=%d, dep[l].child0=%d, dep[l].child1=%d\n", l, dep[l].child0, dep[l].child1 );
-		if( dep[l].child0 == -1 ) cpmxchild0 = NULL; else cpmxchild0 = cpmxhist[dep[l].child0];
-		if( dep[l].child1 == -1 ) cpmxchild1 = NULL; else cpmxchild1 = cpmxhist[dep[l].child1];
+		if( dep[l].child0 == -1 ) cpmxchild0 = NULL; else cpmxchild0 = cpmxhist+dep[l].child0;
+		if( dep[l].child1 == -1 ) cpmxchild1 = NULL; else cpmxchild1 = cpmxhist+dep[l].child1;
 //		reporterr( "cpmxchild0=%p, cpmxchild1=%p\n", cpmxchild0, cpmxchild1 );
 
 
@@ -2259,7 +2259,7 @@ static void *treebasethread( void *arg )
 					break;
 				case( 'M' ):
 					if( l < 500 || l % 100 == 0 ) reporterr(       "m" );
-					if( l < 500 || l % 100 == 0 ) if( cpmxchild1 || cpmxchild0 ) reporterr(       " h" );
+					if( l < 500 || l % 100 == 0 ) if( ( cpmxchild1 && *cpmxchild1 ) || ( cpmxchild0 && *cpmxchild0 ) ) reporterr(       " h" );
 //					reporterr(       "%d-%d", clus1, clus2 );
 					pscore = MSalignmm( dynamicmtx, mseq1, mseq2, effarr1, effarr2, clus1, clus2, *alloclen, NULL, NULL, NULL, NULL, NULL, 0, NULL, outgap, outgap, cpmxchild0, cpmxchild1, cpmxhist+l, orieff1, orieff2 );
 					break;
@@ -2284,7 +2284,7 @@ static void *treebasethread( void *arg )
 					else
 					{
 //						reporterr(       "%d-%d", clus1, clus2 );
-						if( l < 500 || l % 100 == 0 ) if( cpmxchild1 || cpmxchild0 ) reporterr(       " h" );
+						if( l < 500 || l % 100 == 0 ) if( ( cpmxchild1 && *cpmxchild1 ) || ( cpmxchild0 && *cpmxchild0 ) ) reporterr(       " h" );
 						pscore = A__align( dynamicmtx, penalty, penalty_ex, mseq1, mseq2, effarr1, effarr2, clus1, clus2, *alloclen, 0, &dumdb, NULL, NULL, NULL, NULL, NULL, 0, NULL, outgap, outgap, -1, -1, cpmxchild0, cpmxchild1, cpmxhist+l, orieff1, orieff2 );
 					}
 					break;
@@ -2420,7 +2420,7 @@ static int dooneiteration( int *nlen, char **aseq, int nadd, char *mergeoralign,
 	int *alreadyaligned = NULL;
 	double **dynamicmtx = NULL;
 	int **localmem = NULL;
-	double **cpmxchild0, **cpmxchild1;
+	double ***cpmxchild0, ***cpmxchild1;
 	double orieff1, orieff2;
 	double oscore, nscore;
 	ExtAnch *pairanch;
@@ -2606,7 +2606,7 @@ static int dooneiteration( int *nlen, char **aseq, int nadd, char *mergeoralign,
 					break;
 				case( 'M' ):
 					if( l < 500 || l % 100 == 0 ) reporterr(       "m" );
-					if( l < 500 || l % 100 == 0 ) if( cpmxchild1 || cpmxchild0 ) reporterr(       " h" );
+					if( l < 500 || l % 100 == 0 ) if( ( cpmxchild1 && *cpmxchild1 ) || ( cpmxchild0 && *cpmxchild0 ) ) reporterr(       " h" );
 //					reporterr(       "%d-%d", clus1, clus2 );
 					pscore = MSalignmm( dynamicmtx, mseq1, mseq2, effarr1, effarr2, clus1, clus2, *alloclen, NULL, NULL, NULL, NULL, NULL, 0, NULL, outgap, outgap, cpmxchild0, cpmxchild1, cpmxhist+l, orieff1, orieff2 );
 					break;
@@ -2630,7 +2630,7 @@ static int dooneiteration( int *nlen, char **aseq, int nadd, char *mergeoralign,
 					}
 					else
 					{
-						if( l < 500 || l % 100 == 0 ) if( cpmxchild1 || cpmxchild0 ) reporterr(       " h" );
+						if( l < 500 || l % 100 == 0 ) if( ( cpmxchild1 && *cpmxchild1 ) || ( cpmxchild0 && *cpmxchild0 ) ) reporterr(       " h" );
 //						reporterr(       "\n\n %d - %d (%d x %d) : \n", topol[l][0][0], topol[l][1][0], clus1, clus2 );
 						pscore = A__align( dynamicmtx, penalty, penalty_ex, mseq1, mseq2, effarr1, effarr2, clus1, clus2, *alloclen, 0, &dumdb, NULL, NULL, NULL, NULL, NULL, 0, NULL, outgap, outgap, localmem[0][0], 1, cpmxchild0, cpmxchild1, cpmxhist+l, orieff1, orieff2 );
 					}
@@ -2748,7 +2748,7 @@ static int treebase( int *nlen, char **aseq, int nadd, char *mergeoralign, char 
 	int tm, ti;
 	int gapmaplen;
 	int **localmem = NULL;
-	double **cpmxchild0, **cpmxchild1;
+	double ***cpmxchild0, ***cpmxchild1;
 	double orieff1, orieff2;
 	ExtAnch *pairanch;
 #if SKIP
@@ -2808,8 +2808,8 @@ static int treebase( int *nlen, char **aseq, int nadd, char *mergeoralign, char 
 //		reporterr( " at the beginning of the loop, clus1,clus2=%d,%d\n", clus1, clus2 );
 
 //		reporterr( "l=%d, dep[l].child0=%d, dep[l].child1=%d\n", l, dep[l].child0, dep[l].child1 );
-		if( dep[l].child0 == -1 ) cpmxchild0 = NULL; else cpmxchild0 = cpmxhist[dep[l].child0];
-		if( dep[l].child1 == -1 ) cpmxchild1 = NULL; else cpmxchild1 = cpmxhist[dep[l].child1];
+		if( dep[l].child0 == -1 ) cpmxchild0 = NULL; else cpmxchild0 = cpmxhist+dep[l].child0;
+		if( dep[l].child1 == -1 ) cpmxchild1 = NULL; else cpmxchild1 = cpmxhist+dep[l].child1;
 //		reporterr( "cpmxchild0=%p, cpmxchild1=%p\n", cpmxchild0, cpmxchild1 );
 
 #if 0
@@ -3075,7 +3075,7 @@ static int treebase( int *nlen, char **aseq, int nadd, char *mergeoralign, char 
 					break;
 				case( 'M' ):
 					if( l < 500 || l % 100 == 0 ) reporterr(       "m" );
-					if( l < 500 || l % 100 == 0 ) if( cpmxchild1 || cpmxchild0 ) reporterr(       " h" );
+					if( l < 500 || l % 100 == 0 ) if( ( cpmxchild1 && *cpmxchild1 ) || ( cpmxchild0 && *cpmxchild0 ) ) reporterr(       " h" );
 //					reporterr(       "%d-%d", clus1, clus2 );
 					pscore = MSalignmm( dynamicmtx, mseq1, mseq2, effarr1, effarr2, clus1, clus2, *alloclen, NULL, NULL, NULL, NULL, NULL, 0, NULL, outgap, outgap, cpmxchild0, cpmxchild1, cpmxhist+l, orieff1, orieff2 );
 					break;
@@ -3099,7 +3099,7 @@ static int treebase( int *nlen, char **aseq, int nadd, char *mergeoralign, char 
 					}
 					else
 					{
-						if( l < 500 || l % 100 == 0 ) if( cpmxchild1 || cpmxchild0 ) reporterr(       " h" );
+						if( l < 500 || l % 100 == 0 ) if( ( cpmxchild1 && *cpmxchild1 ) || ( cpmxchild0 && *cpmxchild0 ) ) reporterr(       " h" );
 //						reporterr(       "\n\n %d - %d (%d x %d) : \n", topol[l][0][0], topol[l][1][0], clus1, clus2 );
 						pscore = A__align( dynamicmtx, penalty, penalty_ex, mseq1, mseq2, effarr1, effarr2, clus1, clus2, *alloclen, 0, &dumdb, NULL, NULL, NULL, NULL, NULL, 0, NULL, outgap, outgap, localmem[0][0], 1, cpmxchild0, cpmxchild1, cpmxhist+l, orieff1, orieff2 );
 					}
@@ -4766,12 +4766,27 @@ int disttbfast( int ngui, int lgui, char **namegui, char **seqgui, int argc, cha
 //		free( topol[njob-1] ); topol[njob-1]=NULL;
 //		free( topol ); topol=NULL;
 		FreeIntCub( topol ); topol = NULL;
+#if 1 // 2021/Jun/24
+		if( cpmxhist ) // nakutemo yoi
+		{
+			for( i=0; i<njob-1; i++ )
+			{
+				if( cpmxhist[i] )
+				{
+//					reporterr( "freeing cpmxhist[%d]\n", i );
+					FreeDoubleMtx( cpmxhist[i] ); cpmxhist[i] = NULL;
+				}
+			}
+			free( cpmxhist ); cpmxhist = NULL;
+		}
+#else
 		if( cpmxhist[njob-2] )
 		{
 //			reporterr( "freeing cpmxhist[njob-2]\n" );
 			FreeDoubleMtx( cpmxhist[njob-2] ); cpmxhist[njob-2] = NULL;
 		}
 		free( cpmxhist ); cpmxhist = NULL;
+#endif
 
 		free( memhist ); memhist = NULL;
 //		reporterr( "after freeing topol, " );

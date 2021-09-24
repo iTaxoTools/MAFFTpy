@@ -397,6 +397,7 @@ static void overridematrix( double **matrix )
 		matrix[i1][i2] = v;
 		matrix[i2][i1] = v; // 2018/May/11
 	}
+	fclose( fp );
 }
 
 void extendedmtx( double **matrix, double *freq, unsigned char *amino, char *amino_grp )

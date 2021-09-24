@@ -11528,7 +11528,7 @@ void dontcalcimportance_firstone( int nseq, double *eff, char **seq, LocalHom **
 #endif
 }
 
-void calcimportance_target( int nseq, int ntarget, double *eff, char **seq, LocalHom **localhom, int *targetmap, int *targetmapr )
+void calcimportance_target( int nseq, int ntarget, double *eff, char **seq, LocalHom **localhom, int *targetmap, int *targetmapr, int alloclen )
 {
 	int i, j, pos, len, ti, tj;
 	double *importance; // static -> local, 2012/02/25
@@ -11537,7 +11537,7 @@ void calcimportance_target( int nseq, int ntarget, double *eff, char **seq, Loca
 	int *nogaplen; // static -> local, 2012/02/25
 	LocalHom *tmpptr;
 
-	importance = AllocateDoubleVec( nlenmax );
+	importance = AllocateDoubleVec( alloclen );
 	nogaplen = AllocateIntVec( nseq );
 	ieff = AllocateDoubleVec( nseq );
 
@@ -11571,7 +11571,7 @@ void calcimportance_target( int nseq, int ntarget, double *eff, char **seq, Loca
 	{
 		i = targetmapr[ti];
 //		reporterr(       "i = %d\n", i );
-		for( pos=0; pos<nlenmax; pos++ )
+		for( pos=0; pos<alloclen; pos++ )
 			importance[pos] = 0.0;
 		for( j=0; j<nseq; j++ )
 		{
@@ -11594,7 +11594,7 @@ void calcimportance_target( int nseq, int ntarget, double *eff, char **seq, Loca
 		}
 #if 0
 		reporterr(       "position specific importance of seq %d:\n", i );
-		for( pos=0; pos<nlenmax; pos++ )
+		for( pos=0; pos<alloclen; pos++ )
 			reporterr(       "%d: %f\n", pos, importance[pos] );
 		reporterr(       "\n" );
 #endif
@@ -11761,7 +11761,7 @@ void calcimportance_target( int nseq, int ntarget, double *eff, char **seq, Loca
 	free( ieff );
 }
 
-void calcimportance_half( int nseq, double *eff, char **seq, LocalHom **localhom )
+void calcimportance_half( int nseq, double *eff, char **seq, LocalHom **localhom, int alloclen )
 {
 	int i, j, pos, len;
 	double *importance; // static -> local, 2012/02/25
@@ -11770,7 +11770,8 @@ void calcimportance_half( int nseq, double *eff, char **seq, LocalHom **localhom
 	int *nogaplen; // static -> local, 2012/02/25
 	LocalHom *tmpptr;
 
-	importance = AllocateDoubleVec( nlenmax );
+	importance = AllocateDoubleVec( alloclen );
+//	reporterr("alloclen=%d, nlenmax=%d\n", alloclen, nlenmax );
 	nogaplen = AllocateIntVec( nseq );
 	ieff = AllocateDoubleVec( nseq );
 
@@ -11802,8 +11803,10 @@ void calcimportance_half( int nseq, double *eff, char **seq, LocalHom **localhom
 	for( i=0; i<nseq; i++ )
 	{
 //		reporterr(       "i = %d\n", i );
-		for( pos=0; pos<nlenmax; pos++ )
+		for( pos=0; pos<alloclen; pos++ )
+		{
 			importance[pos] = 0.0;
+		}
 		for( j=0; j<nseq; j++ )
 		{
 			if( i == j ) continue;
@@ -11812,6 +11815,7 @@ void calcimportance_half( int nseq, double *eff, char **seq, LocalHom **localhom
 			{
 				for( tmpptr = localhom[i]+j-i; tmpptr; tmpptr=tmpptr->next )
 				{
+//					reporterr( "pos=%d, alloclen=%d\n", pos, alloclen );
 					if( tmpptr->opt == -1 ) continue;
 					for( pos=tmpptr->start1; pos<=tmpptr->end1; pos++ )
 					{
