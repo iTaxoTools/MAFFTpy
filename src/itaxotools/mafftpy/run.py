@@ -1,7 +1,5 @@
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
 
-"""Console entry point"""
+"""Console entry points"""
 
 import sys
 from . import core

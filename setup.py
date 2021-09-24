@@ -129,7 +129,7 @@ setup(
             'mafftpy = itaxotools.mafftpy.run:main',
             'mafftpy-ginsi = itaxotools.mafftpy.run:ginsi',
             'mafftpy-fftns1 = itaxotools.mafftpy.run:fftns1',
-            'mafftpy-qt = itaxotools.mafftpy.gui.run:main',
+            'mafftpy-gui = itaxotools.mafftpy.gui:run',
         ],
         'pyinstaller40': [
           'hook-dirs = itaxotools.__pyinstaller:get_hook_dirs',

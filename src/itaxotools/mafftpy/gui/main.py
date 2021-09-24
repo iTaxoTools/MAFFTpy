@@ -173,7 +173,7 @@ class Main(widgets.ToolDialog):
         self.cog()
 
         if init is not None:
-            self.machine.started.connect(init)
+            self.machine.started.connect(lambda: init(self))
 
     def __getstate__(self):
         return (self.analysis,)
@@ -776,19 +776,3 @@ class Main(widgets.ToolDialog):
         else:
             self.footer.setText(
                 'Saved aligned sequence to file: {}'.format(fileName))
-
-
-def show():
-    """Entry point"""
-    def init():
-        if len(sys.argv) >= 2:
-            file = pathlib.Path(sys.argv[1])
-            main.handleOpen(fileName=str(file))
-
-    app = QtWidgets.QApplication(sys.argv)
-    app.setStyle('Fusion')
-    main = Main(init=init)
-    main.setWindowFlags(QtCore.Qt.Window)
-    main.setModal(True)
-    main.show()
-    sys.exit(app.exec_())

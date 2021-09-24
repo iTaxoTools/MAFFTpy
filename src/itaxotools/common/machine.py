@@ -57,7 +57,6 @@ class TaggedTransition(QtStateMachine.QSignalTransition):
         filter=lambda e: True,
         effect=lambda e: None,
     ):
-        print('testmesignal!', signal, dir(signal))
         super().__init__(signal)
         self.tag = tag
         self.filter = filter
