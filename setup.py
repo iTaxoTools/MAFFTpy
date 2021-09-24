@@ -104,7 +104,7 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 
 setup(
     name='mafftpy',
-    version='0.1.0',
+    version='0.1.1',
     description='A Python wrapper for MAFFT',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -112,7 +112,6 @@ setup(
     author_email='stefanpatman91@gmail.com',
     package_dir={'': 'src'},
     packages=find_namespace_packages(
-        # exclude=('itaxotools.common*',),
         include=('itaxotools*',),
         where='src',
     ),
@@ -120,7 +119,7 @@ setup(
     python_requires='>=3.9, <4',
     install_requires=[
         'pyside6>=6.1.1',
-        'itaxotools-common==0.2.1',
+        'itaxotools-common @ git+ssh://git@github.com/iTaxoTools/itt-common.git@v0.2.1',
         ],
     extras_require = {
         'dev': ['pyinstaller>=4.5.1'],

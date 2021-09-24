@@ -8,16 +8,11 @@ This is a Python wrapper for MAFFT: <https://mafft.cbrc.jp/alignment/software/>
 
 *(you will need a C compiler when building from source)*
 
-Install using pip:
+Install using pip, then run the GUI:
 
 ```
 $ pip install .
-```
-
-Run the GUI:
-
-```
-$ mafftpy-qt
+$ mafftpy-gui
 ```
 
 Simple command line tools:
