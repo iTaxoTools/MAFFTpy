@@ -219,12 +219,14 @@ class MafftVars():
 
         if strategy == 'auto':
             self.auto = 1
-        if strategy == 'ginsi':
+        elif strategy == 'ginsi':
+            self.auto = 0
             self.fft = 1
             self.cycle = 1
             self.iterate = 1000
             self.distance = "global"
         elif strategy == 'fftns1':
+            self.auto = 0
             self.fft = 1
             self.cycle = 1
             self.distance = "ktuples"
