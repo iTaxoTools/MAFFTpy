@@ -28,14 +28,14 @@ import pickle
 import shutil
 import pathlib
 import tempfile
-import importlib.resources
+import enum
 
 from itaxotools import common
 from itaxotools.common.param import qt as param_qt
-from itaxotools.common import utility
 from itaxotools.common import widgets
 from itaxotools.common import resources
-from itaxotools.common import threads
+from itaxotools.common import threading
+from itaxotools.common import machine
 from itaxotools.common import io
 
 from .. import core
@@ -45,6 +45,16 @@ from time import sleep
 
 def get_icon(path):
     return resources.get_common(pathlib.Path('icons/svg') / path)
+
+
+class Action(enum.Enum):
+    Empty = enum.auto()
+    Update = enum.auto()
+    Done = enum.auto()
+    Fail = enum.auto()
+    Run = enum.auto()
+    Cancel = enum.auto()
+    Open = enum.auto()
 
 
 class TextEditInput(QtWidgets.QTextEdit):
@@ -76,11 +86,11 @@ class TextEditInput(QtWidgets.QTextEdit):
     def handleInputChange(self):
 
         if self.document().isEmpty():
-            self.main.machine.postEvent(utility.NamedEvent('EMPTY'))
+            self.main.postAction(Action.Empty)
             self.notifyOnNextUpdate = True
         elif self.notifyOnNextUpdate == True:
             self.main.file = None
-            self.main.machine.postEvent(utility.NamedEvent('UPDATE'))
+            self.main.postAction(Action.Update)
             self.notifyOnNextUpdate = False
 
     def canInsertFromMimeData(self, source):
@@ -138,6 +148,8 @@ class TextEditLogger(widgets.TextEditLogger):
 class Main(widgets.ToolDialog):
     """Main window, handles everything"""
 
+    actionSignal = QtCore.Signal(Action, list, dict)
+
     def __init__(self, parent=None, init=None):
         super(Main, self).__init__(parent)
 
@@ -163,12 +175,17 @@ class Main(widgets.ToolDialog):
         if init is not None:
             self.machine.started.connect(init)
 
-
     def __getstate__(self):
         return (self.analysis,)
 
     def __setstate__(self, state):
         (self.analysis,) = state
+
+    def postAction(self, action, *args, **kwargs):
+        self.actionSignal.emit(action, args, kwargs)
+
+    def taggedTransition(self, action):
+        return machine.TaggedTransition(self.actionSignal, action)
 
     def onReject(self):
         """If running, verify cancel"""
@@ -289,30 +306,30 @@ class Main(widgets.ToolDialog):
 
         internal = QtStateMachine.QAbstractTransition.TransitionType.InternalTransition
 
-        transition = utility.NamedTransition('EMPTY')
+        transition = self.taggedTransition(Action.Empty)
         transition.setTransitionType(internal)
         def onTransition(event):
             self.setWindowTitle(self.title)
             self.pane['input'].title = 'Input'
-        transition.onTransition = onTransition
+        transition.effect = onTransition
         transition.setTargetState(self.state['idle/input.none'])
         self.state['idle/input'].addTransition(transition)
 
-        transition = utility.NamedTransition('UPDATE')
+        transition = self.taggedTransition(Action.Update)
         transition.setTransitionType(internal)
         def onTransition(event):
             self.setWindowTitle(self.title + ' - From Text')
             self.pane['input'].title = 'Input - From Text'
-        transition.onTransition = onTransition
+        transition.effect = onTransition
         transition.setTargetState(self.state['idle/input.raw'])
         self.state['idle/input'].addTransition(transition)
 
-        transition = utility.NamedTransition('UPDATE')
+        transition = self.taggedTransition(Action.Update)
         transition.setTransitionType(internal)
         transition.setTargetState(self.state['idle/output.updated'])
         self.state['idle/output.complete'].addTransition(transition)
 
-        transition = utility.NamedTransition('OPEN')
+        transition = self.taggedTransition(Action.Open)
         transition.setTransitionType(internal)
         def onTransition(event):
             fileInfo = QtCore.QFileInfo(event.kwargs['file'])
@@ -321,18 +338,18 @@ class Main(widgets.ToolDialog):
                 fileName = fileName[:37] + '...'
             self.setWindowTitle(self.title + ' - ' + fileName)
             self.pane['input'].title = 'Input - ' + fileName
-        transition.onTransition = onTransition
+        transition.effect = onTransition
         transition.setTargetStates([
             self.state['idle/input.file'],
             self.state['idle/output.none'],
             ])
         self.state['idle'].addTransition(transition)
 
-        transition = utility.NamedTransition('RUN')
+        transition = self.taggedTransition(Action.Run)
         transition.setTargetState(self.state['running'])
         self.state['idle'].addTransition(transition)
 
-        transition = utility.NamedTransition('DONE')
+        transition = self.taggedTransition(Action.Done)
         def onTransition(event):
             msgBox = QtWidgets.QMessageBox(self)
             msgBox.setWindowTitle(self.windowTitle())
@@ -341,24 +358,24 @@ class Main(widgets.ToolDialog):
             msgBox.setStandardButtons(QtWidgets.QMessageBox.Ok)
             msgBox.setDefaultButton(QtWidgets.QMessageBox.Ok)
             self.msgShow(msgBox)
-        transition.onTransition = onTransition
+        transition.effect = onTransition
         transition.setTargetStates([
             self.state['idle/input.last'],
             self.state['idle/output.complete'],
             ])
         self.state['running'].addTransition(transition)
 
-        transition = utility.NamedTransition('FAIL')
+        transition = self.taggedTransition(Action.Fail)
         def onTransition(event):
             self.fail(event.args[0])
-        transition.onTransition = onTransition
+        transition.effect = onTransition
         transition.setTargetStates([
             self.state['idle/input.last'],
             self.state['idle/output.failed'],
             ])
         self.state['running'].addTransition(transition)
 
-        transition = utility.NamedTransition('CANCEL')
+        transition = self.taggedTransition(Action.Cancel)
         transition.setTargetStates([
             self.state['idle/input.last'],
             self.state['idle/output.last'],
@@ -482,6 +499,7 @@ class Main(widgets.ToolDialog):
         self.subheader = widgets.Subheader()
         self.subheader.setStyleSheet(self.subheader.styleSheet() +
             """QRadioButton {padding-right: 12px; padding-top: 2px;}""")
+        self.subheader.setContentsMargins(0, 4, 0, 4)
 
         self.subheader.icon = QtWidgets.QLabel()
         self.subheader.icon.setPixmap(widgets.VectorPixmap(get_icon('arrow-right.svg'),
@@ -689,18 +707,18 @@ class Main(widgets.ToolDialog):
             with open(pathlib.Path(result) / 'pre') as output:
                 self.textOutput.setPlainText(output.read())
             self.textInput.notifyOnNextUpdate = True
-            self.machine.postEvent(utility.NamedEvent('DONE', True))
+            self.postAction(Action.Done, True)
 
         def fail(exception):
             self.textInput.notifyOnNextUpdate = True
-            self.machine.postEvent(utility.NamedEvent('FAIL', exception))
+            self.postAction(Action.Fail, exception)
 
-        self.process = threads.Process(self.handleRunWork)
+        self.process = threading.Process(self.handleRunWork)
         self.process.done.connect(done)
         self.process.fail.connect(fail)
         self.process.setStream(self.textLogIO)
         self.process.start()
-        self.machine.postEvent(utility.NamedEvent('RUN'))
+        self.postAction(Action.Run)
 
     def handleStop(self):
         """Called by cancel button"""
@@ -715,7 +733,7 @@ class Main(widgets.ToolDialog):
             if self.process is not None:
                 self.process.quit()
             self.textInput.notifyOnNextUpdate = True
-            self.machine.postEvent(utility.NamedEvent('CANCEL'))
+            self.postAction(Action.Cancel)
 
     def handleOpen(self, checked=False, fileName=None):
         """Called by toolbar action"""
@@ -733,7 +751,7 @@ class Main(widgets.ToolDialog):
         except Exception as e:
             self.fail(e)
         self.textOutput.clear()
-        self.machine.postEvent(utility.NamedEvent('OPEN',file=fileName))
+        self.postAction(Action.Open, file=fileName)
         self.file = fileName
 
     def handleSave(self):
