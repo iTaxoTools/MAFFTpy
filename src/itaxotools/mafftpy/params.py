@@ -1,17 +1,16 @@
-params = {
-    "general": {
-        "label": "General",
-        "fields": {
-            "strategy": {
-                "label":    "Strategy",
-                "doc":      "Strategy.",
-                "type":     "list",
-                "default":  "auto",
-                "data": {
-                    "items":  ["auto","fftns1","ginsi"],
-                    "labels": ["Auto","FFT-NS-1","G-INS-i"]
-                }
-            },
-        },
-    },
-}
+from itaxotools.common.param import Field, Group
+
+params = Group(key='root', children=[
+            Group(key='general',
+                  label='General',
+                  children=[
+                Field(key='strategy',
+                      label='Strategy',
+                      doc=("Strategy"),
+                      type=str,
+                      list={'auto': 'Auto',
+                            'fftns1': 'FFT-NS-1',
+                            'ginsi':  'G-INS-i'},
+                      default='auto'),
+            ])
+    ])

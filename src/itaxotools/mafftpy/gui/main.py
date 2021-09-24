@@ -31,7 +31,6 @@ import tempfile
 import enum
 
 from itaxotools import common
-from itaxotools.common.param import qt as param_qt
 from itaxotools.common import widgets
 from itaxotools.common import resources
 from itaxotools.common import threading

@@ -28,7 +28,6 @@ import sys
 from datetime import datetime
 from contextlib import contextmanager
 
-from itaxotools.common import param
 from itaxotools.common.io import redirect
 
 from . import mafft
@@ -216,16 +215,16 @@ class MafftVars():
     def update_from_params(self, params):
         """Parse params and update variables"""
 
-        d = params.as_dictionary()
+        strategy = params.general.strategy
 
-        if d['strategy'] == 'auto':
+        if strategy == 'auto':
             self.auto = 1
-        if d['strategy'] == 'ginsi':
+        if strategy == 'ginsi':
             self.fft = 1
             self.cycle = 1
             self.iterate = 1000
             self.distance = "global"
-        elif d['strategy'] == 'fftns1':
+        elif strategy == 'fftns1':
             self.fft = 1
             self.cycle = 1
             self.distance = "ktuples"
@@ -249,7 +248,7 @@ class MultipleSequenceAlignment():
         self.target = None
         self.results = None
         self.log = None
-        self.params = param.ParamList(params.params)
+        self.params = params.params
         self.vars = MafftVars(self.params)
 
     @staticmethod
