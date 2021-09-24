@@ -30,4 +30,4 @@ exe = EXE(pyz,
           upx_exclude=[],
           runtime_tmpdir=None,
           console=False,
-          icon='../src/itaxotools/common/resources/logos/ico/mafft.ico' )
+          icon='../src/itaxotools/mafftpy/gui/logos/mafft.ico' )

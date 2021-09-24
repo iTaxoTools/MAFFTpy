@@ -52,13 +52,10 @@ $ pip install .
 
 ## Packaging
 
-It is advised to do this inside a virtual environment using venv/pipenv.
-The GUI module uses PySide6, for which the PyInstaller hooks are provided
-with the latest version on GitHub. Clone and install PyInstaller from there.
-Then call pyinstaller on the provided spec file:
+It is advised to do this inside a virtual environment using a tool such as pipenv:
 
 ```
-$ git clone https://github.com/pyinstaller/pyinstaller.git
-$ pip install pyinstaller/.
+$ pipenv shell
+$ pip install -e .[dev]
 $ pyinstaller scripts/mafftpy.spec
 ```

@@ -122,7 +122,7 @@ setup(
         'pyside6>=6.1.1',
         ],
     extras_require = {
-        'dev': ['pyinstaller==5.0.dev0'],
+        'dev': ['pyinstaller>=4.5.1'],
     },
     entry_points = {
         'console_scripts': [

@@ -2,4 +2,5 @@ include README.md
 include LICENSE.txt
 include setup.py
 
-recursive-include src/itaxotools/**/resources *
+recursive-include src/itaxotools/common/resources *
+recursive-include src/itaxotools/mafftpy/gui/logos *
