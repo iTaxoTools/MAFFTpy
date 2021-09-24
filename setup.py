@@ -120,6 +120,7 @@ setup(
     python_requires='>=3.9, <4',
     install_requires=[
         'pyside6>=6.1.1',
+        'itaxotools-common==0.2.1',
         ],
     extras_require = {
         'dev': ['pyinstaller>=4.5.1'],
@@ -131,10 +132,6 @@ setup(
             'mafftpy-fftns1 = itaxotools.mafftpy.run:fftns1',
             'mafftpy-gui = itaxotools.mafftpy.gui:run',
         ],
-        'pyinstaller40': [
-          'hook-dirs = itaxotools.__pyinstaller:get_hook_dirs',
-          'tests = itaxotools.__pyinstaller:get_PyInstaller_tests'
-        ]
     },
     cmdclass = {
         'build_pthread': CommandPthread,

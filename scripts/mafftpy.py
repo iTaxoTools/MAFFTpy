@@ -8,4 +8,4 @@ from itaxotools.mafftpy.gui import run
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
-    run.main()
+    run()
