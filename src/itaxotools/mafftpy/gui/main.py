@@ -186,13 +186,13 @@ class Main(widgets.ToolDialog):
     def taggedTransition(self, action):
         return machine.TaggedTransition(self.actionSignal, action)
 
-    def onReject(self):
+    def filterReject(self):
         """If running, verify cancel"""
         if self.state['running'] in list(self.machine.configuration()):
             self.handleStop()
-            return True
+            return False
         else:
-            return None
+            return True
 
     def cog(self):
         """Initialize state machine"""
