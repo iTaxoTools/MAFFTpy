@@ -11,7 +11,7 @@ This is a Python wrapper for MAFFT: <https://mafft.cbrc.jp/alignment/software/>
 Install using pip, then run the GUI:
 
 ```
-$ pip install .
+$ pip install . -f packages.html
 $ mafftpy-gui
 ```
 
@@ -36,6 +36,6 @@ using a tool such as pipenv:
 
 ```
 $ pipenv shell
-$ pip install -e .[dev]
+$ pip install ".[dev]" -f packages.html
 $ pyinstaller scripts/mafftpy.spec
 ```
