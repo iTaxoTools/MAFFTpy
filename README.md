@@ -24,24 +24,15 @@ $ mafftpy-ginsi tests/sample
 
 ## Building on Windows
 
-You must have MS Visual Studio 2019 installed.
+You must have Git and MS Visual Studio 2019 installed.
 The Windows version depends on the open pthread-win32 library,
-which is included as a git submodule.
-
-Setuptools will automatically update and compile the library. Use the
-Native Tools Command Prompt to automatically configure the path
-and build environment. Alternatively, run the corresponding batch script
-before installing. Please make sure to match the architecture you are
-compiling for (x64/x86). Then use setuptools to install as usual:
-
-```
-$ "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
-$ pip install .
-```
+which is included as a git submodule. Setuptools will automatically
+fetch and compile the library.
 
 ## Packaging
 
-It is advised to do this inside a virtual environment using a tool such as pipenv:
+It is advised to do this inside a virtual environment
+using a tool such as pipenv:
 
 ```
 $ pipenv shell

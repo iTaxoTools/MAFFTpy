@@ -1,7 +1,7 @@
 """A setuptools based setup module."""
 
 # Always prefer setuptools over distutils
-from setuptools import setup, find_namespace_packages, Command, Extension
+from setuptools import setup, find_namespace_packages, Command, Extension, msvc
 from setuptools.command.build_ext import build_ext as _build_ext
 from subprocess import check_call
 from pathlib import Path
@@ -9,44 +9,26 @@ import os
 
 here = Path(__file__).parent.resolve()
 
-class CommandPthread(Command):
+class CommandPthread(_build_ext):
     """Custom command for compiling the pthread-win32 library"""
     description = 'compile pthread-win32'
     user_options = []
-    def initialize_options(self):
-        """virtual overload"""
-        pass
-    def finalize_options(self):
-        """virtual overload"""
-        pass
+
     def run(self):
         """build_pthread"""
+        plat_name = self.plat_name
+        if plat_name.startswith('win-'):
+            plat_name = plat_name[len('win-'):]
+        env = msvc.msvc14_get_vc_env(plat_name)
+        os.environ.update(env)
         path = Path('src/pthread-win32')
-        print('###################################################')
-        print('###################################################')
-        print('###################################################')
-        print('###################################################')
-        print('###################################################')
-        print('###################################################')
-        if not any(path.iterdir()):
+        if Path(path / 'libpthreadVC3.lib').exists():
+            return
+        if not path.exists() or not any(path.iterdir()):
             if Path('.gitmodules').exists():
-                print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
                 check_call(['git', 'submodule', 'update', '--init'])
-                print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
-            else:
-                raise Exception('Git is not configured: please fetch src/pthread-win32 manually')
-        try:
-            try:
-                check_call(['nmake', 'VC-static'], cwd=str(path))
-            except FileNotFoundError as exception:
-                raise RuntimeError('Cannot find nmake, please make sure path and environment is set properly (eg. run setup.py from within the "x64/x86 Native Tools Command Prompt for VS")') from exception
-            except Exception as exception:
-                raise RuntimeError('nmake failed, abort') from exception
-        except Exception as exception:
-            if Path(path / 'libpthreadVC3.lib').exists():
-                print('nmake failed, falling back to existing pthread library...')
-            else:
-                raise exception
+        check_call(['nmake', 'VC-static'], cwd=str(path))
+
 
 class build_ext(_build_ext):
     """Overrides setuptools build_ext to execute build_init commands"""
