@@ -3,11 +3,11 @@
 # Always prefer setuptools over distutils
 from setuptools import setup, find_namespace_packages, Command, Extension
 from setuptools.command.build_ext import build_ext as _build_ext
-import pathlib
-import subprocess
+from subprocess import check_call
+from pathlib import Path
 import os
 
-here = pathlib.Path(__file__).parent.resolve()
+here = Path(__file__).parent.resolve()
 
 class CommandPthread(Command):
     """Custom command for compiling the pthread-win32 library"""
@@ -21,18 +21,29 @@ class CommandPthread(Command):
         pass
     def run(self):
         """build_pthread"""
-        path = 'src/pthread-win32'
-        if not os.listdir(path):
-            raise FileNotFoundError('pthread-win32 directory is empty: please fetch the latest sources from git')
+        path = Path('src/pthread-win32')
+        print('###################################################')
+        print('###################################################')
+        print('###################################################')
+        print('###################################################')
+        print('###################################################')
+        print('###################################################')
+        if not any(path.iterdir()):
+            if Path('.gitmodules').exists():
+                print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+                check_call(['git', 'submodule', 'update', '--init'])
+                print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+            else:
+                raise Exception('Git is not configured: please fetch src/pthread-win32 manually')
         try:
             try:
-                subprocess.check_call(['nmake', 'VC-static'], cwd=path)
+                check_call(['nmake', 'VC-static'], cwd=str(path))
             except FileNotFoundError as exception:
                 raise RuntimeError('Cannot find nmake, please make sure path and environment is set properly (eg. run setup.py from within the "x64/x86 Native Tools Command Prompt for VS")') from exception
             except Exception as exception:
                 raise RuntimeError('nmake failed, abort') from exception
         except Exception as exception:
-            if os.path.exists(os.path.join(path, 'libpthreadVC3.lib')):
+            if Path(path / 'libpthreadVC3.lib').exists():
                 print('nmake failed, falling back to existing pthread library...')
             else:
                 raise exception
@@ -119,7 +130,7 @@ setup(
     python_requires='>=3.9, <4',
     install_requires=[
         'pyside6>=6.1.1',
-        'itaxotools-common @ git+ssh://git@github.com/iTaxoTools/itt-common.git@v0.2.1',
+        'itaxotools-common @ git+https://git@github.com/iTaxoTools/itt-common.git@v0.2.1',
         ],
     extras_require = {
         'dev': ['pyinstaller>=4.5.1'],
