@@ -274,7 +274,7 @@ class MultipleSequenceAlignment():
         """Copy results as a new directory"""
         if self.results is None:
             raise RuntimeError('No results to fetch.')
-        shutil.copytree(self.results, destination)
+        shutil.copyfile(Path(self.results) / 'pre', destination)
 
     def run(self):
         """
