@@ -1,4 +1,4 @@
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # MAFFTpy - Multiple sequence alignment with MAFFT
 # Copyright (C) 2021  Patmanidis Stefanos
 #
@@ -14,18 +14,17 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 
 from multiprocessing import Process
 
 import tempfile
 import shutil
-import pathlib
 import re
 import os
 import sys
-from datetime import datetime
+from pathlib import Path
 from contextlib import contextmanager
 
 from itaxotools.common.io import redirect
@@ -243,9 +242,7 @@ class MultipleSequenceAlignment():
     def __setstate__(self, state):
         self.__dict__ = state
 
-    def __init__(self, file=None):
-        """
-        """
+    def __init__(self, file: Path = None):
         self.file = file
         self.target = None
         self.results = None
@@ -267,7 +264,7 @@ class MultipleSequenceAlignment():
     @staticmethod
     def _trim(file, dest):
         """Copy file while trimming carriage returns"""
-        tr = str.maketrans('\r','\n')
+        tr = str.maketrans('', '', '\r')
         with open(file, 'r') as fin:
             with open(dest, 'w') as fout:
                 for line in fin:
@@ -292,9 +289,9 @@ class MultipleSequenceAlignment():
 
         if self.target is None:
             self._temp = tempfile.TemporaryDirectory(prefix='mafft_')
-            self.target = pathlib.Path(self._temp.name).as_posix()
+            self.target = Path(self._temp.name).as_posix()
 
-        self._trim(self.file, pathlib.Path(self.target) / self.vars.infilename)
+        self._trim(self.file, Path(self.target) / self.vars.infilename)
 
         with pushd(self.target):
             self._script()
@@ -629,7 +626,7 @@ class MultipleSequenceAlignment():
         # When the last reference of TemporaryDirectory is gone,
         # the directory is automatically cleaned up, so keep it here.
         self._temp = tempfile.TemporaryDirectory(prefix='mafft_')
-        self.target = pathlib.Path(self._temp.name).as_posix()
+        self.target = Path(self._temp.name).as_posix()
         p = Process(target=self.run)
         p.start()
         p.join()
@@ -638,22 +635,25 @@ class MultipleSequenceAlignment():
         # Success, update analysis object for parent process
         self.results = self.target
 
-def quick(input=None, save=None, strategy='auto'):
+
+def quick(input: Path = None, save: Path = None, strategy='auto'):
     """Quick analysis"""
     a = MultipleSequenceAlignment(input)
     a.params.general.strategy = strategy
     a.launch()
     if save is not None:
-        savefile = open(save, 'w')
+        savefile = save.open('w')
     else:
         savefile = sys.stdout
-    with open(pathlib.Path(a.results) / 'pre') as result:
+    with open(Path(a.results) / 'pre') as result:
         print(result.read(), file=savefile)
     if save is not None:
         savefile.close()
 
-def fftns1(input=None, save=None):
+
+def fftns1(input: Path = None, save: Path = None):
     quick(input, save, 'fftns1')
 
-def ginsi(input=None, save=None):
+
+def ginsi(input: Path = None, save: Path = None):
     quick(input, save, 'ginsi')

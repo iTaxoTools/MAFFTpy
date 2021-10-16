@@ -101,7 +101,7 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 
 setup(
     name='mafftpy',
-    version='0.1.1',
+    version='0.1.dev2',
     description='A Python wrapper for MAFFT',
     long_description=long_description,
     long_description_content_type='text/markdown',
