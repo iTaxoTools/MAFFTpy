@@ -113,10 +113,10 @@ setup(
         where='src',
     ),
     ext_modules=[mafft_module],
-    python_requires='>=3.9, <4',
+    python_requires='>=3.8, <4',
     install_requires=[
         'pyside6>=6.1.1',
-        'itaxotools-common==0.2.1',
+        'itaxotools-common==0.2.dev2',
         ],
     extras_require={
         'dev': ['pyinstaller>=4.5.1'],
@@ -136,6 +136,7 @@ setup(
     classifiers=[
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',  # noqa
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3 :: Only',
     ],
