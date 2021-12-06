@@ -22,6 +22,7 @@ from PySide6 import QtWidgets
 from PySide6 import QtStateMachine
 from PySide6 import QtGui
 
+import os
 import sys
 import re
 import pickle
@@ -38,6 +39,7 @@ from itaxotools.common import machine
 from itaxotools.common import io
 
 from .. import core
+from .. import mafft
 
 from time import sleep
 
@@ -56,7 +58,55 @@ class Action(enum.Enum):
     Open = enum.auto()
 
 
-class TextEditInput(QtWidgets.QTextEdit):
+class SeqEdit(QtWidgets.QTextEdit):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.clear_meta()
+
+    def clear_meta(self):
+        self.warnings = []
+        self.overflow = False
+        self.seq_num = 0
+        self.seq_min = 0
+        self.seq_max = 0
+
+    def previewPath(self, path, max=-1):
+        self.clear_meta()
+        warnings = []
+        with path.open('r') as file:
+            text = file.read(max)
+            overflow = bool(max > 0 and len(text) >= max)
+            with (
+                io.redirect(mafft, 'stdout', os.devnull, 'w'),
+                io.redirect(mafft, 'stderr', os.devnull, 'a')
+            ):
+                seq, max, min, _, _ = mafft.countlen(str(path))
+            if seq == 0:
+                warnings.append('No sequences found')
+            else:
+                self.seq_num = seq
+                self.seq_min = min
+                self.seq_max = max
+            if overflow:
+                warnings.append('file too large: showing top')
+            self.setPlainText(text)
+        self.warnings = warnings
+        self.overflow = overflow
+
+    def get_footer_text(self):
+        all = [] if not self.seq_num else [
+            f'Sequences: {self.seq_num}',
+            f'Lengths: {self.seq_max} - {self.seq_min}'
+            ]
+        all += self.warnings
+        return ', '.join(all)
+
+    def clear(self, *args, **kwargs):
+        super().clear(*args, **kwargs)
+        self.clear_meta()
+
+
+class TextEditInput(SeqEdit):
     def __init__(self, main, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.main = main
@@ -83,7 +133,6 @@ class TextEditInput(QtWidgets.QTextEdit):
             """)
 
     def handleInputChange(self):
-
         if self.document().isEmpty():
             self.main.postAction(Action.Empty)
             self.notifyOnNextUpdate = True
@@ -111,7 +160,7 @@ class TextEditInput(QtWidgets.QTextEdit):
             super().insertFromMimeData(source)
 
 
-class TextEditOutput(QtWidgets.QTextEdit):
+class TextEditOutput(SeqEdit):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setLineWrapMode(QtWidgets.QTextEdit.LineWrapMode.NoWrap)
@@ -157,6 +206,8 @@ class Main(widgets.ToolDialog):
         self.file = None
         self._temp = None
         self.temp = None
+
+        self._preview_max = 50 * 2**20  # 50MB
 
         icon = QtGui.QIcon(common.resources.get(
             'itaxotools.mafftpy.gui', 'logos/mafft.ico'))
@@ -236,23 +287,23 @@ class Main(widgets.ToolDialog):
 
         state = self.state['idle/input.none']
         state.assignProperty(self.action['run'], 'enabled', False)
-        state.assignProperty(self.footer, 'text', 'Waiting for sequences.')
+        state.assignProperty(self.pane['output'].labelFoot, 'text', 'Waiting for sequences.')
 
         state = self.state['idle/input.file']
         state.assignProperty(self.action['run'], 'enabled', True)
-        state.assignProperty(self.footer, 'text', 'Click "Run" to align.')
+        state.assignProperty(self.pane['output'].labelFoot, 'text', 'Click "Run" to align.')
         def onEntry(event):
             self.textInput.notifyOnNextUpdate = True
         state.onEntry = onEntry
 
         state = self.state['idle/input.raw']
         state.assignProperty(self.action['run'], 'enabled', True)
-        state.assignProperty(self.footer, 'text', 'Click "Run" to align.')
+        state.assignProperty(self.pane['output'].labelFoot, 'text', 'Click "Run" to align.')
 
         state = self.state['idle/output.none']
         state.assignProperty(self.action['save'], 'enabled', False)
         def onEntry(event):
-            self.pane['output'].title = 'Output'
+            self.pane['output'].title = '\u2023 Output'
             self.pane['input'].flag = None
             self.pane['output'].flag = None
             self.pane['input'].flagTip = None
@@ -263,9 +314,9 @@ class Main(widgets.ToolDialog):
         state = self.state['idle/output.failed']
         state.assignProperty(self.action['save'], 'enabled', False)
         tip = 'An error occured, please check the logs for details.'
-        state.assignProperty(self.footer, 'text', tip)
+        state.assignProperty(self.pane['output'].labelFoot, 'text', tip)
         def onEntry(event):
-            self.pane['output'].title = 'Progress Log'
+            self.pane['output'].title = '\u2023 Progress Log'
             self.pane['input'].flag = None
             self.pane['output'].flag = None
             self.pane['input'].flagTip = None
@@ -275,16 +326,16 @@ class Main(widgets.ToolDialog):
 
         state = self.state['idle/output.complete']
         state.assignProperty(self.action['save'], 'enabled', True)
-        state.assignProperty(self.footer, 'text', 'Sequence aligment was successful.')
         def onEntry(event):
-            self.pane['output'].title = 'Results [{}]'.format(self.analysis.strategy)
+            self.pane['output'].title = '\u2023 Results [{}]'.format(self.analysis.strategy)
+            self.pane['output'].footer = self.textOutput.get_footer_text()
             self.stack.setCurrentWidget(self.textOutput)
         state.onEntry = onEntry
 
         state = self.state['idle/output.updated']
         state.assignProperty(self.action['save'], 'enabled', True)
         tip = 'Input has changed, run a new analysis to update results.'
-        state.assignProperty(self.footer, 'text', tip)
+        state.assignProperty(self.pane['output'].labelFoot, 'text', tip)
         def onEntry(event):
             self.pane['output'].title += ' [outdated]'
             self.stack.setCurrentWidget(self.textOutput)
@@ -296,9 +347,9 @@ class Main(widgets.ToolDialog):
         state.assignProperty(self.action['open'], 'enabled', False)
         state.assignProperty(self.action['save'], 'enabled', False)
         state.assignProperty(self.subheader, 'enabled', False)
-        state.assignProperty(self.footer, 'text', 'Aligning sequences, please wait...')
+        state.assignProperty(self.pane['output'].labelFoot, 'text', 'Aligning sequences, please wait...')
         def onEntry(event):
-            self.pane['output'].title = 'Progress Log'
+            self.pane['output'].title = '\u2023 Progress Log'
             self.stack.setCurrentWidget(self.textLogger)
             self.textInput.setReadOnly(True)
         state.onEntry = onEntry
@@ -309,7 +360,7 @@ class Main(widgets.ToolDialog):
         transition.setTransitionType(internal)
         def onTransition(event):
             self.setWindowTitle(self.title)
-            self.pane['input'].title = 'Input'
+            self.pane['input'].title = '\u2023 Input'
         transition.effect = onTransition
         transition.setTargetState(self.state['idle/input.none'])
         self.state['idle/input'].addTransition(transition)
@@ -318,7 +369,7 @@ class Main(widgets.ToolDialog):
         transition.setTransitionType(internal)
         def onTransition(event):
             self.setWindowTitle(self.title + ' - From Text')
-            self.pane['input'].title = 'Input - From Text'
+            self.pane['input'].title = '\u2023 Input - From Text'
         transition.effect = onTransition
         transition.setTargetState(self.state['idle/input.raw'])
         self.state['idle/input'].addTransition(transition)
@@ -336,7 +387,7 @@ class Main(widgets.ToolDialog):
             if len(fileName) > 40:
                 fileName = fileName[:37] + '...'
             self.setWindowTitle(self.title + ' - ' + fileName)
-            self.pane['input'].title = 'Input - ' + fileName
+            self.pane['input'].title = '\u2023 Input - ' + fileName
         transition.effect = onTransition
         transition.setTargetStates([
             self.state['idle/input.file'],
@@ -549,8 +600,9 @@ class Main(widgets.ToolDialog):
         self.textInput = TextEditInput(self)
 
         self.pane['input'] = widgets.Panel(self)
-        self.pane['input'].title = 'Input'
-        self.pane['input'].footer = ''
+        self.pane['input'].title = '\u2023 Input'
+        self.pane['input'].footer = '-'
+        self.pane['input'].labelFoot.setAlignment(QtCore.Qt.AlignLeft)
         self.pane['input'].body.addWidget(self.textInput)
         self.pane['input'].body.setContentsMargins(0, 0, 0, 0)
 
@@ -563,8 +615,9 @@ class Main(widgets.ToolDialog):
         self.stack.addWidget(self.textLogger)
 
         self.pane['output'] = widgets.Panel(self)
-        self.pane['output'].title = 'Output'
-        self.pane['output'].footer = ''
+        self.pane['output'].title = '\u2023 Output'
+        self.pane['output'].footer = '-'
+        self.pane['output'].labelFoot.setAlignment(QtCore.Qt.AlignLeft)
         self.pane['output'].body.addLayout(self.stack)
         self.pane['output'].body.setContentsMargins(0, 0, 0, 0)
 
@@ -578,29 +631,12 @@ class Main(widgets.ToolDialog):
         self.splitter.setStyleSheet("QSplitter::handle { height: 8px; }")
         self.splitter.setContentsMargins(8, 4, 8, 4)
 
-        self.footer = QtWidgets.QLabel('Open a file to begin.')
-        self.footer.setStyleSheet("""
-            QLabel {
-                color: palette(Shadow);
-                font-size: 12px;
-                background: palette(Window);
-                border-top: 1px solid palette(Mid);
-                padding: 6px 8px 8px 8px;
-                }
-            QLabel:disabled {
-                color: palette(Mid);
-                background: palette(Window);
-                border: 1px solid palette(Mid);
-                }
-            """)
-
         layout = QtWidgets.QVBoxLayout(self)
         layout.addWidget(self.header, 0)
         layout.addWidget(self.subheader, 0)
         layout.addSpacing(8)
         layout.addWidget(self.splitter, 1)
         layout.addSpacing(8)
-        layout.addWidget(self.footer, 0)
         layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
@@ -703,8 +739,8 @@ class Main(widgets.ToolDialog):
             self.temp = self._temp
             self.analysis.results = result
             self.analysis.strategy = strategy
-            with open(pathlib.Path(result) / 'pre') as output:
-                self.textOutput.setPlainText(output.read())
+            path = pathlib.Path(result) / 'pre'
+            self.textOutput.previewPath(path, self._preview_max)
             self.textInput.notifyOnNextUpdate = True
             self.postAction(Action.Done, True)
 
@@ -745,8 +781,9 @@ class Main(widgets.ToolDialog):
         if len(fileName) == 0:
             return
         try:
-            with open(fileName) as input:
-                self.textInput.setPlainText(input.read())
+            path = pathlib.Path(fileName)
+            self.textInput.previewPath(path, self._preview_max)
+            self.pane['input'].footer = self.textInput.get_footer_text()
         except Exception as e:
             self.fail(e)
         self.textOutput.clear()
@@ -773,5 +810,5 @@ class Main(widgets.ToolDialog):
         except Exception as exception:
             self.fail(exception)
         else:
-            self.footer.setText(
+            self.pane['output'].labelFoot.setText(
                 'Saved aligned sequence to file: {}'.format(fileName))
