@@ -113,6 +113,7 @@ class TextEditInput(SeqEdit):
         self.notifyOnNextUpdate = True
         self.setLineWrapMode(QtWidgets.QTextEdit.LineWrapMode.NoWrap)
         self.setAcceptRichText(False)
+        self.setAcceptDrops(True)
         self.setFont(QtGui.QFontDatabase.systemFont(
             QtGui.QFontDatabase.FixedFont))
         self.document().setDocumentMargin(6)
@@ -152,12 +153,13 @@ class TextEditInput(SeqEdit):
         else:
             return False
 
-    def insertFromMimeData(self, source):
-        if source.hasUrls():
-            url = source.urls()[0]
+    def dropEvent(self, event):
+        data = event.mimeData()
+        if data.hasUrls():
+            url = event.mimeData().urls()[0]
             self.main.handleOpen(fileName=url.toLocalFile())
-        elif source.hasText():
-            super().insertFromMimeData(source)
+        elif data.hasText():
+            super().insertFromMimeData(event.mimeData())
 
 
 class TextEditOutput(SeqEdit):
@@ -771,7 +773,7 @@ class Main(widgets.ToolDialog):
             self.postAction(Action.Cancel)
 
     def handleOpen(self, checked=False, fileName=None):
-        """Called by toolbar action"""
+        """Called by toolbar action or drag-and-drop"""
         # `checked` kwarg provided by default trigger event
         if fileName is None:
             (fileName, _) = QtWidgets.QFileDialog.getOpenFileName(self,
