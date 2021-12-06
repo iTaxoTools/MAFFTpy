@@ -1,41 +1,61 @@
 # MAFFTpy
 
-Multiple sequence alignment.
+Multiple sequence alignment. This is a Python wrapper for
+[MAFFT](https://mafft.cbrc.jp/alignment/software/).
 
-This is a Python wrapper for MAFFT: <https://mafft.cbrc.jp/alignment/software/>
+## Executables
+Download and run the standalone executables without installing Python.</br>
+[See the latest release here.](https://github.com/iTaxoTools/MAFFTpy/releases/latest)
+
+## Installing
+
+Installing from source requires Python 3.8 or later and a C compiler.
+
+Clone and install the latest version:
+```
+$ git clone https://github.com/iTaxoTools/MAFFTpy.git
+$ cd MAFFTpy
+$ pip install . -f packages.html
+```
+
+### Building on Windows
+
+You must have Git and MS Visual Studio 2019 or later installed.
+Please make sure your environment is properly configured to use MSVC.
+The Windows version depends on the open
+[pthread-win32](https://github.com/GerHobbelt/pthread-win32) library,
+which is included as a git submodule. Setuptools will automatically
+fetch and compile the library.
 
 ## Quick start
 
-*(you will need a C compiler when building from source)*
-
-Install using pip, then run the GUI:
-
+Run the GUI:
 ```
-$ pip install . -f packages.html
 $ mafftpy-gui
 ```
 
 Simple command line tools:
-
 ```
-$ mafftpy-fftns1 tests/sample
+$ mafftpy-fftns1 tests/sample tests/sample.out
 $ mafftpy-ginsi tests/sample
 ```
 
-## Building on Windows
+## Python API
 
-You must have Git and MS Visual Studio 2019 installed.
-The Windows version depends on the open pthread-win32 library,
-which is included as a git submodule. Setuptools will automatically
-fetch and compile the library.
+Call the functions from within Python:
+```
+from itaxotools.mafftpy import quick, fftns1, ginsi
+from pathlib import Path
+
+quick(Path('tests/sample'), strategy='auto')
+fftns1(Path('tests/sample'), Path('tests/sample.out'))
+ginsi(Path('tests/sample'))
+```
 
 ## Packaging
 
-It is advised to do this inside a virtual environment
-using a tool such as pipenv:
-
+It is advised to use PyInstaller within a virtual environment:
 ```
-$ pipenv shell
 $ pip install ".[dev]" -f packages.html
 $ pyinstaller scripts/mafftpy.spec
 ```

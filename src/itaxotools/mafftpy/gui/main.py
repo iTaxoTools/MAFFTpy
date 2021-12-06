@@ -847,5 +847,6 @@ class Main(widgets.ToolDialog):
         except Exception as exception:
             self.fail(exception)
         else:
+            name = pathlib.Path(fileName).name
             self.pane['output'].labelFoot.setText(
-                'Saved aligned sequence to file: {}'.format(fileName))
+                f'Saved aligned sequence to file: {repr(name)}')

@@ -101,7 +101,7 @@ long_description = (here / 'README.md').read_text(encoding='utf-8')
 
 setup(
     name='mafftpy',
-    version='0.1.dev2',
+    version='0.1.2',
     description='A Python wrapper for MAFFT',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -113,7 +113,7 @@ setup(
         where='src',
     ),
     ext_modules=[mafft_module],
-    python_requires='>=3.8, <4',
+    python_requires='>=3.8.6, <4',
     install_requires=[
         'pyside6>=6.1.1',
         'itaxotools-common==0.2.2',
