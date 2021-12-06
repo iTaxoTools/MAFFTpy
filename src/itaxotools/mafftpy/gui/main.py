@@ -56,6 +56,7 @@ class Action(enum.Enum):
     Run = enum.auto()
     Cancel = enum.auto()
     Open = enum.auto()
+    Calc = enum.auto()
 
 
 class SeqEdit(QtWidgets.QTextEdit):
@@ -70,7 +71,7 @@ class SeqEdit(QtWidgets.QTextEdit):
         self.seq_min = 0
         self.seq_max = 0
 
-    def previewPath(self, path, max=-1):
+    def previewPath(self, path, max=-1, update=True):
         self.clear_meta()
         warnings = []
         with path.open('r') as file:
@@ -89,7 +90,8 @@ class SeqEdit(QtWidgets.QTextEdit):
                 self.seq_max = max
             if overflow:
                 warnings.append('file too large: showing top')
-            self.setPlainText(text)
+            if update:
+                self.setPlainText(text)
         self.warnings = warnings
         self.overflow = overflow
 
@@ -130,6 +132,7 @@ class TextEditInput(SeqEdit):
             QTextEdit {
                 background-color: palette(Base);
                 border: 1px solid palette(Mid);
+                border-bottom: 0;
                 }
             """)
 
@@ -179,6 +182,7 @@ class TextEditOutput(SeqEdit):
             QTextEdit {
                 background-color: palette(Base);
                 border: 1px solid palette(Mid);
+                border-bottom: 0;
                 }
             """)
 
@@ -188,9 +192,10 @@ class TextEditLogger(widgets.TextEditLogger):
         super().__init__(*args, **kwargs)
         self.document().setDocumentMargin(6)
         self.setStyleSheet("""
-            QTextEdit {
+            TextEditLogger {
                 background-color: palette(Base);
                 border: 1px solid palette(Mid);
+                border-bottom: 0;
                 }
             """)
 
@@ -260,8 +265,12 @@ class Main(widgets.ToolDialog):
         self.state['idle/input.none'] = QtStateMachine.QState(self.state['idle/input'])
         self.state['idle/input.file'] = QtStateMachine.QState(self.state['idle/input'])
         self.state['idle/input.raw'] = QtStateMachine.QState(self.state['idle/input'])
+        self.state['idle/input.raw.unknown'] = QtStateMachine.QState(self.state['idle/input.raw'])
+        self.state['idle/input.raw.calculated'] = QtStateMachine.QState(self.state['idle/input.raw'])
+        self.state['idle/input.raw'].setInitialState(self.state['idle/input.raw.unknown'])
         self.state['idle/input.last'] = QtStateMachine.QHistoryState(self.state['idle/input'])
         self.state['idle/input.last'].setDefaultState(self.state['idle/input.none'])
+        self.state['idle/input.last'].setHistoryType(QtStateMachine.QHistoryState.DeepHistory)
         self.state['idle/input'].setInitialState(self.state['idle/input.none'])
 
         self.state['idle/output'] = QtStateMachine.QState(self.state['idle'])
@@ -289,7 +298,10 @@ class Main(widgets.ToolDialog):
 
         state = self.state['idle/input.none']
         state.assignProperty(self.action['run'], 'enabled', False)
-        state.assignProperty(self.pane['output'].labelFoot, 'text', 'Waiting for sequences.')
+        def onEntry(event):
+            self.pane['input'].footer = 'Waiting for sequences.'
+            self.pane['output'].footer = '-'
+        state.onEntry = onEntry
 
         state = self.state['idle/input.file']
         state.assignProperty(self.action['run'], 'enabled', True)
@@ -301,6 +313,16 @@ class Main(widgets.ToolDialog):
         state = self.state['idle/input.raw']
         state.assignProperty(self.action['run'], 'enabled', True)
         state.assignProperty(self.pane['output'].labelFoot, 'text', 'Click "Run" to align.')
+
+        state = self.state['idle/input.raw.unknown']
+        def onEntry(event):
+            self.pane['input'].footer = 'Input will be taken from raw text'
+        state.onEntry = onEntry
+
+        state = self.state['idle/input.raw.calculated']
+        def onEntry(event):
+            self.pane['input'].footer = self.textInput.get_footer_text()
+        state.onEntry = onEntry
 
         state = self.state['idle/output.none']
         state.assignProperty(self.action['save'], 'enabled', False)
@@ -336,7 +358,7 @@ class Main(widgets.ToolDialog):
 
         state = self.state['idle/output.updated']
         state.assignProperty(self.action['save'], 'enabled', True)
-        tip = 'Input has changed, run a new analysis to update results.'
+        tip = 'Run a new analysis to update results.'
         state.assignProperty(self.pane['output'].labelFoot, 'text', tip)
         def onEntry(event):
             self.pane['output'].title += ' [outdated]'
@@ -396,6 +418,11 @@ class Main(widgets.ToolDialog):
             self.state['idle/output.none'],
             ])
         self.state['idle'].addTransition(transition)
+
+        transition = self.taggedTransition(Action.Calc)
+        transition.setTransitionType(internal)
+        transition.setTargetState(self.state['idle/input.raw.calculated'])
+        self.state['idle/input.raw.unknown'].addTransition(transition)
 
         transition = self.taggedTransition(Action.Run)
         transition.setTargetState(self.state['running'])
@@ -730,6 +757,8 @@ class Main(widgets.ToolDialog):
                 with open(str(temp), 'w') as file:
                     file.write(self.textInput.toPlainText())
                     file.write('\n')
+                self.textInput.previewPath(temp, update=False)
+                self.postAction(Action.Calc)
                 self.analysis.file = str(temp)
         except Exception as exception:
             self.fail(exception)
