@@ -188,6 +188,8 @@ class TextEditOutput(SeqEdit):
 
 
 class TextEditLogger(widgets.TextEditLogger):
+    text_translation = str.maketrans('', '', '\x08')
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.document().setDocumentMargin(6)
@@ -199,6 +201,10 @@ class TextEditLogger(widgets.TextEditLogger):
                 }
             """)
 
+    @QtCore.Slot(object)
+    def _appendTextInline(self, text):
+        text = text.translate(self.text_translation)
+        super()._appendTextInline(text)
 
 class Main(widgets.ToolDialog):
     """Main window, handles everything"""
