@@ -247,7 +247,7 @@ class MultipleSequenceAlignment():
         self.target = None
         self.results = None
         self.log = None
-        self.params = params.params
+        self.params = params.params()
         self.vars = MafftVars(self.params)
 
     @staticmethod
