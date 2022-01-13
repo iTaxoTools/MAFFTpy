@@ -77,10 +77,8 @@ class SeqEdit(QtWidgets.QTextEdit):
         with path.open('r') as file:
             text = file.read(max)
             overflow = bool(max > 0 and len(text) >= max)
-            with (
-                io.redirect(mafft, 'stdout', os.devnull, 'w'),
-                io.redirect(mafft, 'stderr', os.devnull, 'a')
-            ):
+            with io.redirect(mafft, 'stdout', os.devnull, 'w'), \
+                 io.redirect(mafft, 'stderr', os.devnull, 'a'):
                 seq, max, min, _, _ = mafft.countlen(str(path))
             if seq == 0:
                 warnings.append('No sequences found')
