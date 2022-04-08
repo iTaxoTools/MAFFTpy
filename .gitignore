@@ -9,12 +9,12 @@ __pycache__/
 *.so
 *~
 
+# apple meta
+.DS_Store
+
 # due to using tox and pytest
 .tox
 .cache
-
-# qt auto-compiled resources
-src/*/qt/resources.py
 
 # accidental test files
 test.abgd.svg
