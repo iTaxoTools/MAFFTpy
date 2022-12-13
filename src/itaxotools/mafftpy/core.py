@@ -32,6 +32,9 @@ from itaxotools.common.io import redirect
 from . import mafft
 from . import params
 
+def printerr(s):
+    sys.stderr.write(s + "\ ")
+
 @contextmanager
 def pushd(target):
     """Temporarily change directory"""
@@ -215,6 +218,7 @@ class MafftVars():
         """Parse params and update variables"""
 
         strategy = params.general.strategy
+        self.adjustdirection = params.general.adjustdirection
 
         if strategy == 'auto':
             self.auto = 1
@@ -449,6 +453,83 @@ class MultipleSequenceAlignment():
 
         v.outputopt = "-f"
 
+        """
+        if [ $adjustdirection -gt 0 ]; then
+            if [ $fragment -ne 0 ]; then
+                fragarg="-F" #
+            else
+                fragarg="-F" # 2014/02/06, do not consider other additional sequences, even in the case of --add
+            fi
+            if [ $adjustdirection -eq 1 ]; then
+                "$prefix/makedirectionlist" $fragarg -C $numthreads -m -I $nadd -i infile -t 0.00 -r 5000 -o a > _direction 2>>"$progressfile"
+            elif [ $adjustdirection -eq 2 ]; then
+                "$prefix/makedirectionlist" $fragarg -C $numthreads -m -I $nadd -i infile -t 0.00 -r 100 -o a -d > _direction 2>>"$progressfile"
+            fi
+            "$prefix/setdirection" $mergearg -d _direction -i infile > infiled 2>>"$progressfile" || exit
+            mv infiled infile
+            if [ $anysymbol -eq 1 ]; then
+                "$prefix/setdirection" $mergearg -d _direction -i orig -r  > origd 2>>"$progressfile" || exit
+                mv origd orig
+            fi
+        fi
+        """
+        
+        v.nadd = 0    #TODO
+        if v.adjustdirection > 0:
+            print("adjustdirection")
+            v.fragarg = ""
+            if v.fragment != 0:
+                v.fragarg = "-F"
+            else:
+                v.fragarg = "-F"
+            if v.adjustdirection == 1:
+                with redirect(mafft, 'stdout', "_direction", 'w'), \
+                     redirect(mafft, 'stderr', v.progressfile, 'a'):
+                    mafft.makedirectionlist(
+                        C = v.numthreads,
+                        m = None,
+                        I = v.nadd,
+                        i = v.infilename,
+                        t = 0.00,
+                        r = 5000,
+                        o = "a",
+                        **self._vars_to_kwargs([
+                            v.fragarg
+                        ])
+                    )
+            elif v.adjustdirection == 2:
+                with redirect(mafft, 'stdout', "_direction", 'w'), \
+                     redirect(mafft, 'stderr', v.progressfile, 'a'):
+                    mafft.makedirectionlist(
+                        C = v.numthreads,
+                        m = None,
+                        I = v.nadd,
+                        i = v.infilename,
+                        t = 0.00,
+                        r = 100,
+                        o = "a",
+                        **self._vars_to_kwargs([
+                            v.fragarg
+                        ])
+                    )
+            with redirect(mafft, 'stdout', "infiled", 'w'), \
+                 redirect(mafft, 'stderr', v.progressfile, 'a'):
+                mafft.setdirection(
+                    d = "_direction",
+                    i = "infile",
+                    **self._vars_to_kwargs([
+                        v.mergearg
+                    ])
+                )
+            temp1 = open("infiled", "r") #dirty hack
+            temp2 = open("infile", "w")
+            temp2.write(temp1.read())
+            temp1.close()
+            temp2.close()
+
+            
+
+
         if v.distance == "global" and v.memsavetree == 0:
             with redirect(mafft, 'stdout', os.devnull, 'w'), \
                  redirect(mafft, 'stderr', v.progressfile, 'a'):
@@ -636,24 +717,28 @@ class MultipleSequenceAlignment():
         self.results = self.target
 
 
-def quick(input: Path = None, save: Path = None, strategy='auto'):
+def quick(args: dict, strategy='auto'):
     """Quick analysis"""
-    a = MultipleSequenceAlignment(input)
+    a = MultipleSequenceAlignment(args.input)
     a.params.general.strategy = strategy
+    if args.adjustdirection:
+        a.params.general.adjustdirection = 1
+    elif args.adjustdirectionaccurately:
+        a.params.general.adjustdirection = 2
     a.launch()
-    if save is not None:
-        savefile = save.open('w')
+    if args.save is not None:
+        savefile = args.save.open('w')
     else:
         savefile = sys.stdout
     with open(Path(a.results) / 'pre') as result:
         print(result.read(), file=savefile)
-    if save is not None:
+    if args.save is not None:
         savefile.close()
 
 
-def fftns1(input: Path = None, save: Path = None):
-    quick(input, save, 'fftns1')
+def fftns1(args: dict):
+    quick(args, 'fftns1')
 
 
-def ginsi(input: Path = None, save: Path = None):
-    quick(input, save, 'ginsi')
+def ginsi(args: dict):
+    quick(args, 'ginsi')

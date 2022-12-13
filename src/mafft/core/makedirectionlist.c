@@ -139,7 +139,11 @@ static void partshuffle( int size, int outsize, int *ary )
 }
 #endif
 
+#ifdef ismodule
+void arguments_makedirectionlist( int argc, char *argv[] )
+#else
 void arguments( int argc, char *argv[] )
+#endif
 {
     int c;
 
@@ -288,6 +292,7 @@ void arguments( int argc, char *argv[] )
 
 
 
+#ifndef ismodule
 void seq_grp_nuc( int *grp, char *seq )
 {
 	int tmp;
@@ -309,7 +314,9 @@ void seq_grp_nuc( int *grp, char *seq )
 		*grpbk = -1;
 	}
 }
+#endif
 
+#ifndef ismodule
 void seq_grp( int *grp, char *seq )
 {
 	int tmp;
@@ -331,8 +338,13 @@ void seq_grp( int *grp, char *seq )
 		*grpbk = -1;
 	}
 }
+#endif
 
+#ifdef ismodule
+void makecompositiontable_p_short( short *table, int *pointt )
+#else
 void makecompositiontable_p( short *table, int *pointt )
+#endif
 {
 	int point;
 
@@ -341,6 +353,7 @@ void makecompositiontable_p( short *table, int *pointt )
 }
 
 
+#ifndef ismodule
 void makepointtable_nuc( int *pointt, int *n )
 {
 	int point;
@@ -370,7 +383,9 @@ void makepointtable_nuc( int *pointt, int *n )
 	}
 	*pointt = END_OF_VEC;
 }
+#endif
 
+#ifndef ismodule
 void makepointtable( int *pointt, int *n )
 {
 	int point;
@@ -400,6 +415,7 @@ void makepointtable( int *pointt, int *n )
 	}
 	*pointt = END_OF_VEC;
 }
+#endif
 
 static int localcommonsextet_p2( short *table, int *pointt )
 {
@@ -459,13 +475,21 @@ static void makecontrastorder6mer( int *order, int **pointt, int **pointt_rev, c
 		if( i % 100 == 1 ) reporterr( "%d   \r", i );
 		table1 = (short *)calloc( tsize, sizeof( short ) );
 		if( !table1 ) ErrorExit( "Cannot allocate table1\n" );
+#ifdef ismodule
+		makecompositiontable_p_short( table1, pointt[i] );
+#else
 		makecompositiontable_p( table1, pointt[i] );
+#endif
 		res[i] = localcommonsextet_p2( table1, pointt[i] );
 		free( table1 );
 
 		table1_rev = (short *)calloc( tsize, sizeof( short ) );
 		if( !table1_rev ) ErrorExit( "Cannot allocate table1\n" );
+#ifdef ismodule
+		makecompositiontable_p_short( table1_rev, pointt_rev[i] );
+#else
 		makecompositiontable_p( table1_rev, pointt_rev[i] );
+#endif
 		res[i] -= localcommonsextet_p2( table1_rev, pointt[i] );
 		free( table1_rev );
 
@@ -650,7 +674,7 @@ static void	*directionthread( void *arg )
 	return( NULL );
 }
 
-int main( int argc, char *argv[] )
+int makedirectionlist( int argc, char *argv[] )
 {
 	static int  *nlen;	
 	static int  *nogaplen;	
@@ -671,7 +695,11 @@ int main( int argc, char *argv[] )
 	static char **mseq1f, **mseq1r, **mseq2;
 	int *contrastorder;
 
+#ifdef ismodule
+	arguments_makedirectionlist( argc, argv );
+#else
 	arguments( argc, argv );
+#endif
 #ifndef enablemultithread
 	nthread = 0;
 #endif
@@ -997,8 +1025,13 @@ int main( int argc, char *argv[] )
 				if( !table1 ) ErrorExit( "Cannot allocate table1\n" );
 				table1_rev = (short *)calloc( tsize, sizeof( short ) );
 				if( !table1_rev ) ErrorExit( "Cannot allocate table1_rev\n" );
+#ifdef ismodule
+				makecompositiontable_p_short( table1, pointt[ic] );
+				makecompositiontable_p_short( table1_rev, pointt_rev[ic] );
+#else
 				makecompositiontable_p( table1, pointt[ic] );
 				makecompositiontable_p( table1_rev, pointt_rev[ic] );
+#endif
 			}
 #endif
 
@@ -1298,3 +1331,8 @@ int main( int argc, char *argv[] )
 	return( 0 );
 }
 
+#ifndef ismodule
+int main(int argc, char* argv[]){
+	return makedirectionlist(argc, argv);
+}
+#endif

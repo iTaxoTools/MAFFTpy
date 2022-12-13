@@ -8,6 +8,7 @@ dist/
 __pycache__/
 *.so
 *~
+*.o
 
 # apple meta
 .DS_Store

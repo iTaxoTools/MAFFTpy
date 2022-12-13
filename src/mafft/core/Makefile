@@ -150,11 +150,11 @@ MANPAGES = mafft.1 mafft-homologs.1
 
 
 all : $(PERLPROGS) $(PROGS) $(SCRIPTS)
-	cp $(SCRIPTS) ../scripts
-	chmod 755 ../scripts/*
-	cp $(PERLPROGS) $(PROGS) ../binaries
-	chmod 755 ../binaries/*
-	cp $(MANPAGES) ../binaries
+	#cp $(SCRIPTS) ../scripts
+	#chmod 755 ../scripts/*
+	#cp $(PERLPROGS) $(PROGS) ../binaries
+	#chmod 755 ../binaries/*
+	#cp $(MANPAGES) ../binaries
 	@echo done.
 
 sos : $(SOS)

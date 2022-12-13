@@ -94,6 +94,8 @@ mafft_module = MafftExtension(
         mafft_core + '/nj.c',
         mafft_core + '/tditeration.c',
         mafft_core + '/treeOperation.c',
+        mafft_core + '/makedirectionlist.c',
+        mafft_core + '/setdirection.c',
         ],
     )
 

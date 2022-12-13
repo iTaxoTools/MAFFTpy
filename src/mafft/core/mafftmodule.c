@@ -27,9 +27,12 @@ https://www.python.org/dev/peps/pep-0489/
 #include <Python.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
+#include <assert.h>
 #include "mafftmodule.h"
 #include "mltaln.h"
 #include "wrapio.h"
+
 
 // Set var = dict[str], do nothing if key does not exist.
 // On failure, sets error indicator and returns -1.
@@ -293,6 +296,77 @@ mafft_dvtditr(PyObject *self, PyObject *args, PyObject *kwargs) {
 }
 
 static PyObject *
+mafft_makedirectionlist(PyObject *self, PyObject *args, PyObject *kwargs) {
+
+	/* module specific */
+
+	PyObject *dict = kwargs;
+	PyObject *item;
+	FILE *f_in;
+
+	int argc;
+	char **argv;
+	if(argsFromDict(dict, &argc, &argv, "makedirectionlist"))
+		return NULL;
+
+	fprintf(stderr, ">");
+	for (int i = 0; i < argc; i++)
+		fprintf(stderr, " %s", argv[i]);
+	fprintf(stderr, "\n");
+
+	int res = makedirectionlist(argc, argv);
+	if (res) {
+		PyErr_Format(PyExc_TypeError, "mafft_makedirectionlist: Abnormal exit code: %i", res);
+		return NULL;
+	}
+
+	// argsFree(argc, argv);
+
+	// Required, as streams are redirected by python caller
+	fflush(stdout);
+	fflush(stderr);
+
+	Py_INCREF(Py_None);
+	return Py_None;
+}
+
+static PyObject *
+mafft_setdirection(PyObject *self, PyObject *args, PyObject *kwargs) {
+
+	/* module specific */
+
+	PyObject *dict = kwargs;
+	PyObject *item;
+	FILE *f_in;
+
+	int argc;
+	char **argv;
+	if(argsFromDict(dict, &argc, &argv, "setdirection"))
+		return NULL;
+
+	fprintf(stderr, ">");
+	for (int i = 0; i < argc; i++)
+		fprintf(stderr, " %s", argv[i]);
+	fprintf(stderr, "\n");
+
+	int res = setdirection(argc, argv);
+	if (res) {
+		fprintf(stderr, "test2\n");
+		PyErr_Format(PyExc_TypeError, "mafft_setdirection: Abnormal exit code: %i", res);
+		return NULL;
+	}
+
+	// argsFree(argc, argv);
+
+	// Required, as streams are redirected by python caller
+	fflush(stdout);
+	fflush(stderr);
+
+	Py_INCREF(Py_None);
+	return Py_None;
+}
+
+static PyObject *
 mafft_countlen(PyObject *self, PyObject *args) {
 
 	FILE *infp;
@@ -334,6 +408,10 @@ static PyMethodDef MafftMethods[] = {
    "Run mafft/tbfast with given parameters."},
   {"dvtditr",  mafft_dvtditr, METH_VARARGS | METH_KEYWORDS,
    "Run mafft/dvtditr with given parameters."},
+  {"makedirectionlist",  mafft_makedirectionlist, METH_VARARGS | METH_KEYWORDS,
+   "Run mafft/makedirectionlist with given parameters."},
+  {"setdirection",  mafft_setdirection, METH_VARARGS | METH_KEYWORDS,
+   "Run mafft/setdirection with given parameters."},
   {"countlen",  mafft_countlen, METH_VARARGS,
    "Run mafft/getnumlen_nogap_countn."},
   {"foo",  mafft_foo, METH_VARARGS, "bar"},

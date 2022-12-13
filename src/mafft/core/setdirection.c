@@ -8,7 +8,11 @@ static int show_R_ = 1;
 static int subalignment;
 static int subalignmentoffset;
 
+#ifdef ismodule
+void arguments_setdirection( int argc, char *argv[] )
+#else
 void arguments( int argc, char *argv[] )
+#endif
 {
     int c;
 
@@ -60,7 +64,7 @@ void arguments( int argc, char *argv[] )
 
 
 
-int main( int argc, char *argv[] )
+int setdirection( int argc, char *argv[] )
 {
 	FILE *infp;
 	FILE *difp;
@@ -77,7 +81,11 @@ int main( int argc, char *argv[] )
 	char firstdir;
 	char *directions;
 
+#ifdef ismodule
+	arguments_setdirection( argc, argv );
+#else
 	arguments( argc, argv );
+#endif
 
 	reporterr( "subalignment = %d\n", subalignment );
 	reporterr( "subalignmentoffset = %d\n", subalignmentoffset );
@@ -211,3 +219,9 @@ int main( int argc, char *argv[] )
 
 	return( 0 );
 }
+
+#ifndef ismodule
+int main(int argc, char* argv[]){
+	return setdirection(argc, argv);
+}
+#endif

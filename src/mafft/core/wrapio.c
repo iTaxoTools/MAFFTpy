@@ -29,7 +29,7 @@
 
 static PyObject * _module = NULL;
 static char *_buffer = NULL;
-static int _buffer_size = 512;
+static int _buffer_size = 8192;
 
 
 int __add_attr_from_dict ( PyObject *m, PyObject *dict, char *attr ) {
@@ -107,7 +107,7 @@ int _vfprintf ( FILE *stream, const char *format, va_list args ) {
       PyErr_SetString(PyExc_RuntimeError,	"Buffer not initialised.");
       return -1;
     }
-    while ((done = vsnprintf (_buffer, _buffer_size, format, args)) >= _buffer_size) {
+    while ((done = vsnprintf (_buffer, _buffer_size, format, args)) >= _buffer_size) { //TODO calling vsnprintf twice causes trouble because of va_list
       free(_buffer);
       _buffer_size = done + 1;
       if (!(_buffer = malloc(sizeof(char) * _buffer_size))) {
