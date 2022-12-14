@@ -744,7 +744,11 @@ int makedirectionlist( int argc, char *argv[] )
 		fprintf( stderr, "Not necessary!\n" );
 		for( i=0; i<njob; i++ ) 
 			fprintf( stdout, "_F_%-10.10s\n", name[i]+1 );
+#ifdef ismodule
+		exit( 0 );
+#else
 		exit( 1 );
+#endif
 	}
 #endif
 
