@@ -32,8 +32,6 @@ from itaxotools.common.io import redirect
 from . import mafft
 from . import params
 
-def printerr(s):
-	sys.stderr.write(s + "\ ")
 
 @contextmanager
 def pushd(target):
@@ -259,7 +257,7 @@ class MultipleSequenceAlignment():
 		"""Convert strings into kwargs accepted by the module"""
 		res = dict()
 		for item in list:
-			for var in re.finditer('-([\+a-zA-Z])\s*([^-\s]*)?', item):
+			for var in re.finditer(r'-([+a-zA-Z])\s*([^-\s]*)?', item):
 				key = var.group(1)
 				val = None if var.group(2) == '' else var.group(2)
 				res[key] = val
