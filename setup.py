@@ -121,7 +121,10 @@ setup(
         'itaxotools-common==0.2.2',
         ],
     extras_require={
-        'dev': ['pyinstaller>=4.5.1'],
+        'dev': [
+            'pyinstaller>=4.5.1',
+            'pytest>=7.2'
+        ],
     },
     entry_points={
         'console_scripts': [
