@@ -29,7 +29,7 @@
 
 static PyObject * _module = NULL;
 static char *_buffer = NULL;
-static int _buffer_size = 8192;
+static int _buffer_size = 256;
 
 
 int __add_attr_from_dict ( PyObject *m, PyObject *dict, char *attr ) {
@@ -107,14 +107,22 @@ int _vfprintf ( FILE *stream, const char *format, va_list args ) {
       PyErr_SetString(PyExc_RuntimeError,	"Buffer not initialised.");
       return -1;
     }
-    while ((done = vsnprintf (_buffer, _buffer_size, format, args)) >= _buffer_size) { //TODO calling vsnprintf twice causes trouble because of va_list
+
+    va_list args_copy;
+    va_copy(args_copy, args);
+
+    while ((done = vsnprintf (_buffer, _buffer_size, format, args_copy)) >= _buffer_size) {
       free(_buffer);
       _buffer_size = done + 1;
       if (!(_buffer = malloc(sizeof(char) * _buffer_size))) {
         PyErr_SetString(PyExc_RuntimeError,	"Failed to re-allocate memory.");
         return -1;
       }
+      va_end(args_copy);
+      va_copy(args_copy, args);
     }
+
+    va_end(args_copy);
 
     if (!(file = __file_from_stream(stream)))
       return -1;
