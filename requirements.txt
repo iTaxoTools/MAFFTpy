@@ -1,5 +1,5 @@
 altgraph==0.17.2
-itaxotools-common==0.2.2
+itaxotools-common==0.3.3
 pip==21.2.4
 pyinstaller==4.7
 pyinstaller-hooks-contrib==2021.4
