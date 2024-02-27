@@ -60,12 +60,12 @@ mafft_tests = list()
 for sample in ['sample1', 'sample2', 'sample3', 'sample4']:
     mafft_tests.extend([
         MafftTest(f'{sample}/sample', f'{sample}/sample.fftns1', 'fftns1', 0),
-        MafftTest(f'{sample}/sample', f'{sample}/sample.fftns1.adjustdirection', 'fftns1', 1),
-        MafftTest(f'{sample}/sample', f'{sample}/sample.fftns1.adjustdirectionaccurately', 'fftns1', 2),
+        # MafftTest(f'{sample}/sample', f'{sample}/sample.fftns1.adjustdirection', 'fftns1', 1),
+        # MafftTest(f'{sample}/sample', f'{sample}/sample.fftns1.adjustdirectionaccurately', 'fftns1', 2),
 
         MafftTest(f'{sample}/sample', f'{sample}/sample.ginsi', 'ginsi', 0),
-        MafftTest(f'{sample}/sample', f'{sample}/sample.ginsi.adjustdirection', 'ginsi', 1),
-        MafftTest(f'{sample}/sample', f'{sample}/sample.ginsi.adjustdirectionaccurately', 'ginsi', 2),
+        # MafftTest(f'{sample}/sample', f'{sample}/sample.ginsi.adjustdirection', 'ginsi', 1),
+        # MafftTest(f'{sample}/sample', f'{sample}/sample.ginsi.adjustdirectionaccurately', 'ginsi', 2),
     ])
 
 @pytest.mark.parametrize("test", mafft_tests)

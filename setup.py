@@ -118,7 +118,7 @@ setup(
     python_requires='>=3.8.6, <4',
     install_requires=[
         'pyside6>=6.1.1',
-        'itaxotools-common==0.3.3',
+        'itaxotools-common>=0.3.3',
         ],
     extras_require={
         'dev': [
