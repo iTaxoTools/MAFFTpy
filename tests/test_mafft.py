@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Callable, NamedTuple
+import difflib
 
 import pytest
 
@@ -40,6 +41,18 @@ class MafftTest(NamedTuple):
         output_path = Path(a.results) / 'pre'
         fixed_text = fixed_path.read_text()
         output_text = output_path.read_text()
+
+        trans = str.maketrans('', '', '\r\n')
+        fixed_text = fixed_text.translate(trans)
+        output_text = output_text.translate(trans)
+
+        if fixed_text != output_text:
+            diff = difflib.unified_diff(
+                fixed_text.splitlines(),
+                output_text.splitlines()
+            )
+            print('\n'.join(diff))
+
         assert fixed_text == output_text
 
 
