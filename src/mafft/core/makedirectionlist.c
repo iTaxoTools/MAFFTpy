@@ -18,7 +18,7 @@ int contrastsort = 1;
 
 typedef struct _thread_arg
 {
-	int iend; 
+	int iend;
 	char **seq;
 	int *map;
 	char *tmpseq;
@@ -47,7 +47,7 @@ typedef struct _selfdpthread_arg
 
 typedef struct _contrast
 {
-	int pos; 
+	int pos;
 	double dif;
 } contrastarr;
 
@@ -59,7 +59,7 @@ static void	*selfdpthread( void *arg )
 	double *res = targ->res;
 #ifdef enablemultithread
 	int thread_no = targ->thread_no;
-	int *jshare = targ->jshare; 
+	int *jshare = targ->jshare;
 #endif
 	int j;
 	char **revseq;
@@ -88,7 +88,7 @@ static void	*selfdpthread( void *arg )
 		{
 			j++;
 			if( j%100 == 0 ) reporterr( "%d / %d      \r", j, iend );
-			if( j == iend ) 
+			if( j == iend )
 			{
 				break;
 			}
@@ -157,7 +157,7 @@ void arguments( int argc, char *argv[] )
 	fmodel = 0;
 //	ppenalty = (int)( -2.0 * 1000 - 0.5 );
 //	ppenalty_ex = (int)( -0.1 * 1000 - 0.5 );
-//	poffset = (int)( 0.1 * 1000 - 0.5 ); 
+//	poffset = (int)( 0.1 * 1000 - 0.5 );
 	ppenalty = NOTSPECIFIED;
 	ppenalty_ex = NOTSPECIFIED;
 	poffset = NOTSPECIFIED;
@@ -186,7 +186,7 @@ void arguments( int argc, char *argv[] )
 				case 'C':
 					nthread = myatoi( *++argv );
 					fprintf( stderr, "nthread = %d\n", nthread );
-					--argc; 
+					--argc;
 					goto nextoption;
 				case 'f':
 					ppenalty = (int)( atof( *++argv ) * 1000 - 0.5 );
@@ -218,17 +218,17 @@ void arguments( int argc, char *argv[] )
 				case 't':
 					thresholdtorev = atof( *++argv );
 					fprintf( stderr, "thresholdtorev = %f\n", thresholdtorev );
-					--argc; 
+					--argc;
 					goto nextoption;
 				case 'o':
 					mode = *(*++argv);
 					fprintf( stderr, "mode = %c\n", mode );
-					--argc; 
+					--argc;
 					goto nextoption;
 				case 'r':
 					reflim = myatoi(*++argv);
 					fprintf( stderr, "reflim = %d\n", reflim );
-					--argc; 
+					--argc;
 					goto nextoption;
 				case 'c':
 					contrastsort = 0;
@@ -276,7 +276,7 @@ void arguments( int argc, char *argv[] )
         cut = atof( (*argv) );
         argc--;
     }
-    if( argc != 0 ) 
+    if( argc != 0 )
     {
         fprintf( stderr, "options: Check source file !\n" );
         exit( 1 );
@@ -288,9 +288,10 @@ void arguments( int argc, char *argv[] )
 	}
 }
 
-
-
-
+#ifdef ismodule
+void seq_grp_nuc( int *grp, char *seq );
+void makepointtable_nuc( int *pointt, int *n );
+#endif
 
 #ifndef ismodule
 void seq_grp_nuc( int *grp, char *seq )
@@ -443,7 +444,7 @@ static int localcommonsextet_p2( short *table, int *pointt )
 		if( tmp == 0 ) *cp++ = point;
 	}
 	*cp = END_OF_VEC;
-	
+
 	cp =  ct;
 	while( *cp != END_OF_VEC )
 		memo[*cp++] = 0;
@@ -457,7 +458,7 @@ static int compfunc( const void *a, const void *b )
 {
 	return ((contrastarr *)b)->dif - ((contrastarr *)a)->dif; // correct
 //	return ((contrastarr *)a)->dif - ((contrastarr *)b)->dif; // incorrect!
-} 
+}
 
 static void makecontrastorder6mer( int *order, int **pointt, int **pointt_rev, char **seq, int iend, int shift )
 {
@@ -531,18 +532,18 @@ static void makecontrastorder( int *order, char **seq, int iend, int shift )
 		pthread_mutex_t mutex_counter;
 		selfdpthread_arg_t *targ;
 		int *jsharept;
-		
+
 		targ = calloc( nthread, sizeof( selfdpthread_arg_t ) );
 		handle = calloc( nthread, sizeof( pthread_t ) );
 		pthread_mutex_init( &mutex_counter, NULL );
 		jsharept = calloc( 1, sizeof(int) );
 		*jsharept = 0;
-		
+
 		for( j=0; j<nthread; j++ )
 		{
 			targ[j].iend = iend;
 			targ[j].seq = seq;
-			targ[j].res = res; 
+			targ[j].res = res;
 			targ[j].jshare = jsharept;
 			targ[j].mutex_counter = &mutex_counter;
 			targ[j].thread_no = j;
@@ -561,7 +562,7 @@ static void makecontrastorder( int *order, char **seq, int iend, int shift )
 		targ = calloc( 1, sizeof( selfdpthread_arg_t ) );
 		targ[0].iend = iend;
 		targ[0].seq = seq;
-		targ[0].res = res; 
+		targ[0].res = res;
 		selfdpthread( targ );
 		free( targ );
 	}
@@ -600,7 +601,7 @@ static void	*directionthread( void *arg )
 //	int iq = targ->iq;
 #ifdef enablemultithread
 //	int thread_no = targ->thread_no;
-	int *jshare = targ->jshare; 
+	int *jshare = targ->jshare;
 #endif
 	int j;
 	char **mseq1, **mseq2;
@@ -632,7 +633,7 @@ static void	*directionthread( void *arg )
 #endif
 		{
 			j++;
-			if( j == iend ) 
+			if( j == iend )
 			{
 //				if( iq%100==1 ) fprintf( stderr, "\r %d / %d  \r", iq, njob );
 				break;
@@ -676,8 +677,8 @@ static void	*directionthread( void *arg )
 
 int makedirectionlist( int argc, char *argv[] )
 {
-	static int  *nlen;	
-	static int  *nogaplen;	
+	static int  *nlen;
+	static int  *nogaplen;
 	static char **name, **seq;
 	int i, j, istart, iend, ic;
 	FILE *infp;
@@ -734,15 +735,15 @@ int makedirectionlist( int argc, char *argv[] )
 	readData( infp, name, nlen, seq );
 #else
     name = AllocateCharMtx( njob, B+1 );
-    nlen = AllocateIntVec( njob ); 
-    nogaplen = AllocateIntVec( njob ); 
+    nlen = AllocateIntVec( njob );
+    nogaplen = AllocateIntVec( njob );
 	readData_pointer( infp, name, nlen, seq );
 	fclose( infp );
 
 	if( dorp != 'd' )
 	{
 		fprintf( stderr, "Not necessary!\n" );
-		for( i=0; i<njob; i++ ) 
+		for( i=0; i<njob; i++ )
 			fprintf( stdout, "_F_%-10.10s\n", name[i]+1 );
 #ifdef ismodule
 		return 0;
@@ -798,7 +799,7 @@ int makedirectionlist( int argc, char *argv[] )
 			strncpy( name[i]+3, tmpseq+1, 10 );
 			name[i][13] = 0;
 		}
-		for( i=istart; i<njob; i++ ) 
+		for( i=istart; i<njob; i++ )
 		{
 			gappick0( mseq2[0], seq[i] );
 
@@ -864,7 +865,7 @@ int makedirectionlist( int argc, char *argv[] )
 		else
 		{
 //			nthread = 0; // heiretsu keisan no kouritsu ha warui node
-			spointt = AllocateIntMtx( njob, 0 ); 
+			spointt = AllocateIntMtx( njob, 0 );
 			pointt = AllocateIntMtx( njob, nlenmax+1 );
 			pointt_rev = AllocateIntMtx( njob, nlenmax+1 );
 		}
@@ -896,7 +897,7 @@ int makedirectionlist( int argc, char *argv[] )
 				iend = njob - nadd;
 			else
 				iend = 0; // keisan shinai
-	
+
 			for( i=0; i<iend; i++ )
 			{
 				gappick0( tmpseq, seq[i] );
@@ -905,12 +906,12 @@ int makedirectionlist( int argc, char *argv[] )
 				makepointtable_nuc( pointt[i], grpseq );
 				spointt[i] = pointt[i];
 			}
-	
+
 			if( nadd )
 				istart = njob - nadd;
 			else
 				istart = 0;
-			for( i=istart; i<njob; i++ ) 
+			for( i=istart; i<njob; i++ )
 			{
 				gappick0( tmpseq, seq[i] );
 				strcpy( seq[i], tmpseq );
@@ -928,7 +929,7 @@ int makedirectionlist( int argc, char *argv[] )
 //				reporterr( "pointt[i] = %p\n", pointt[i] );
 //				reporterr( "pointt[i][0] = %p\n", pointt[i][0] );
 
-			}	
+			}
 		}
 
 
@@ -1000,7 +1001,7 @@ int makedirectionlist( int argc, char *argv[] )
 			istart = njob - nadd;
 		else
 			istart = 1;
-		for( i=istart; i<njob; i++ ) 
+		for( i=istart; i<njob; i++ )
 		{
 //			fprintf( stderr, "\r %d / %d ", i, njob );
 			ic = contrastorder[i];
@@ -1045,7 +1046,7 @@ int makedirectionlist( int argc, char *argv[] )
 				iend = i;
 
 
-			if( iend > reflim ) 
+			if( iend > reflim )
 			{
 //				reporterr( "iend = %d -> %d\n", iend, reflim );
 #if 0
@@ -1074,23 +1075,23 @@ int makedirectionlist( int argc, char *argv[] )
 				pthread_mutex_t mutex_counter;
 				thread_arg_t *targ;
 				int *jsharept;
-		
+
 				targ = calloc( nthread, sizeof( thread_arg_t ) );
 				handle = calloc( nthread, sizeof( pthread_t ) );
 				pthread_mutex_init( &mutex_counter, NULL );
 				jsharept = calloc( 1, sizeof(int) );
 				*jsharept = 0;
-		
+
 				if( i%100==1 ) fprintf( stderr, " %d / %d (%d threads)   \r", i, njob, nthread );
 				for( j=0; j<nthread; j++ )
 				{
 					targ[j].iend = iend;
 					targ[j].map = map;
 					targ[j].seq = seq;
-					targ[j].tmpseq = tmpseq; 
-					targ[j].res = resf; 
-					targ[j].spointt = spointt; 
-					targ[j].table1 = table1; 
+					targ[j].tmpseq = tmpseq;
+					targ[j].res = resf;
+					targ[j].spointt = spointt;
+					targ[j].table1 = table1;
 					targ[j].jshare = jsharept;
 					targ[j].iq = i; // iranai
 					targ[j].mutex_counter = &mutex_counter;
@@ -1113,10 +1114,10 @@ int makedirectionlist( int argc, char *argv[] )
 				targ[0].iend = iend;
 				targ[0].map = map;
 				targ[0].seq = seq;
-				targ[0].tmpseq = tmpseq; 
-				targ[0].res = resf; 
-				targ[0].spointt = spointt; 
-				targ[0].table1 = table1; 
+				targ[0].tmpseq = tmpseq;
+				targ[0].res = resf;
+				targ[0].spointt = spointt;
+				targ[0].table1 = table1;
 				targ[0].iq = i;  // iranai
 				directionthread( targ );
 				free( targ );
@@ -1131,22 +1132,22 @@ int makedirectionlist( int argc, char *argv[] )
 				pthread_mutex_t mutex_counter;
 				thread_arg_t *targ;
 				int *jsharept;
-		
+
 				targ = calloc( nthread, sizeof( thread_arg_t ) );
 				handle = calloc( nthread, sizeof( pthread_t ) );
 				pthread_mutex_init( &mutex_counter, NULL );
 				jsharept = calloc( 1, sizeof(int) );
 				*jsharept = 0;
-		
+
 				for( j=0; j<nthread; j++ )
 				{
 					targ[j].iend = iend;
 					targ[j].seq = seq;
 					targ[j].map = map;
-					targ[j].tmpseq = revseq; 
-					targ[j].res = resr; 
-					targ[j].spointt = spointt; 
-					targ[j].table1 = table1_rev; 
+					targ[j].tmpseq = revseq;
+					targ[j].res = resr;
+					targ[j].spointt = spointt;
+					targ[j].table1 = table1_rev;
 					targ[j].jshare = jsharept;
 					targ[j].iq = i; // iranai
 					targ[j].mutex_counter = &mutex_counter;
@@ -1167,10 +1168,10 @@ int makedirectionlist( int argc, char *argv[] )
 				targ[0].iend = iend;
 				targ[0].seq = seq;
 				targ[0].map = map;
-				targ[0].tmpseq = revseq; 
-				targ[0].res = resr; 
+				targ[0].tmpseq = revseq;
+				targ[0].res = resr;
 				targ[0].spointt = spointt;
-				targ[0].table1 = table1_rev; 
+				targ[0].table1 = table1_rev;
 				targ[0].iq = i;  // iranai
 				directionthread( targ );
 				free( targ );
@@ -1184,9 +1185,9 @@ int makedirectionlist( int argc, char *argv[] )
 					ires = resf[j];
 //					fprintf( stdout, "ires (%d,%d) = %d\n", i, j, ires );
 //					fflush( stdout );
-					if( ires>mres2 ) 
+					if( ires>mres2 )
 					{
-						if( ires>mres ) 
+						if( ires>mres )
 						{
 							mres2 = mres;
 							mres = ires;
@@ -1202,7 +1203,7 @@ int makedirectionlist( int argc, char *argv[] )
 					ires = resr[j];
 					if( ires>mres2 )
 					{
-						if( ires>mres ) 
+						if( ires>mres )
 						{
 							mres2 = mres;
 							mres = ires;
@@ -1279,9 +1280,9 @@ int makedirectionlist( int argc, char *argv[] )
 
 		if( name[0][1] == 'R' )
 		{
-			for( j=0; j<njob; j++ ) 
+			for( j=0; j<njob; j++ )
 			{
-				if( name[j][1] == 'R' ) 
+				if( name[j][1] == 'R' )
 					name[j][1] = 'F';
 				else
 					name[j][1] = 'R';
@@ -1318,7 +1319,7 @@ int makedirectionlist( int argc, char *argv[] )
 		exit( 1 );
 	}
 //	writeData_pointer( stdout, njob, name, nlen, seq );
-	for( i=0; i<njob; i++ ) 
+	for( i=0; i<njob; i++ )
 	{
 //		fprintf( stdout, ">%s\n", name[i] );
 //		fprintf( stdout, "%s\n", seq[i] );

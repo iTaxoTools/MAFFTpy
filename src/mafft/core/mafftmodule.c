@@ -29,8 +29,8 @@ https://www.python.org/dev/peps/pep-0489/
 #include <stdio.h>
 #include <stdbool.h>
 #include <assert.h>
-#include "mafftmodule.h"
 #include "mltaln.h"
+#include "mafftmodule.h"
 #include "wrapio.h"
 
 

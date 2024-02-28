@@ -55,7 +55,7 @@ void arguments( int argc, char *argv[] )
 		nextoption:
 			;
 	}
-    if( argc != 0 ) 
+    if( argc != 0 )
     {
         fprintf( stderr, "options: Check source file !\n" );
         exit( 1 );
@@ -182,7 +182,7 @@ int setdirection( int argc, char *argv[] )
 		preservegaps = AllocateIntVec( njob );
 		readsubalignmentstable( njob, subtable, preservegaps, NULL, NULL );
 
-		for( j=0; j<nsubalignments; j++ ) 
+		for( j=0; j<nsubalignments; j++ )
 		{
 			reporterr( "Checking directions of sequences in subalignment%d\n", j );
 			firstdir = directions[subtable[j][0]];
