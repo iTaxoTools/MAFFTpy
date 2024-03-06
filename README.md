@@ -4,18 +4,16 @@ Multiple sequence alignment. This is a Python wrapper for
 [MAFFT](https://mafft.cbrc.jp/alignment/software/).
 
 ## Executables
+
 Download and run the standalone executables without installing Python.</br>
 [See the latest release here.](https://github.com/iTaxoTools/MAFFTpy/releases/latest)
 
 ## Installing
 
-Installing from source requires Python 3.8 or later and a C compiler.
+Installing from source requires a C++ compiler:
 
-Clone and install the latest version:
 ```
-$ git clone https://github.com/iTaxoTools/MAFFTpy.git
-$ cd MAFFTpy
-$ pip install . -f packages.html
+$ pip install git+https://github.com/iTaxoTools/MAFFTpy.git
 ```
 
 ### Building on Windows
