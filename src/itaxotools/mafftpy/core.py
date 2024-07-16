@@ -471,7 +471,6 @@ class MultipleSequenceAlignment():
 			fi
 		fi
 		"""
-		print("test")
 		
 		v.nadd = 0    #TODO
 		if v.adjustdirection > 0:
@@ -524,10 +523,6 @@ class MultipleSequenceAlignment():
 			temp2.write(temp1.read())
 			temp1.close()
 			temp2.close()
-
-		print("test")
-			
-
 
 		if v.distance == "global" and v.memsavetree == 0:
 			with redirect(mafft, 'stdout', os.devnull, 'w'), \
