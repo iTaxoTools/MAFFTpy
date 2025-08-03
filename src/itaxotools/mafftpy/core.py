@@ -73,6 +73,7 @@ class MafftVars:
 
         self.outputfile = ""
         self.namelength = -1
+        self.linelength = 60
         self.anysymbol = 0
         self.parallelizationstrategy = "BAATARI2"
         self.kappa = self.defaultkappa
@@ -114,7 +115,9 @@ class MafftVars:
         self.progressfile = "/dev/stderr"
         self.anchorfile = "/dev/null"
         self.anchoropt = ""
-        self.maxanchorseparation = 1000
+        # self.maxanchorseparation = 1000
+        # self.maxanchorseparation = -1
+        self.terminalmargin = 100
         self.debug = 0
         self.sw = 0
         self.algopt = self.defaultalgopt
@@ -139,6 +142,7 @@ class MafftVars:
         self.treeout = 0
         self.nodeout = 0
         self.distout = 0
+        self.distformat = "hat2"
         self.distoutopt = " "
         self.treein = 0
         self.topin = 0
@@ -151,12 +155,15 @@ class MafftVars:
         self.scorematrix = "/dev/null"
         self.textmatrix = "/dev/null"
         self.treeinfile = "/dev/null"
+        self.codonposfile = "/dev/null"
+        self.codonscorefile = "/dev/null"
         self.rnascoremtx = " "
         self.laraparams = "/dev/null"
         self.foldalignopt = " "
         self.treealg = " -X 0.1 "
         self.sueff = "1.0"
         self.maxambiguous = "1.0"
+        self.dofilter = 0
         self.scoreoutarg = " "
         self.numthreads = 0
         self.numthreadsit = -1
@@ -194,6 +201,7 @@ class MafftVars:
         self.enrichseq = 0  # ato de kezuru
         self.enrichstr = 0  # ato de kezuru
         self.seektarget = ""  # ato de kezuru
+        self.dashserver = "https://sysimm.org/dash/REST1.0/"
         self.newdash = 0
         self.newdash_originalsequenceonly = 0
         self.exclude_ho = 0
@@ -603,7 +611,7 @@ class MultipleSequenceAlignment:
                         f="-" + v.gop,
                         Q=v.spfactor,
                         h=v.aof,
-                        x=v.maxanchorseparation,
+                        x=v.terminalmargin,
                         **self._vars_to_kwargs(
                             [
                                 v.legacygapopt,

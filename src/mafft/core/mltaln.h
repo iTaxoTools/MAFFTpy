@@ -41,7 +41,7 @@
 
 
 
-#define VERSION "7.487"
+#define VERSION "7.525"
 #define SHOWVERSION reporterr( "%s (%s) Version " VERSION "\nalg=%c, model=%s, amax=%3.1f\n%d thread(s)\n\n", progName( argv[0] ), (dorp=='d')?"nuc":((nblosum==-2)?"text":"aa"), alg, modelname, specificityconsideration, nthread )
 
 #define FFT_THRESHOLD  80
@@ -53,6 +53,7 @@
 #define M  500000       /* njob no saidaiti */
 #define N 5000000       /* nlen no saidaiti */
 #define MAXSEG 100000
+#define MAXSEG_GIVENANCHORS 10000000
 #define B     256
 #define C     60       /*  1 gyou no mojisuu */
 #define D      6
@@ -336,16 +337,19 @@ typedef struct _extanch
 	int score;
 } ExtAnch;
 
+typedef struct _gappos
+{
+	int pos;
+	int len;
+} GapPos;
+
+
 #include "fft.h"
 #include "dp.h"
 #include "functions.h"
 
 #ifdef enablemultithread
-#ifdef _MSC_VER
-#define TLS __declspec(thread)
-#else
 #define TLS __thread
-#endif
 #else
 #define TLS
 #endif
@@ -385,6 +389,13 @@ extern double sueff_global;
 extern double lenfaca, lenfacb, lenfacc, lenfacd;
 extern int maxl, tsize;
 
+extern char codonpos;
+extern char codonscore;
+
+extern char distout;
+
+extern int terminalmargin;
+
 
 /* for --large  */
 extern int compacttree;
@@ -394,3 +405,4 @@ extern int specifictarget;
 extern int nadd;
 extern int usenaivescoreinsteadofalignmentscore;
 #define MYBUFSIZE 1000 * 1000 * 100 // 100MB
+extern int LineLengthInFASTA;

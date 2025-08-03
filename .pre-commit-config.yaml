@@ -3,13 +3,9 @@ repos:
   rev: v2.3.0
   hooks:
   -   id: check-yaml
-      exclude: ^src/mafft/
   -   id: end-of-file-fixer
-      exclude: ^src/mafft/
   -   id: trailing-whitespace
-      exclude: ^src/mafft/
   -   id: check-added-large-files
-      exclude: ^src/mafft/
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.1.6

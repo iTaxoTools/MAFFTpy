@@ -418,7 +418,7 @@ static void arguments( int argc, char *argv[] )
 
 int dvtditr( int argc, char *argv[] )
 {
-  int identity;
+	int identity;
 	static int nlen[M];
 	static char **name, **seq, **aseq, **bseq;
 	static Segment *segment = NULL;
@@ -1139,16 +1139,27 @@ exit( 1 );
 
 	fprintf( stderr, "done\n" );
 	fprintf( trap_g, "done\n" );
-	fclose( trap_g );
+//	fclose( trap_g ); // -> closeFiles()
 	freeconstants();
+
 
 
 	devide = 0;
 	writePre( njob, name, nlen, res_g, 1 );
-	fclose( prep_g );
 #if 0
 	writeData( stdout, njob, name, nlen, res_g, 1 );
 #endif
+// 2021/Sep
+	FreeCharMtx( nogap1seq );
+	FreeCharMtx( seq );
+	FreeCharMtx( name );
+	free( seq_g ); // seq_g_bk de free sareteirunode
+	FreeCharMtx( res_g );
+	FreeCharMtx( aseq );
+	FreeCharMtx( bseq );
+	free( segment );
+	closeFiles();
+// 2021/Sep
 
 
 	if( spscoreout ) reporterr( "Unweighted sum-of-pairs score = %10.5f\n", sumofpairsscore( njob, res_g ) );

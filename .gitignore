@@ -17,11 +17,7 @@ __pycache__/
 .tox
 .cache
 
-# accidental test files
-test.abgd.svg
-test.disthist.svg
-test.rank.svg
-distmat.txt
+.vscode
 
 Pipfile
 Pipfile.lock

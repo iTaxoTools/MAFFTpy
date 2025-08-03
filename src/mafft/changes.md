@@ -1,17 +1,22 @@
 
-The following changes were made to the original (version 7.487):
+The following changes were made to the original (version 7.525):
 
 Added python module: `mafftmodule.c`, `mafftmodule.h`
 Added output wrapper: `wrapio.c`, `wrapio.h`
 
-Renamed `disttbfast.c` and `tbfast.c` main() functions
+Renamed the main() functions in `disttbfast.c`, `tbfast.c`, `makedirectionlist.c`, `setdirection.c`
 and put ``#ifndef ismodule` around them.
 
-Modified arguments() as static in `tbfast.c`, `disttbfast.c`, `dvtditr.c`
+Also modified the following functions as static in `tbfast.c`, `disttbfast.c`, `dvtditr.c`, `makedirectionlist.c`, `setdirection.c`:
+- arguments()
+- makecompositiontable_p()
+- makepointtable()
+- seq_grp()
+- makepointtable_nuc()
+- seq_grp_nuc()
 
-`dvtditr`: fclose( prep_g ); for flushing
 
-Added section to the following files: fft.h mltaln.h mtxutl.c
+Added section to the following files: `fft.h` `mltaln.h` `mtxutl.c`
 ```
 #ifdef ismodule
 #define PY_SSIZE_T_CLEAN
@@ -20,9 +25,22 @@ Added section to the following files: fft.h mltaln.h mtxutl.c
 #endif
 ```
 
-Changed for MSVC compatibility:
+Changed for module workflow:
+
+- diff `makedirectionlist.c` :
 ```
-diff `disttbfast.c`:
+737,739d736
+< #ifdef ismodule
+< 		return 0;
+< #else
+741d737
+< #endif
+```
+
+Changed for MSVC compatibility:
+
+- diff `disttbfast.c`:
+```
 1422c1422
 <       return (int)((char *)p - (char *)q);
 ---
@@ -31,8 +49,10 @@ diff `disttbfast.c`:
 <       return (int)((char *)q - (char *)p);
 ---
 >       return (int)((void *)q - (void *)p);
+```
 
-diff `dp.h`:
+- diff `dp.h`:
+```
 2,4d1
 < #ifdef _MSC_VER
 < #define TLS __declspec(thread)
@@ -43,8 +63,10 @@ diff `dp.h`:
 < #define TLS
 ---
 > #define TLS
+```
 
-diff `mltaln.h`:
+- diff `mltaln.h`:
+```
 344,346d338
 < #ifdef _MSC_VER
 < #define TLS __declspec(thread)

@@ -10,7 +10,6 @@
 static int treein;
 static int topin;
 static int treeout;
-static int distout;
 static int noalign;
 static int multidist;
 static int subalignment;
@@ -343,8 +342,15 @@ static void arguments( int argc, char *argv[], int *pac, char **pav, int *tac, c
 					addprofile = 0;
 					break;
 				case 'y':
-					distout = 1;
-					break;
+                                        distout = *(*++argv);
+					reporterr(       "distout=%c\n", distout );
+                                        if( distout != 'c' && distout != 'h' )
+                                        {
+                                            reporterr(       "Set -y c or -y h in v>=7.521.\n" );
+                                            exit( 1 );
+                                        }
+					--argc;
+					goto nextoption;
 				case 't':
 					treeout = 1;
 					break;
@@ -475,10 +481,12 @@ static void arguments( int argc, char *argv[], int *pac, char **pav, int *tac, c
 					tbutree = 0;
 					break;
 /* modification end. */
+#if 0
 				case 'z':
 					fftThreshold = myatoi( *++argv );
 					--argc;
 					goto nextoption;
+#endif
 				case 'w':
 					fftWinSize = myatoi( *++argv );
 					--argc;
@@ -495,6 +503,9 @@ static void arguments( int argc, char *argv[], int *pac, char **pav, int *tac, c
 #endif
 				case 'Y':
 					keeplength = 1;
+					break;
+				case 'z':
+					mapout = 2;
 					break;
 				case 'Z':
 					mapout = 1;
@@ -1905,7 +1916,7 @@ int tbfast( int argc, char *argv[] )
 	char ***subalnpt;
 	char *originalgaps = NULL;
 	char **addbk = NULL;
-	int **deletelist = NULL;
+	GapPos **deletelist = NULL;
 	FILE *dlf = NULL;
 	int **localmem = NULL;
 	int posinmem;
@@ -3434,11 +3445,12 @@ int tbfast( int argc, char *argv[] )
 	{
 
 		dlf = fopen( "_deletelist", "w" );
-		deletelist = (int **)calloc( nadd+1, sizeof( int * ) );
+		deletelist = (GapPos **)calloc( nadd+1, sizeof( GapPos * ) );
 		for( i=0; i<nadd; i++ )
 		{
-			deletelist[i] = calloc( 1, sizeof( int ) );
-			deletelist[i][0] = -1;
+			deletelist[i] = calloc( 1, sizeof( GapPos ) );
+			deletelist[i][0].pos = -1;
+			deletelist[i][0].len = 0;
 		}
 		deletelist[nadd] = NULL;
 		ndeleted = deletenewinsertions_whole( njob-nadd, nadd, bseq, bseq+njob-nadd, deletelist );
@@ -3446,8 +3458,8 @@ int tbfast( int argc, char *argv[] )
 		for( i=0; i<nadd; i++ )
 		{
 			if( deletelist[i] )
-				for( j=0; deletelist[i][j]!=-1; j++ )
-					fprintf( dlf, "%d %d\n", njob-nadd+i, deletelist[i][j] ); // 0origin
+				for( j=0; deletelist[i][j].pos!=-1; j++ )
+					fprintf( dlf, "%d %d %d\n", njob-nadd+i, deletelist[i][j].pos, deletelist[i][j].len ); // 0origin
 		}
 		fclose( dlf );
 
@@ -3457,13 +3469,19 @@ int tbfast( int argc, char *argv[] )
 		if( mapout )
 		{
 			dlf = fopen( "_deletemap", "w" );
-			reconstructdeletemap( nadd, addbk, deletelist, bseq+njob-nadd, dlf, name+njob-nadd );
+			if( mapout == 1 )
+				reconstructdeletemap( nadd, addbk, deletelist, bseq+njob-nadd, dlf, name+njob-nadd );
+			else
+				reconstructdeletemap_compact( nadd, addbk, deletelist, seq+njob-nadd, dlf, name+njob-nadd );
 			FreeCharMtx( addbk );
 			addbk = NULL;
 			fclose( dlf );
 		}
 
-		FreeIntMtx( deletelist );
+//		FreeIntMtx( deletelist );
+//		deletelist = NULL;
+		for( i=0; deletelist[i] != NULL; i++ ) free( deletelist[i] );
+		free( deletelist );
 		deletelist = NULL;
 	}
 

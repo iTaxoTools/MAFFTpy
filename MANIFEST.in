@@ -9,3 +9,6 @@ recursive-include src/mafft *
 
 # Include GUI graphics
 recursive-include src/itaxotools/mafftpy/gui/logos *
+
+# exclude original MAFFT code reference
+exclude src/mafft-*-original/**

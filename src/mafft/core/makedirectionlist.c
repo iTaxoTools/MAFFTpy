@@ -24,7 +24,7 @@ typedef struct _thread_arg
 	char *tmpseq;
 	int *res;
 	int **spointt;
-	short *table1;
+	int *table1;
 	int iq;
 #ifdef enablemultithread
 	int *jshare;
@@ -139,11 +139,7 @@ static void partshuffle( int size, int outsize, int *ary )
 }
 #endif
 
-#ifdef ismodule
-void arguments_makedirectionlist( int argc, char *argv[] )
-#else
-void arguments( int argc, char *argv[] )
-#endif
+static void arguments( int argc, char *argv[] )
 {
     int c;
 
@@ -288,13 +284,11 @@ void arguments( int argc, char *argv[] )
 	}
 }
 
-#ifdef ismodule
-void seq_grp_nuc( int *grp, char *seq );
-void makepointtable_nuc( int *pointt, int *n );
-#endif
 
-#ifndef ismodule
-void seq_grp_nuc( int *grp, char *seq )
+
+
+
+static void seq_grp_nuc( int *grp, char *seq )
 {
 	int tmp;
 	int *grpbk = grp;
@@ -315,10 +309,8 @@ void seq_grp_nuc( int *grp, char *seq )
 		*grpbk = -1;
 	}
 }
-#endif
 
-#ifndef ismodule
-void seq_grp( int *grp, char *seq )
+static void seq_grp( int *grp, char *seq )
 {
 	int tmp;
 	int *grpbk = grp;
@@ -339,23 +331,27 @@ void seq_grp( int *grp, char *seq )
 		*grpbk = -1;
 	}
 }
-#endif
 
-#ifdef ismodule
-void makecompositiontable_p_short( short *table, int *pointt )
-#else
-void makecompositiontable_p( short *table, int *pointt )
-#endif
+static void makecompositiontable_p( int *table, int *pointt )
 {
 	int point;
 
 	while( ( point = *pointt++ ) != END_OF_VEC )
+	{
+#if 1
 		table[point]++;
+#else
+		if( (unsigned int)table[point]++ >= INT_MAX )
+		{
+			reporterr( "Overflow. table[point]=%d>INT_MAX(%d).\n", table[point], INT_MAX );
+			exit( 1 );
+		}
+#endif
+	}
 }
 
 
-#ifndef ismodule
-void makepointtable_nuc( int *pointt, int *n )
+static void makepointtable_nuc( int *pointt, int *n )
 {
 	int point;
 	register int *p;
@@ -384,10 +380,8 @@ void makepointtable_nuc( int *pointt, int *n )
 	}
 	*pointt = END_OF_VEC;
 }
-#endif
 
-#ifndef ismodule
-void makepointtable( int *pointt, int *n )
+static void makepointtable( int *pointt, int *n )
 {
 	int point;
 	register int *p;
@@ -416,23 +410,22 @@ void makepointtable( int *pointt, int *n )
 	}
 	*pointt = END_OF_VEC;
 }
-#endif
 
-static int localcommonsextet_p2( short *table, int *pointt )
+static int localcommonsextet_p2( int *table, int *pointt )
 {
 	int value = 0;
-	short tmp;
+	unsigned int tmp;
 	int point;
-	short *memo;
+	int *memo;
 	int *ct;
 	int *cp;
 
 	if( *pointt == -1 )
 		return( 0 );
 
-	memo = (short *)calloc( tsize, sizeof( short ) );
+	memo = (int *)calloc( tsize, sizeof( int ) );
 	if( !memo ) ErrorExit( "Cannot allocate memo\n" );
-	ct = (int *)calloc( MIN( maxl, tsize )+1, sizeof( int ) ); // chuui!!
+	ct = (int *)calloc( MIN( maxl, tsize )+1, sizeof( int ) );
 	if( !ct ) ErrorExit( "Cannot allocate memo\n" );
 
 	cp = ct;
@@ -442,6 +435,14 @@ static int localcommonsextet_p2( short *table, int *pointt )
 		if( tmp < table[point] )
 			value++;
 		if( tmp == 0 ) *cp++ = point;
+#if 0 // kakunin shinai
+		if( tmp >= INT_MAX )
+		{
+			reporterr( "Overflow.\n" );
+			reporterr( "cp-ct=%d, point=%d, tmp=%d, memo[point]=%d>INT_MAX(%d)\n", cp-ct, point, tmp, memo[point], INT_MAX );
+			exit( 1 );
+		}
+#endif
 	}
 	*cp = END_OF_VEC;
 
@@ -465,7 +466,7 @@ static void makecontrastorder6mer( int *order, int **pointt, int **pointt_rev, c
 	int i;
 	double *res;
 	contrastarr *arr;
-	short *table1, *table1_rev;
+	int *table1, *table1_rev;
 
 
 	arr = calloc( iend, sizeof( contrastarr ) );
@@ -474,23 +475,15 @@ static void makecontrastorder6mer( int *order, int **pointt, int **pointt_rev, c
 	for( i=0; i<iend; i++ )
 	{
 		if( i % 100 == 1 ) reporterr( "%d   \r", i );
-		table1 = (short *)calloc( tsize, sizeof( short ) );
+		table1 = (int *)calloc( tsize, sizeof( int ) );
 		if( !table1 ) ErrorExit( "Cannot allocate table1\n" );
-#ifdef ismodule
-		makecompositiontable_p_short( table1, pointt[i] );
-#else
 		makecompositiontable_p( table1, pointt[i] );
-#endif
 		res[i] = localcommonsextet_p2( table1, pointt[i] );
 		free( table1 );
 
-		table1_rev = (short *)calloc( tsize, sizeof( short ) );
+		table1_rev = (int *)calloc( tsize, sizeof( int ) );
 		if( !table1_rev ) ErrorExit( "Cannot allocate table1\n" );
-#ifdef ismodule
-		makecompositiontable_p_short( table1_rev, pointt_rev[i] );
-#else
 		makecompositiontable_p( table1_rev, pointt_rev[i] );
-#endif
 		res[i] -= localcommonsextet_p2( table1_rev, pointt[i] );
 		free( table1_rev );
 
@@ -597,7 +590,7 @@ static void	*directionthread( void *arg )
 	char *tmpseq = targ->tmpseq;
 	int *res = targ->res;
 	int **spointt = targ->spointt;
-	short *table1 = targ->table1;
+	int *table1 = targ->table1;
 //	int iq = targ->iq;
 #ifdef enablemultithread
 //	int thread_no = targ->thread_no;
@@ -692,15 +685,11 @@ int makedirectionlist( int argc, char *argv[] )
 	int ires, mres, mres2;
 	int *res, *resr, *resf;
 	int *map;
-	static short *table1, *table1_rev;
+	static int *table1, *table1_rev;
 	static char **mseq1f, **mseq1r, **mseq2;
 	int *contrastorder;
 
-#ifdef ismodule
-	arguments_makedirectionlist( argc, argv );
-#else
 	arguments( argc, argv );
-#endif
 #ifndef enablemultithread
 	nthread = 0;
 #endif
@@ -1026,17 +1015,12 @@ int makedirectionlist( int argc, char *argv[] )
 #else
 			if( !dodp )
 			{
-				table1 = (short *)calloc( tsize, sizeof( short ) );
+				table1 = (int *)calloc( tsize, sizeof( int ) );
 				if( !table1 ) ErrorExit( "Cannot allocate table1\n" );
-				table1_rev = (short *)calloc( tsize, sizeof( short ) );
+				table1_rev = (int *)calloc( tsize, sizeof( int ) );
 				if( !table1_rev ) ErrorExit( "Cannot allocate table1_rev\n" );
-#ifdef ismodule
-				makecompositiontable_p_short( table1, pointt[ic] );
-				makecompositiontable_p_short( table1_rev, pointt_rev[ic] );
-#else
 				makecompositiontable_p( table1, pointt[ic] );
 				makecompositiontable_p( table1_rev, pointt_rev[ic] );
-#endif
 			}
 #endif
 

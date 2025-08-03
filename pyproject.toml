@@ -58,7 +58,7 @@ wheel.packages = ["src/itaxotools"]
 ignore-init-module-imports = true
 extend-select = ["I"]
 exclude = [
-    "src/mafft",
+    "src/mafft*",
 ]
 
 [tool.ruff.lint.isort]

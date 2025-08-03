@@ -16,7 +16,6 @@ static int treein;
 static int topin;
 static int treeout;
 static int noalign;
-static int distout;
 static int tuplesize;
 static int subalignment;
 static int subalignmentoffset;
@@ -30,7 +29,6 @@ static double maxdistmtxsize;
 static int nthreadtb;
 static int useexternalanchors;
 static int oneiteration;
-static double maxanchorseparation;
 
 #if 0
 #define PLENFACA 0.0123
@@ -222,7 +220,6 @@ static void arguments( int argc, char *argv[] )
 	mapout = 0;
 	smoothing = 0;
 	nwildcard = 0;
-	maxanchorseparation = 1000.0;
 
     while( --argc > 0 && (*++argv)[0] == '-' )
 	{
@@ -314,8 +311,15 @@ static void arguments( int argc, char *argv[] )
 					addprofile = 0;
 					break;
 				case 'y':
-					distout = 1;
-					break;
+                                        distout = *(*++argv);
+					reporterr(       "distout=%c\n", distout );
+                                        if( distout != 'c' && distout != 'h' )
+                                        {
+                                            reporterr(       "Set -y c or -y h in v>=7.521.\n" );
+                                            exit( 1 );
+                                        }
+					--argc;
+					goto nextoption;
 				case 't':
 					treeout = 1;
 					break;
@@ -341,7 +345,7 @@ static void arguments( int argc, char *argv[] )
 					fftscore = 0;
 					break;
 				case 'x':
-					maxanchorseparation = myatof( *++argv );
+					terminalmargin = myatoi( *++argv );
 					--argc;
 					goto nextoption;
 				case 'H':
@@ -459,10 +463,12 @@ static void arguments( int argc, char *argv[] )
 				case 'J':
 					tbutree = 0;
 					break;
+#if 0
 				case 'z':
 					fftThreshold = myatoi( *++argv );
 					--argc;
 					goto nextoption;
+#endif
 				case 'w':
 					fftWinSize = myatoi( *++argv );
 					--argc;
@@ -478,6 +484,9 @@ static void arguments( int argc, char *argv[] )
 #endif
 				case 'Y':
 					keeplength = 1;
+					break;
+				case 'z':
+					mapout = 2;
 					break;
 				case 'Z':
 					mapout = 1;
@@ -667,7 +676,7 @@ static void pickup( int n, int *seqlen, int ***topol, char **name, char **seq ) 
 
 static int nunknown = 0;
 
-void seq_grp_nuc( int *grp, char *seq )
+static void seq_grp_nuc( int *grp, char *seq )
 {
 	int tmp;
 	int *grpbk = grp;
@@ -688,7 +697,7 @@ void seq_grp_nuc( int *grp, char *seq )
 	}
 }
 
-void seq_grp( int *grp, char *seq )
+static void seq_grp( int *grp, char *seq )
 {
 	int tmp;
 	int *grpbk = grp;
@@ -709,16 +718,26 @@ void seq_grp( int *grp, char *seq )
 	}
 }
 
-void makecompositiontable_p( int *table, int *pointt )
+static void makecompositiontable_p( int *table, int *pointt )
 {
 	int point;
 
 	while( ( point = *pointt++ ) != END_OF_VEC )
+	{
+#if 1
 		table[point]++;
+#else // kakunin shinai
+		if( (unsigned int)table[point]++ >= INT_MAX )
+		{
+			reporterr( "Overflow. table[point]=%d>INT_MAX(%d).\n", table[point], INT_MAX );
+			exit( 1 );
+		}
+#endif
+	}
 }
 
 
-void makepointtable_nuc_dectet( int *pointt, int *n )
+static void makepointtable_nuc_dectet( int *pointt, int *n )
 {
 	int point;
 	register int *p;
@@ -785,7 +804,7 @@ void makepointtable_nuc_octet( int *pointt, int *n )
 	*pointt = END_OF_VEC;
 }
 
-void makepointtable_nuc( int *pointt, int *n )
+static void makepointtable_nuc( int *pointt, int *n )
 {
 	int point;
 	register int *p;
@@ -815,7 +834,7 @@ void makepointtable_nuc( int *pointt, int *n )
 	*pointt = END_OF_VEC;
 }
 
-void makepointtable( int *pointt, int *n )
+static void makepointtable( int *pointt, int *n )
 {
 	int point;
 	register int *p;
@@ -1349,6 +1368,7 @@ static void *distancematrixthread( void *arg )
 		free( table1 );
 	}
 }
+#endif // enablemultithread
 
 static void recountpositions( ExtAnch *pairanch, int n1, int n2, char **seq1, char **seq2 ) // loop no junban kentou
 {
@@ -1452,190 +1472,14 @@ static void indexanchors( ExtAnch *a, int **idx )
 #endif
 }
 
-
-#if 0
-static void checkanchors_internal( ExtAnch *a )
-{
-	int p, q, r, s;
-	int i, j;
-	int consistent;
-	int m;
-#if 0
-	reporterr( "before sortscore\n" );
-	for( p=0; a[p].i>-1; p++ )
-	{
-		reporterr( "a[%d].starti,j=%d,%d, score=%d\n", p, a[p].starti, a[p].startj, a[p].score );
-	}
-#endif
-
-
-	for( r=0; a[r].i>-1; )
-	{
-		i = a[r].i;
-		j = a[r].j;
-		s = r;
-		for( ; i==a[r].i && j==a[r].j; r++ )
-			;
-//		reporterr( "s=%d, r=%d\n", s, r );
-
-		qsort( a+s, r-s, sizeof( ExtAnch ), anchscorecomp );
-#if 0
-		reporterr( "after sortscore, r=%d\n", r );
-		for( p=s; p<r; p++ )
-		{
-			reporterr( "a[%d].starti,j=%d,%d, score=%d\n", p, a[p].starti, a[p].startj, a[p].score );
-		}
-		exit( 1 );
-#endif
-
-		for( p=s; p<r; p++ )
-		{
-			if( a[p].starti == -1 ) continue;
-			consistent = 1;
-			m = 0;
-			for( q=p+1; q<r; q++ )
-			{
-				if( a[q].starti == -1 ) continue;
-#if 0
-				reporterr( "p=%d, q=%d\n", p, q );
-				reporterr( "p: a[%d].starti,j=%d,%d, score=%d\n", p, a[p].starti, a[p].startj, a[p].score );
-				reporterr( "q: a[%d].starti,j=%d,%d, score=%d\n", q, a[q].starti, a[q].startj, a[q].score );
-#endif
-
-				if( a[p].endi == a[q].endi && a[p].starti == a[q].starti && a[p].endj == a[q].endj && a[p].startj == a[q].startj )
-				{
-//					reporterr( "identical\n" );
-//					reporterr( "p: a[%d].regi,regj=%d-%d,%d-%d, score=%d\n", p, a[p].starti, a[p].endi, a[p].startj, a[p].endj, a[p].score );
-//					reporterr( "q: a[%d].regi,regj=%d-%d,%d-%d, score=%d\n", q, a[q].starti, a[q].endi, a[q].startj, a[q].endj, a[q].score );
-					;
-				}
-				else if( a[p].endi < a[q].starti && a[p].endj < a[q].startj )
-				{
-//					reporterr( "consistent\n" );
-					;
-				}
-//				else if( a[p].endi == a[q].starti && a[p].endj < a[q].startj && a[q].starti<a[q].endi )
-//				{
-//					a[q].starti += 1; // 1 zai overlap
-//				}
-//				else if( a[p].endi < a[q].starti && a[p].endj == a[q].startj && a[q].startj<a[q].endj )
-//				{
-//					a[q].startj += 1; // 1 zai overlap
-//				}
-				else if( a[q].endi < a[p].starti && a[q].endj < a[p].startj )
-				{
-//					reporterr( "consistent\n" );
-					;
-				}
-//				else if( a[q].endi == a[p].starti && a[q].endj < a[p].startj && a[q].starti<a[q].endi ) // bug in v7.442
-//				{
-//					a[q].endi -= 1; // 1 zai overlap
-//				}
-//				else if( a[q].endi < a[p].starti && a[q].endj == a[p].startj && a[q].startj<a[q].endj )
-//				{
-//					a[q].endj -= 1; // 1 zai overlap
-//				}
-				else
-				{
-					consistent = 0;
-					if( a[q].score > m ) m = a[q].score;
-//					reporterr( "INconsistent\n" );
-//					reporterr( "p=%d, q=%d\n", p, q );
-//					reporterr( "p: a[%d].regi,regj=%d-%d,%d-%d, score=%d\n", p, a[p].starti, a[p].endi, a[p].startj, a[p].endj, a[p].score );
-//					reporterr( "q: a[%d].regi,regj=%d-%d,%d-%d, score=%d\n", q, a[q].starti, a[q].endi, a[q].startj, a[q].endj, a[q].score );
-//					a[q].starti = a[q].startj = a[q].startj = a[q].endj = -1;
-//					a[q].score = a[p].score - a[q].score; // ??
-//					a[q].score = ( a[p].score + a[q].score ) / 2; // ??
-					a[q].score = 0;
-				}
-			}
-			if( !consistent )
-//				a[p].score = ( a[p].score + m ) / 2; // >= 0
-				a[p].score -= m; // >= 0
-//				a[p].score = 0;
-		}
-	}
-
-#if 0
-	reporterr( "after filtering\n" );
-	for( p=0; a[p].i>-1; p++ )
-	{
-		reporterr( "a[%d].starti,j=%d,%d, score=%d\n", p, a[p].starti, a[p].startj, a[p].score );
-	}
-	exit( 1 );
-#endif
-}
-#endif
-
-static void checkanchors_strongestfirst( ExtAnch *a, int s, double gapratio1, double gapratio2 )
+static void checkanchors_strongestfirst( ExtAnch *a, int s )
 {
 	int p, q;
-	double zureij;
-	double nogaplenestimation1;
-	double nogaplenestimation2;
-#if 0
-	reporterr( "before sortscore\n" );
-	for( p=0; a[p].i>-1; p++ )
-	{
-		reporterr( "a[%d].starti,j=%d,%d, score=%d\n", p, a[p].starti, a[p].startj, a[p].score );
-	}
-#endif
 	qsort( a, s, sizeof( ExtAnch ), anchscorecomp );
-
-	nogaplenestimation1 = (double)a[0].starti / (1.0+gapratio1);
-	nogaplenestimation2 = (double)a[0].startj / (1.0+gapratio2);
-	zureij = nogaplenestimation1 - nogaplenestimation2;
 
 	for( p=0; a[p].i>-1; p++ )
 	{
 		if( a[p].starti == -1 ) continue;
-
-#if 0
-		nogaplenestimation1 = (double)a[p].starti / (1.0+gapratio1);
-		nogaplenestimation2 = (double)a[p].startj / (1.0+gapratio2);
-		if( fabs( zureij - ( nogaplenestimation1 - nogaplenestimation2 ) ) > maxanchorseparation )
-		{
-//			reporterr( "warning: long internal gaps in %d-%d, |%5.2f-%5.2f - %5.2f| = %5.2f > %5.2f\n", a[p].i, a[p].j, nogaplenestimation1, nogaplenestimation2, zureij, fabs( zureij - ( nogaplenestimation1, nogaplenestimation2 ) ), maxanchorseparation );
-			a[p].starti = a[p].startj = a[p].startj = a[p].endj = -1;
-			continue;
-		}
-#else
-		int nearest, mindist;
-		double zurei, zurej;
-		if( p )
-		{
-			mindist = 999999999;
-			for( q=0; q<p; q++ )
-			{
-				if( a[q].starti == -1 ) continue;
-				if( abs( a[p].starti - a[q].starti ) < mindist )
-				{
-					nearest = q;
-					mindist = abs( a[p].starti - a[q].starti );
-				}
-			}
-			//reporterr( "nearest=%d\n", nearest );
-			if( a[nearest].starti < a[p].starti )
-			{
-				zurei = (double)( a[p].starti - a[nearest].endi )/(1.0+gapratio1);
-				zurej = (double)( a[p].startj - a[nearest].endj )/(1.0+gapratio2);
-			}
-			else
-			{
-				zurei = (double)( a[nearest].starti - a[p].endi )/(1.0+gapratio1);
-				zurej = (double)( a[nearest].startj - a[p].endj )/(1.0+gapratio2);
-			}
-		}
-		else
-			zurei = zurej = 0.0;
-		if( fabs( zurei - zurej ) > maxanchorseparation )
-//		if( fabs( zurei - zurej ) > maxanchorseparation || zurei > maxanchorseparation || zurej > maxanchorseparation ) // test
-		{
-//			reporterr( "warning: long internal gaps in %d-%d, |%5.2f-%5.2f - %5.2f| = %5.2f > %5.2f\n", a[p].i, a[p].j, nogaplenestimation1, nogaplenestimation2, zureij, fabs( zureij - ( nogaplenestimation1, nogaplenestimation2 ) ), maxanchorseparation );
-			a[p].starti = a[p].startj = a[p].startj = a[p].endj = -1;
-			continue;
-		}
-#endif
 
 //		reporterr( "P score=%d, %d-%d, %d-%d\n", a[p].score, a[p].starti, a[p].endi, a[p].startj, a[p].endj );
 		for( q=p+1; a[q].i>-1; q++ )
@@ -1676,6 +1520,7 @@ static void checkanchors_strongestfirst( ExtAnch *a, int s, double gapratio1, do
 				a[q].starti = a[q].startj = a[q].startj = a[q].endj = -1;
 			}
 		}
+		if( p % 1000 == 0 ) reporterr( "%d/%d\r", p, s );
 	}
 
 	qsort( a, s, sizeof( ExtAnch ), anchcomp );
@@ -1686,41 +1531,6 @@ static void checkanchors_strongestfirst( ExtAnch *a, int s, double gapratio1, do
 		reporterr( "a[%d].starti,j=%d,%d, score=%d\n", p, a[p].starti, a[p].startj, a[p].score );
 	}
 #endif
-}
-
-
-static double gapnongapratio( int n, char **s )
-{
-	int i, j, len;
-	char *seq, *pt1, *pt2;
-	double fv, ng;
-
-	len = strlen( s[0] );
-	seq = calloc( len+1, sizeof( char ) );
-
-	fv = 0.0;
-	ng = 0.0;
-	for( i=0; i<n; i++  )
-	{
-		pt1 = s[i];
-		while( *pt1 == '-' ) pt1++;
-		pt2 = seq;
-		while( *pt1 != 0 ) *pt2++ = *pt1++;
-		*pt2 = *pt1; // 0
-		pt1 = pt2-1;
-		while( *pt1 == '-' ) pt1--;
-		*(pt1+1) = 0;
-//		reporterr( "seq[i]=%s\n", s[i] );
-//		reporterr( "seq=%s\n", seq );
-		len = pt1-seq+1;
-		for( j=0; j<len; j++ )
-			if( seq[j] == '-' )
-				fv+=1.0;
-			else
-				ng+=1.0;
-	}
-	free( seq );
-	return( fv/ng );
 }
 
 static void	pickpairanch( ExtAnch **pairanch, ExtAnch *extanch, int **anchindex, int n1, int n2, int *m1, int *m2, char **seq1, char **seq2 ) // loop no junban wo kaeta hou ga iikamo
@@ -1871,11 +1681,9 @@ static void	pickpairanch( ExtAnch **pairanch, ExtAnch *extanch, int **anchindex,
 	reporterr( "\n" );
 #endif
 
-	checkanchors_strongestfirst( *pairanch, s, gapnongapratio( n1, seq1 ), gapnongapratio( n2, seq2 ) );
+	reporterr( "Checking external anchors\n" );
+	checkanchors_strongestfirst( *pairanch, s );
 
-
-//	qsort( *pairanch, s, sizeof( ExtAnch ), anchcomp );
-//	checkanchors_new( *pairanch );
 
 #if 0
 	reporterr( "After check\n" );
@@ -1887,6 +1695,7 @@ static void	pickpairanch( ExtAnch **pairanch, ExtAnch *extanch, int **anchindex,
 #endif
 }
 
+#ifdef enablemultithread
 static void *treebasethread( void *arg )
 {
 	treebasethread_arg_t *targ = (treebasethread_arg_t *)arg;
@@ -2402,7 +2211,7 @@ static void *treebasethread( void *arg )
 	reporterr(       "totalscore = %10.2f\n\n", tscore );
 #endif
 }
-#endif
+#endif // enablemultithread
 
 static int dooneiteration( int *nlen, char **aseq, int nadd, char *mergeoralign, char **mseq1, char **mseq2, int ***topol, Treedep *dep, int **memhist, double ***cpmxhist, double *effarr, double **newdistmtx, int *selfscore, ExtAnch *extanch, int **anchindex, int *alloclen, int (*callback)(int, int, char*) )
 {
@@ -3466,7 +3275,7 @@ int disttbfast( int ngui, int lgui, char **namegui, char **seqgui, int argc, cha
 	char algbackup;
 	char *originalgaps = NULL;
 	char **addbk = NULL;
-	int **deletelist = NULL;
+	GapPos **deletelist = NULL;
 	FILE *dlf = NULL;
 	int randomseed;
 	int **localmem = NULL;
@@ -3533,10 +3342,10 @@ int disttbfast( int ngui, int lgui, char **namegui, char **seqgui, int argc, cha
 		rewind( infp );
 	}
 
-	if( njob > 1000000 )
+	if( njob > 10000000 )
 	{
-		reporterr(       "The number of sequences must be < %d\n", 1000000 );
-		reporterr(       "Please try the --parttree option for such large data.\n" );
+		reporterr(       "The number of sequences must be < %d\n", 10000000 );
+//		reporterr(       "Please try the --parttree option for such large data.\n" );
 		exit( 1 );
 	}
 
@@ -5031,11 +4840,12 @@ int disttbfast( int ngui, int lgui, char **namegui, char **seqgui, int argc, cha
 	{
 
 		dlf = fopen( "_deletelist", "w" );
-		deletelist = (int **)calloc( nadd+1, sizeof( int * ) );
+		deletelist = (GapPos **)calloc( nadd+1, sizeof( GapPos * ) );
 		for( i=0; i<nadd; i++ )
 		{
-			deletelist[i] = calloc( 1, sizeof( int ) );
-			deletelist[i][0] = -1;
+			deletelist[i] = calloc( 1, sizeof( GapPos ) );
+			deletelist[i][0].pos = -1;
+			deletelist[i][0].len = 0;
 		}
 		deletelist[nadd] = NULL;
 		ndeleted = deletenewinsertions_whole( njob-nadd, nadd, bseq, bseq+njob-nadd, deletelist );
@@ -5043,8 +4853,9 @@ int disttbfast( int ngui, int lgui, char **namegui, char **seqgui, int argc, cha
 		for( i=0; i<nadd; i++ )
 		{
 			if( deletelist[i] )
-				for( j=0; deletelist[i][j]!=-1; j++ )
-					fprintf( dlf, "%d %d\n", njob-nadd+i, deletelist[i][j] ); // 0origin
+				for( j=0; deletelist[i][j].pos!=-1; j++ )
+//					fprintf( dlf, "%d %d\n", njob-nadd+i, deletelist[i][j] ); // 0origin
+					fprintf( dlf, "%d %d %d\n", njob-nadd+i, deletelist[i][j].pos, deletelist[i][j].len ); // 0origin
 		}
 		fclose( dlf );
 
@@ -5054,13 +4865,19 @@ int disttbfast( int ngui, int lgui, char **namegui, char **seqgui, int argc, cha
 		if( mapout )
 		{
 			dlf = fopen( "_deletemap", "w" );
-			reconstructdeletemap( nadd, addbk, deletelist, bseq+njob-nadd, dlf, name+njob-nadd );
+			if( mapout == 1 )
+				reconstructdeletemap( nadd, addbk, deletelist, bseq+njob-nadd, dlf, name+njob-nadd );
+			else
+				reconstructdeletemap_compact( nadd, addbk, deletelist, seq+njob-nadd, dlf, name+njob-nadd );
 			FreeCharMtx( addbk );
 			addbk = NULL;
 			fclose( dlf );
 		}
 
-		FreeIntMtx( deletelist );
+//		FreeIntMtx( deletelist );
+//		deletelist = NULL;
+		for( i=0; deletelist[i] != NULL; i++ ) free( deletelist[i] );
+		free( deletelist );
 		deletelist = NULL;
 	}
 
@@ -5157,7 +4974,12 @@ int disttbfast( int ngui, int lgui, char **namegui, char **seqgui, int argc, cha
 	closeFiles();
 	FreeCommonIP();
 	if( originalgaps ) free( originalgaps ); originalgaps = NULL;
-	if( deletelist ) FreeIntMtx( deletelist ); deletelist = NULL;
+	if( deletelist )
+	{
+		for( i=0; deletelist[i] != NULL; i++ ) free( deletelist[i] );
+		free( deletelist );
+		deletelist = NULL;
+	}
 
 //	use_getrusage();
 
@@ -5205,7 +5027,12 @@ chudan:
 	if( selfscore ) free( selfscore ); selfscore = NULL;
 	if( skiptable ) FreeIntMtx( skiptable ); skiptable = NULL;
 	if( originalgaps ) free( originalgaps ); originalgaps = NULL;
-	if( deletelist ) FreeIntMtx( deletelist ); deletelist = NULL;
+	if( deletelist )
+	{
+		for( i=0; deletelist[i] != NULL; i++ ) free( deletelist[i] );
+		free( deletelist );
+		deletelist = NULL;
+	}
 
 
 	if( subtable ) FreeIntMtx( subtable ); subtable = NULL;
