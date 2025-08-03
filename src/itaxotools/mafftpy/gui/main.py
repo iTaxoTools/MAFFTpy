@@ -39,7 +39,7 @@ from itaxotools.common import machine
 from itaxotools.common import io
 
 from .. import core
-from .. import mafft
+from itaxotools import _mafft
 
 from time import sleep
 
@@ -77,9 +77,9 @@ class SeqEdit(QtWidgets.QTextEdit):
         with path.open('r') as file:
             text = file.read(max)
             overflow = bool(max > 0 and len(text) >= max)
-            with io.redirect(mafft, 'stdout', os.devnull, 'w'), \
-                 io.redirect(mafft, 'stderr', os.devnull, 'a'):
-                seq, max, min, _, _ = mafft.countlen(str(path))
+            with io.redirect(_mafft, 'stdout', os.devnull, 'w'), \
+                 io.redirect(_mafft, 'stderr', os.devnull, 'a'):
+                seq, max, min, _, _ = _mafft.countlen(str(path))
             if seq == 0:
                 warnings.append('No sequences found')
             else:

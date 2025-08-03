@@ -29,7 +29,7 @@ from contextlib import contextmanager
 
 from itaxotools.common.io import redirect
 
-from . import mafft
+from itaxotools import _mafft
 from . import params
 
 
@@ -325,9 +325,9 @@ class MultipleSequenceAlignment():
 		v.nadd = "0"
 
 		if v.auto:
-			with redirect(mafft, 'stdout', os.devnull, 'w'), \
-				 redirect(mafft, 'stderr', v.progressfile, 'a'):
-				 (nseq, nlen, _, _, _) = mafft.countlen(v.infilename)
+			with redirect(_mafft, 'stdout', os.devnull, 'w'), \
+				 redirect(_mafft, 'stderr', v.progressfile, 'a'):
+				 (nseq, nlen, _, _, _) = _mafft.countlen(v.infilename)
 			if nlen < 10000 and nseq < 200:
 				v.fft = 1
 				v.cycle = 1
@@ -471,7 +471,7 @@ class MultipleSequenceAlignment():
 			fi
 		fi
 		"""
-		
+
 		v.nadd = 0    #TODO
 		if v.adjustdirection > 0:
 			v.fragarg = ""
@@ -480,9 +480,9 @@ class MultipleSequenceAlignment():
 			else:
 				v.fragarg = "-F"
 			if v.adjustdirection == 1:
-				with redirect(mafft, 'stdout', "_direction", 'w'), \
-					 redirect(mafft, 'stderr', v.progressfile, 'a'):
-					mafft.makedirectionlist(
+				with redirect(_mafft, 'stdout', "_direction", 'w'), \
+					 redirect(_mafft, 'stderr', v.progressfile, 'a'):
+					_mafft.makedirectionlist(
 						C = v.numthreads,
 						m = None,
 						I = v.nadd,
@@ -495,9 +495,9 @@ class MultipleSequenceAlignment():
 						])
 					)
 			elif v.adjustdirection == 2:
-				with redirect(mafft, 'stdout', "_direction", 'w'), \
-					 redirect(mafft, 'stderr', v.progressfile, 'a'):
-					mafft.makedirectionlist(
+				with redirect(_mafft, 'stdout', "_direction", 'w'), \
+					 redirect(_mafft, 'stderr', v.progressfile, 'a'):
+					_mafft.makedirectionlist(
 						C = v.numthreads,
 						m = None,
 						I = v.nadd,
@@ -509,9 +509,9 @@ class MultipleSequenceAlignment():
 							v.fragarg
 						])
 					)
-			with redirect(mafft, 'stdout', "infiled", 'w'), \
-				 redirect(mafft, 'stderr', v.progressfile, 'a'):
-				mafft.setdirection(
+			with redirect(_mafft, 'stdout', "infiled", 'w'), \
+				 redirect(_mafft, 'stderr', v.progressfile, 'a'):
+				_mafft.setdirection(
 					d = "_direction",
 					i = "infile",
 					**self._vars_to_kwargs([
@@ -525,10 +525,10 @@ class MultipleSequenceAlignment():
 			temp2.close()
 
 		if v.distance == "global" and v.memsavetree == 0:
-			with redirect(mafft, 'stdout', os.devnull, 'w'), \
-				 redirect(mafft, 'stderr', v.progressfile, 'a'):
+			with redirect(_mafft, 'stdout', os.devnull, 'w'), \
+				 redirect(_mafft, 'stderr', v.progressfile, 'a'):
 			# if True:
-				mafft.tbfast(
+				_mafft.tbfast(
 						i = v.infilename,
 						pair = dict(
 							i = v.infilename,
@@ -582,9 +582,9 @@ class MultipleSequenceAlignment():
 				pass
 		# "$prefix/addsingle" -Q 100 $legacygapopt -W $tuplesize -O $outnum $addsinglearg $addarg $add2ndhalfarg -C $numthreads $memopt $weightopt $treeinopt $treeoutopt $distoutopt $seqtype $model -f "-"$gop  -h $aof  $param_fft $localparam   $algopt $treealg $scoreoutarg < infile   > /dev/null 2>>"$progressfile" || exit 1
 			else:
-				with redirect(mafft, 'stdout', 'pre', 'w'), \
-					 redirect(mafft, 'stderr', v.progressfile, 'a'):
-					mafft.disttbfast(
+				with redirect(_mafft, 'stdout', 'pre', 'w'), \
+					 redirect(_mafft, 'stderr', v.progressfile, 'a'):
+					_mafft.disttbfast(
 							i = v.infilename,
 							q = v.npickup,
 							E = v.cycledisttbfast,
@@ -627,7 +627,7 @@ class MultipleSequenceAlignment():
 				# mv pre infile
 				# "$prefix/splittbfast" $legacygapopt -Z $algopt $splitopt $partorderopt $parttreeoutopt $memopt $seqtype $model -f "-"$gop -Q $spfactor -h $aof  -p $partsize -s $groupsize $treealg $outnum -i infile   > pre 2>>"$progressfile" || exit 1
 			else:
-				# mafft.disttbfast(W=v.minimumweight, V='-'+v.gopdist, s=v.unalignlevel, S=None)
+				# _mafft.disttbfast(W=v.minimumweight, V='-'+v.gopdist, s=v.unalignlevel, S=None)
 				pass
 				# "$prefix/tbfast" -W $minimumweight -V "-"$gopdist -s $unalignlevel $legacygapopt $mergearg $termgapopt $outnum -C $numthreadstb $rnaopt $weightopt $treeoutopt $distoutopt $memopt $seqtype $model  -f "-"$gop -Q $spfactor -h $aof $param_fft  $localparam $algopt -J $treealg $scoreoutarg < pre > /dev/null 2>>"$progressfile" || exit 1
 				# fragment>0 no baai, nanimoshinai
@@ -641,9 +641,9 @@ class MultipleSequenceAlignment():
 
 			# with redirect(sys.stdout, os.devnull, 'w'), \
 			#      redirect(sys.stderr, v.progressfile, 'a'):
-			with redirect(mafft, 'stdout', os.devnull, 'w'), \
-				 redirect(mafft, 'stderr', v.progressfile, 'a'):
-				mafft.dvtditr(
+			with redirect(_mafft, 'stdout', os.devnull, 'w'), \
+				 redirect(_mafft, 'stderr', v.progressfile, 'a'):
+				_mafft.dvtditr(
 						i = 'pre',
 						W = v.minimumweight,
 						E = v.fixthreshold,
@@ -685,7 +685,7 @@ class MultipleSequenceAlignment():
 
 		# if self.target is not None:
 		#     kwargs['out'] = self.target
-		# mafft.disttbfast(i=self.file)
+		# _mafft.disttbfast(i=self.file)
 		self.results = self.target
 		self.strategy = v.strategy
 

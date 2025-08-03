@@ -402,15 +402,15 @@ mafft_foo(PyObject *self, PyObject *args) {
 }
 
 static PyMethodDef MafftMethods[] = {
-  {"disttbfast",  mafft_disttbfast, METH_VARARGS | METH_KEYWORDS,
+  {"disttbfast",  (PyCFunction)mafft_disttbfast, METH_VARARGS | METH_KEYWORDS,
    "Run mafft/disttbfast with given parameters."},
-	{"tbfast",  mafft_tbfast, METH_VARARGS | METH_KEYWORDS,
+	{"tbfast",  (PyCFunction)mafft_tbfast, METH_VARARGS | METH_KEYWORDS,
    "Run mafft/tbfast with given parameters."},
-  {"dvtditr",  mafft_dvtditr, METH_VARARGS | METH_KEYWORDS,
+  {"dvtditr",  (PyCFunction)mafft_dvtditr, METH_VARARGS | METH_KEYWORDS,
    "Run mafft/dvtditr with given parameters."},
-  {"makedirectionlist",  mafft_makedirectionlist, METH_VARARGS | METH_KEYWORDS,
+  {"makedirectionlist",  (PyCFunction)mafft_makedirectionlist, METH_VARARGS | METH_KEYWORDS,
    "Run mafft/makedirectionlist with given parameters."},
-  {"setdirection",  mafft_setdirection, METH_VARARGS | METH_KEYWORDS,
+  {"setdirection",  (PyCFunction)mafft_setdirection, METH_VARARGS | METH_KEYWORDS,
    "Run mafft/setdirection with given parameters."},
   {"countlen",  mafft_countlen, METH_VARARGS,
    "Run mafft/getnumlen_nogap_countn."},
@@ -431,7 +431,7 @@ static struct PyModuleDef mafftmodule = {
 };
 
 PyMODINIT_FUNC
-PyInit_mafft(void)
+PyInit__mafft(void)
 {
 	PyObject *m = NULL;
 
