@@ -1,5 +1,11 @@
+# Include project info
 include README.md
 include LICENSE.txt
-include setup.py
+include pyproject.toml
 
+# Include extension module
+include CMakeLists.txt
+recursive-include src/mafft *
+
+# Include GUI graphics
 recursive-include src/itaxotools/mafftpy/gui/logos *

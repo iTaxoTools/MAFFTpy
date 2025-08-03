@@ -1,4 +1,3 @@
-
 """GUI entry point"""
 
 
@@ -8,10 +7,11 @@ def run():
     Imports are made locally to optimize multiprocessing.
     """
 
-    import sys
+    from PySide6 import QtCore, QtWidgets
+
     import pathlib
-    from PySide6 import QtWidgets
-    from PySide6 import QtCore
+    import sys
+
     from .main import Main
 
     def init(self):
@@ -20,7 +20,7 @@ def run():
             self.handleOpen(fileName=str(file))
 
     app = QtWidgets.QApplication(sys.argv)
-    app.setStyle('Fusion')
+    app.setStyle("Fusion")
     main = Main(init=init)
     main.setWindowFlags(QtCore.Qt.Window)
     main.show()

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Callable, NamedTuple
 import difflib
+from pathlib import Path
+from typing import NamedTuple
 
 import pytest
 
@@ -38,35 +38,53 @@ class MafftTest(NamedTuple):
         a.launch()
 
         fixed_path = TEST_DATA_DIR / self.output
-        output_path = Path(a.results) / 'pre'
+        output_path = Path(a.results) / "pre"
         fixed_text = fixed_path.read_text()
         output_text = output_path.read_text()
 
-        trans = str.maketrans('', '', '\r\n')
+        trans = str.maketrans("", "", "\r\n")
         fixed_text = fixed_text.translate(trans)
         output_text = output_text.translate(trans)
 
         if fixed_text != output_text:
             diff = difflib.unified_diff(
-                fixed_text.splitlines(),
-                output_text.splitlines()
+                fixed_text.splitlines(), output_text.splitlines()
             )
-            print('\n'.join(diff))
+            print("\n".join(diff))
 
         assert fixed_text == output_text
 
 
 mafft_tests = list()
-for sample in ['sample1', 'sample2', 'sample3', 'sample4']:
-    mafft_tests.extend([
-        MafftTest(f'{sample}/sample', f'{sample}/sample.fftns1', 'fftns1', 0),
-        MafftTest(f'{sample}/sample', f'{sample}/sample.fftns1.adjustdirection', 'fftns1', 1),
-        MafftTest(f'{sample}/sample', f'{sample}/sample.fftns1.adjustdirectionaccurately', 'fftns1', 2),
+for sample in ["sample1", "sample2", "sample3", "sample4"]:
+    mafft_tests.extend(
+        [
+            MafftTest(f"{sample}/sample", f"{sample}/sample.fftns1", "fftns1", 0),
+            MafftTest(
+                f"{sample}/sample",
+                f"{sample}/sample.fftns1.adjustdirection",
+                "fftns1",
+                1,
+            ),
+            MafftTest(
+                f"{sample}/sample",
+                f"{sample}/sample.fftns1.adjustdirectionaccurately",
+                "fftns1",
+                2,
+            ),
+            MafftTest(f"{sample}/sample", f"{sample}/sample.ginsi", "ginsi", 0),
+            MafftTest(
+                f"{sample}/sample", f"{sample}/sample.ginsi.adjustdirection", "ginsi", 1
+            ),
+            MafftTest(
+                f"{sample}/sample",
+                f"{sample}/sample.ginsi.adjustdirectionaccurately",
+                "ginsi",
+                2,
+            ),
+        ]
+    )
 
-        MafftTest(f'{sample}/sample', f'{sample}/sample.ginsi', 'ginsi', 0),
-        MafftTest(f'{sample}/sample', f'{sample}/sample.ginsi.adjustdirection', 'ginsi', 1),
-        MafftTest(f'{sample}/sample', f'{sample}/sample.ginsi.adjustdirectionaccurately', 'ginsi', 2),
-    ])
 
 @pytest.mark.parametrize("test", mafft_tests)
 def test_write_sequences(test: MafftTest, tmp_path: Path) -> None:

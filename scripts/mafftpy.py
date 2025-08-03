@@ -4,8 +4,9 @@
 """Launch the mafftpy GUI"""
 
 import multiprocessing
+
 from itaxotools.mafftpy.gui import run
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     multiprocessing.freeze_support()
     run()

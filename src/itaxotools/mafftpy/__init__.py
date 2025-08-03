@@ -1,1 +1,8 @@
-from .core import MultipleSequenceAlignment, quick, fftns1, ginsi
+from .core import MultipleSequenceAlignment, fftns1, ginsi, quick
+
+__all__ = [
+    "MultipleSequenceAlignment",
+    "fftns1",
+    "ginsi",
+    "quick",
+]
