@@ -1,23 +1,27 @@
 # general things to ignore
 build/
 dist/
-.eggs/
+*.whl
 *.egg-info/
 *.egg
 *.py[cod]
 __pycache__/
 *.so
 *~
-*.o
 
-# apple meta
 .DS_Store
-
-# due to using tox and pytest
 .tox
 .cache
-
 .vscode
 
 Pipfile
 Pipfile.lock
+
+.pytest_cache
+.ruff_cache
+
+session.vim
+Makefile
+*.make
+.vs
+*.sln
