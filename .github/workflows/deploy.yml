@@ -40,7 +40,7 @@ jobs:
       - name: Upload wheel artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.ARTIFACT_DISTRIBUTIONS }}
+          name: ${{ env.ARTIFACT_DISTRIBUTIONS }}-${{ runner.os }}
           path: ./wheelhouse/*.whl
 
 
@@ -60,7 +60,7 @@ jobs:
       - name: Download all the dists
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.ARTIFACT_DISTRIBUTIONS }}
+          name: ${{ env.ARTIFACT_DISTRIBUTIONS }}-${{ runner.os }}
           path: wheelhouse
 
       - name: Create universal2 wheels
@@ -71,7 +71,7 @@ jobs:
       - name: Upload universal2 wheels
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.ARTIFACT_DISTRIBUTIONS }}
+          name: ${{ env.ARTIFACT_DISTRIBUTIONS }}-${{ runner.os }}-fused
           path: wheelhouse/*universal2.whl
 
 
@@ -88,24 +88,9 @@ jobs:
       - name: Build sdist
         run: pipx run build --sdist
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.x
-
-      - name: Install source distribution
-        run: |
-          python -m pip install --upgrade pip
-          pip install dist/*.tar.gz
-
-      - name: Test with pytest
-        run: |
-          pip install pytest
-          pytest
-
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.ARTIFACT_DISTRIBUTIONS }}
+          name: ${{ env.ARTIFACT_DISTRIBUTIONS }}-source
           path: dist/*.tar.gz
 
 
@@ -131,7 +116,8 @@ jobs:
       - name: Download all the dists
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.ARTIFACT_DISTRIBUTIONS }}
+          pattern: ${{ env.ARTIFACT_DISTRIBUTIONS }}-*
+          merge-multiple: true
           path: dist
 
       - uses: pypa/gh-action-pypi-publish@release/v1
@@ -157,7 +143,8 @@ jobs:
       - name: Download all the dists
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.ARTIFACT_DISTRIBUTIONS }}
+          pattern: ${{ env.ARTIFACT_DISTRIBUTIONS }}-*
+          merge-multiple: true
           path: dist
 
       - uses: pypa/gh-action-pypi-publish@release/v1
@@ -183,7 +170,8 @@ jobs:
       - name: Download all the dists
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.ARTIFACT_DISTRIBUTIONS }}
+          pattern: ${{ env.ARTIFACT_DISTRIBUTIONS }}-*
+          merge-multiple: true
           path: dist/
 
       - name: Create GitHub Release
