@@ -33,8 +33,8 @@ class MafftTest(NamedTuple):
 
     def validate(self, tmp_path: Path) -> None:
         a = MultipleSequenceAlignment(TEST_DATA_DIR / self.input)
-        a.params.general.strategy = self.strategy
-        a.params.general.adjustdirection = self.adjustdirection
+        a.vars.set_strategy(self.strategy)
+        a.vars.set_adjust_direction(self.adjustdirection)
         a.launch()
 
         fixed_path = TEST_DATA_DIR / self.output

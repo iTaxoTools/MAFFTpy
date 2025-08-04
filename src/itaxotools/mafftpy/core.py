@@ -20,16 +20,16 @@
 import os
 import re
 import shutil
-import sys
 import tempfile
 from contextlib import contextmanager
 from multiprocessing import Process
 from pathlib import Path
+from typing import Literal
 
 from itaxotools import _mafft
 from itaxotools.common.io import redirect
 
-from . import params
+Strategy = Literal["auto", "ginsi", "fftns1"]
 
 
 @contextmanager
@@ -46,7 +46,12 @@ def pushd(target):
 class MafftVars:
     """Variables used by MAFFT core"""
 
-    def __init__(self, params=None):
+    def __init__(self, **kwargs):
+        self.set_defaults()
+        if kwargs:
+            self.update_from_arguments(**kwargs)
+
+    def set_defaults(self):
         """As defined in the mafft bash script"""
         self.defaultiterate = 0
         self.defaultcycle = 2
@@ -218,28 +223,34 @@ class MafftVars:
         self.lhlimit = " "
         self.mpiscript = "/dev/null"
 
-        if params is not None:
-            self.update_from_params(params)
+    def update_from_arguments(self, **kwargs):
+        for key, value in kwargs.items():
+            match key:
+                case "strategy":
+                    self.set_strategy(value)
+                case "adjustdirection":
+                    self.set_adjust_direction(1)
+                case "adjustdirectionaccurately":
+                    self.set_adjust_direction(2)
 
-    def update_from_params(self, params):
-        """Parse params and update variables"""
+    def set_strategy(self, value: Strategy):
+        match value:
+            case "auto":
+                self.auto = 1
+            case "ginsi":
+                self.auto = 0
+                self.fft = 1
+                self.cycle = 1
+                self.iterate = 1000
+                self.distance = "global"
+            case "fftns1":
+                self.auto = 0
+                self.fft = 1
+                self.cycle = 1
+                self.distance = "ktuples"
 
-        strategy = params.general.strategy
-        self.adjustdirection = params.general.adjustdirection
-
-        if strategy == "auto":
-            self.auto = 1
-        elif strategy == "ginsi":
-            self.auto = 0
-            self.fft = 1
-            self.cycle = 1
-            self.iterate = 1000
-            self.distance = "global"
-        elif strategy == "fftns1":
-            self.auto = 0
-            self.fft = 1
-            self.cycle = 1
-            self.distance = "ktuples"
+    def set_adjust_direction(self, value: Literal[0, 1, 2]):
+        self.adjustdirection = value
 
 
 class MultipleSequenceAlignment:
@@ -247,19 +258,18 @@ class MultipleSequenceAlignment:
     Container for input/output of MAFFT core.
     """
 
+    def __init__(self, input: Path = None, **kwargs):
+        self.file = input
+        self.target = None
+        self.results = None
+        self.log = None
+        self.vars = MafftVars(**kwargs)
+
     def __getstate__(self):
         return self.__dict__
 
     def __setstate__(self, state):
         self.__dict__ = state
-
-    def __init__(self, file: Path = None):
-        self.file = file
-        self.target = None
-        self.results = None
-        self.log = None
-        self.params = params.params()
-        self.vars = MafftVars(self.params)
 
     @staticmethod
     def _vars_to_kwargs(list):
@@ -281,19 +291,23 @@ class MultipleSequenceAlignment:
                 for line in fin:
                     fout.write(line.translate(tr))
 
+    def get_results_path(self) -> Path | None:
+        if self.results:
+            return Path(self.results) / "pre"
+        return None
+
     def fetch(self, destination):
         """Copy results as a new directory"""
-        if self.results is None:
+        results = self.get_results_path()
+        if results is None:
             raise RuntimeError("No results to fetch.")
-        shutil.copyfile(Path(self.results) / "pre", destination)
+        shutil.copyfile(results, destination)
 
     def run(self):
         """
         Run the MAFFT core with given params,
         save results to a temporary directory.
         """
-
-        self.vars.update_from_params(self.params)
 
         self.vars.progressfile = self.log
         self.vars.infilename = "infile"
@@ -731,28 +745,29 @@ class MultipleSequenceAlignment:
         self.results = self.target
 
 
-def quick(args: dict, strategy="auto"):
+def quick(input: Path, output: Path | None, strategy: Strategy, **kwargs):
     """Quick analysis"""
-    a = MultipleSequenceAlignment(args.input)
-    a.params.general.strategy = strategy
-    if args.adjustdirection:
-        a.params.general.adjustdirection = 1
-    elif args.adjustdirectionaccurately:
-        a.params.general.adjustdirection = 2
+    a = MultipleSequenceAlignment(input, strategy=strategy, **kwargs)
     a.launch()
-    if args.save is not None:
-        savefile = args.save.open("w")
-    else:
-        savefile = sys.stdout
-    with open(Path(a.results) / "pre") as result:
-        print(result.read(), file=savefile)
-    if args.save is not None:
-        savefile.close()
+
+    results_path = a.get_results_path()
+
+    if results_path is None:
+        return
+
+    with results_path.open() as results_file:
+        if output is None:
+            for line in results_file:
+                print(line)
+        else:
+            with output.open("w") as output_file:
+                for line in results_file:
+                    print(line, file=output_file)
 
 
-def fftns1(args: dict):
-    quick(args, "fftns1")
+def fftns1(input: Path, output: Path | None, **kwargs):
+    quick(input, output, strategy="fftns1", **kwargs)
 
 
-def ginsi(args: dict):
-    quick(args, "ginsi")
+def ginsi(input: Path, output: Path | None, **kwargs):
+    quick(input, output, strategy="ginsi", **kwargs)

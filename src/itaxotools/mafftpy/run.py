@@ -6,30 +6,29 @@ from pathlib import Path
 from . import core
 
 
-def default_parser():
+def parse_arguments():
+    #! This should be expanded to accept all arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("input", type=Path)
-    parser.add_argument("save", type=Path, nargs="?")
+    parser.add_argument("output", type=Path, nargs="?")
     parser.add_argument("--adjustdirection", action="store_true")
     parser.add_argument("--adjustdirectionaccurately", action="store_true")
-    return parser
+    kwargs = vars(parser.parse_args())
+    input = kwargs.pop("input")
+    output = kwargs.pop("output")
+    return input, output, kwargs
 
 
-#! This should be expanded to accept all arguments
 def main():
-    """Analyze given file"""
-    parser = default_parser()
-    args = parser.parse_args()
-    core.quick(args)
+    input, output, kwargs = parse_arguments()
+    core.quick(input, output, strategy="auto", **kwargs)
 
 
 def ginsi():
-    parser = default_parser()
-    args = parser.parse_args()
-    core.ginsi(args)
+    input, output, kwargs = parse_arguments()
+    core.quick(input, output, strategy="ginsi", **kwargs)
 
 
 def fftns1():
-    parser = default_parser()
-    args = parser.parse_args()
-    core.fftns1(args)
+    input, output, kwargs = parse_arguments()
+    core.quick(input, output, strategy="fftns1", **kwargs)
