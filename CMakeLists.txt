@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.18)
 project(${SKBUILD_PROJECT_NAME} LANGUAGES C)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-find_package(Python REQUIRED COMPONENTS Interpreter Development Development.Module)
+find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 
 set(MAFFT_SRC
     src/mafft/core/wrapio.c
