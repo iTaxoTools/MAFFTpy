@@ -47,7 +47,6 @@ target_compile_definitions(_mafft PRIVATE
     ismodule=1
 )
 
-target_link_libraries(_mafft PRIVATE Python::Python)
 target_include_directories(_mafft PRIVATE
     ${PROJECT_SOURCE_DIR}/src/mafft/core
     ${Python_INCLUDE_DIRS}

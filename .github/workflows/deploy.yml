@@ -20,7 +20,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-2022, macos-13]
+        # os: [ubuntu-22.04, windows-2022, macos-13]
+        os: [ubuntu-22.04, macos-13]
 
     steps:
       - name: Checkout
@@ -52,9 +53,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: 3.x
 
       - name: Download all the dists
         uses: actions/download-artifact@v4
@@ -87,13 +88,10 @@ jobs:
       - name: Build sdist
         run: pipx run build --sdist
 
-      - name: Set up haxe
-        uses: ./.github/actions/setup-haxe
-
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
+          python-version: 3.x
 
       - name: Install source distribution
         run: |
