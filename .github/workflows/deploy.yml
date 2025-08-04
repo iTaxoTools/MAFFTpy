@@ -37,7 +37,7 @@ jobs:
           CIBW_ARCHS_MACOS: "auto64 arm64"
 
       - name: Upload wheel artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT_DISTRIBUTIONS }}
           path: ./wheelhouse/*.whl
@@ -57,7 +57,7 @@ jobs:
           python-version: '3.x'
 
       - name: Download all the dists
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ env.ARTIFACT_DISTRIBUTIONS }}
           path: wheelhouse
@@ -68,7 +68,7 @@ jobs:
           python tools/fuse-wheels.py
 
       - name: Upload universal2 wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT_DISTRIBUTIONS }}
           path: wheelhouse/*universal2.whl
@@ -105,7 +105,7 @@ jobs:
           pip install pytest
           pytest
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT_DISTRIBUTIONS }}
           path: dist/*.tar.gz
@@ -131,7 +131,7 @@ jobs:
         run: exit 1
 
       - name: Download all the dists
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ env.ARTIFACT_DISTRIBUTIONS }}
           path: dist
@@ -157,7 +157,7 @@ jobs:
 
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ env.ARTIFACT_DISTRIBUTIONS }}
           path: dist
@@ -183,7 +183,7 @@ jobs:
 
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ env.ARTIFACT_DISTRIBUTIONS }}
           path: dist/
