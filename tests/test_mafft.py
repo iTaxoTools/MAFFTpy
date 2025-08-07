@@ -35,10 +35,10 @@ class MafftTest(NamedTuple):
         a = MultipleSequenceAlignment(TEST_DATA_DIR / self.input)
         a.vars.set_strategy(self.strategy)
         a.vars.set_adjust_direction(self.adjustdirection)
-        a.launch()
+        a.start()
 
         fixed_path = TEST_DATA_DIR / self.output
-        output_path = Path(a.results) / "pre"
+        output_path = a.get_results_path()
         fixed_text = fixed_path.read_text()
         output_text = output_path.read_text()
 

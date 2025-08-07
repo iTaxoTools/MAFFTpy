@@ -255,7 +255,7 @@ class MafftVars:
 
 class MultipleSequenceAlignment:
     """
-    Container for input/output of MAFFT core.
+    Container for invoking MAFFT core.
     """
 
     def __init__(self, input: Path = None, **kwargs):
@@ -291,6 +291,14 @@ class MultipleSequenceAlignment:
                 for line in fin:
                     fout.write(line.translate(tr))
 
+    @contextmanager
+    def redirect_io(self, out_filename: Path | None = None):
+        if out_filename is None:
+            out_filename = os.devnull
+        with redirect(_mafft, "stderr", self.vars.progressfile, "a"):
+            with redirect(_mafft, "stdout", out_filename, "w"):
+                yield
+
     def get_results_path(self) -> Path | None:
         if self.results:
             return Path(self.results) / "pre"
@@ -313,8 +321,7 @@ class MultipleSequenceAlignment:
         self.vars.infilename = "infile"
 
         if self.target is None:
-            self._temp = tempfile.TemporaryDirectory(prefix="mafft_")
-            self.target = Path(self._temp.name).as_posix()
+            raise Exception("Target directory was not provided!")
 
         self._trim(self.file, Path(self.target) / self.vars.infilename)
 
@@ -322,6 +329,7 @@ class MultipleSequenceAlignment:
             self._script()
 
     def _script(self):
+        self.results = None
         v = self.vars
 
         # if maxambiguous != 1: call filter()
@@ -347,9 +355,7 @@ class MultipleSequenceAlignment:
         v.nadd = "0"
 
         if v.auto:
-            with redirect(_mafft, "stdout", os.devnull, "w"), redirect(
-                _mafft, "stderr", v.progressfile, "a"
-            ):
+            with self.redirect_io():
                 (nseq, nlen, _, _, _) = _mafft.countlen(v.infilename)
             if nlen < 10000 and nseq < 200:
                 v.fft = 1
@@ -508,9 +514,7 @@ class MultipleSequenceAlignment:
             else:
                 v.fragarg = "-F"
             if v.adjustdirection == 1:
-                with redirect(_mafft, "stdout", "_direction", "w"), redirect(
-                    _mafft, "stderr", v.progressfile, "a"
-                ):
+                with self.redirect_io("_direction"):
                     _mafft.makedirectionlist(
                         C=v.numthreads,
                         m=None,
@@ -522,9 +526,7 @@ class MultipleSequenceAlignment:
                         **self._vars_to_kwargs([v.fragarg]),
                     )
             elif v.adjustdirection == 2:
-                with redirect(_mafft, "stdout", "_direction", "w"), redirect(
-                    _mafft, "stderr", v.progressfile, "a"
-                ):
+                with self.redirect_io("_direction"):
                     _mafft.makedirectionlist(
                         C=v.numthreads,
                         m=None,
@@ -535,9 +537,7 @@ class MultipleSequenceAlignment:
                         o="a",
                         **self._vars_to_kwargs([v.fragarg]),
                     )
-            with redirect(_mafft, "stdout", "infiled", "w"), redirect(
-                _mafft, "stderr", v.progressfile, "a"
-            ):
+            with self.redirect_io("infiled"):
                 _mafft.setdirection(
                     d="_direction", i="infile", **self._vars_to_kwargs([v.mergearg])
                 )
@@ -548,9 +548,7 @@ class MultipleSequenceAlignment:
             temp2.close()
 
         if v.distance == "global" and v.memsavetree == 0:
-            with redirect(_mafft, "stdout", os.devnull, "w"), redirect(
-                _mafft, "stderr", v.progressfile, "a"
-            ):
+            with self.redirect_io():
                 # if True:
                 _mafft.tbfast(
                     i=v.infilename,
@@ -610,9 +608,7 @@ class MultipleSequenceAlignment:
                 pass
             # "$prefix/addsingle" -Q 100 $legacygapopt -W $tuplesize -O $outnum $addsinglearg $addarg $add2ndhalfarg -C $numthreads $memopt $weightopt $treeinopt $treeoutopt $distoutopt $seqtype $model -f "-"$gop  -h $aof  $param_fft $localparam   $algopt $treealg $scoreoutarg < infile   > /dev/null 2>>"$progressfile" || exit 1
             else:
-                with redirect(_mafft, "stdout", "pre", "w"), redirect(
-                    _mafft, "stderr", v.progressfile, "a"
-                ):
+                with self.redirect_io("pre"):
                     _mafft.disttbfast(
                         i=v.infilename,
                         q=v.npickup,
@@ -670,11 +666,7 @@ class MultipleSequenceAlignment:
                 # "$prefix/dndpre" $seqtype $model -M 2 -C $numthreads < pre     > /dev/null 2>>"$progressfile" || exit 1
                 pass
 
-            # with redirect(sys.stdout, os.devnull, 'w'), \
-            #      redirect(sys.stderr, v.progressfile, 'a'):
-            with redirect(_mafft, "stdout", os.devnull, "w"), redirect(
-                _mafft, "stderr", v.progressfile, "a"
-            ):
+            with self.redirect_io():
                 _mafft.dvtditr(
                     i="pre",
                     W=v.minimumweight,
@@ -725,15 +717,13 @@ class MultipleSequenceAlignment:
 
         print("Results:", self.results)
 
-    def launch(self):
+    def start(self):
         """
-        Should always use a seperate process to launch the MAFFT core,
+        Should always use a seperate process to start the MAFFT core,
         as the script uses global I/O redirection, some internal functions
         call exit(), while repeated calls may cause segfaults.
         Save results in a temporary directory, use fetch() to retrieve them.
         """
-        # When the last reference of TemporaryDirectory is gone,
-        # the directory is automatically cleaned up, so keep it here.
         self._temp = tempfile.TemporaryDirectory(prefix="mafft_")
         self.target = Path(self._temp.name).as_posix()
         p = Process(target=self.run)
@@ -748,7 +738,7 @@ class MultipleSequenceAlignment:
 def quick(input: Path, output: Path | None, strategy: Strategy, **kwargs):
     """Quick analysis"""
     a = MultipleSequenceAlignment(input, strategy=strategy, **kwargs)
-    a.launch()
+    a.start()
 
     results_path = a.get_results_path()
 
@@ -763,6 +753,10 @@ def quick(input: Path, output: Path | None, strategy: Strategy, **kwargs):
             with output.open("w") as output_file:
                 for line in results_file:
                     print(line, file=output_file)
+
+
+def auto(input: Path, output: Path | None, **kwargs):
+    quick(input, output, strategy="auto", **kwargs)
 
 
 def fftns1(input: Path, output: Path | None, **kwargs):

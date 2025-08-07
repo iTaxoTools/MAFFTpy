@@ -35,9 +35,10 @@ dev = [
 ]
 
 [project.scripts]
-mafftpy = "itaxotools.mafftpy.run:main"
-mafftpy-ginsi = "itaxotools.mafftpy.run:ginsi"
-mafftpy-fftns1 = "itaxotools.mafftpy.run:fftns1"
+mafftpy = "itaxotools.mafftpy.__main__:main"
+mafftpy-auto = "itaxotools.mafftpy.__main__:auto"
+mafftpy-ginsi = "itaxotools.mafftpy.__main__:ginsi"
+mafftpy-fftns1 = "itaxotools.mafftpy.__main__:fftns1"
 
 [project.urls]
 Homepage = "https://itaxotools.org/"
