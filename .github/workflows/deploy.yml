@@ -2,10 +2,8 @@ name: Deploy
 
 on:
   push:
-    branches:
-      - main
-    # tags:
-    #   - 'v*'
+    tags:
+      - 'v*'
 
 env:
   PROJECT_NAME: itaxotools-mafftpy
@@ -110,9 +108,6 @@ jobs:
       id-token: write
 
     steps:
-      - name: Auto-fail
-        run: exit 1
-
       - name: Download all the dists
         uses: actions/download-artifact@v4
         with:
