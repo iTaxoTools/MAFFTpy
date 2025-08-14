@@ -51,26 +51,15 @@ Changed for MSVC compatibility:
 >       return (int)((void *)q - (void *)p);
 ```
 
-- diff `dp.h`:
+Update multiprocessing macros for Windows in `dp.h` and `mltaln.h`:
 ```
-2,4d1
-< #ifdef _MSC_VER
-< #define TLS __declspec(thread)
-< #else
-6d2
-< #endif
-8c4
-< #define TLS
----
-> #define TLS
-```
-
-- diff `mltaln.h`:
-```
-344,346d338
-< #ifdef _MSC_VER
-< #define TLS __declspec(thread)
-< #else
-348d339
-< #endif
+#ifdef enablemultithread
+    #ifdef _MSC_VER
+        #define TLS __declspec(thread)
+    #else
+        #define TLS __thread
+    #endif
+#else
+    #define TLS
+#endif
 ```

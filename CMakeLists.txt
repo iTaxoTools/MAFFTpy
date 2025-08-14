@@ -47,6 +47,44 @@ target_compile_definitions(_mafft PRIVATE
     ismodule=1
 )
 
+if(WIN32)
+
+    target_compile_definitions(_mafft PRIVATE
+    _CRT_SECURE_NO_WARNINGS=1
+    )
+
+    # Add pthreads dependency
+
+    set(PTHREAD_DIR ${PROJECT_SOURCE_DIR}/src/pthread-win32)
+    set(PTHREAD_STAMP ${PTHREAD_DIR}/pthreadVC3.inlined_static_stamp)
+
+    add_custom_command(
+        OUTPUT ${PTHREAD_STAMP}
+        COMMAND nmake VC-static
+        WORKING_DIRECTORY ${PTHREAD_DIR}
+        COMMENT "Building pthread-win32 static library"
+        VERBATIM
+    )
+
+    add_custom_target(pthread_win32_lib ALL
+        DEPENDS ${PTHREAD_STAMP}
+    )
+
+    add_dependencies(_mafft pthread_win32_lib)
+
+    # Include and link pthreads
+
+    target_include_directories(_mafft PRIVATE
+        ${PROJECT_SOURCE_DIR}/src/pthread-win32
+    )
+
+    target_link_directories(_mafft PRIVATE
+        ${PROJECT_SOURCE_DIR}/src/pthread-win32
+    )
+
+    target_link_libraries(_mafft PRIVATE libpthreadVC3)
+endif()
+
 target_include_directories(_mafft PRIVATE
     ${PROJECT_SOURCE_DIR}/src/mafft/core
     ${Python_INCLUDE_DIRS}

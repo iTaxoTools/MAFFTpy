@@ -349,9 +349,13 @@ typedef struct _gappos
 #include "functions.h"
 
 #ifdef enablemultithread
-#define TLS __thread
+    #ifdef _MSC_VER
+        #define TLS __declspec(thread)
+    #else
+        #define TLS __thread
+    #endif
 #else
-#define TLS
+    #define TLS
 #endif
 
 extern TLS int commonAlloc1;
