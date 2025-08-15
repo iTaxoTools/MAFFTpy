@@ -295,7 +295,10 @@ class MultipleSequenceAlignment:
     def redirect_io(self, out_filename: Path | None = None):
         if out_filename is None:
             out_filename = os.devnull
-        with redirect(_mafft, "stderr", self.vars.progressfile, "a"):
+        err_filename = self.vars.progressfile
+        if err_filename is None:
+            err_filename = os.devnull
+        with redirect(_mafft, "stderr", err_filename, "a"):
             with redirect(_mafft, "stdout", out_filename, "w"):
                 yield
 

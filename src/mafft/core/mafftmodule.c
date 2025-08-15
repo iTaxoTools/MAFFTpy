@@ -404,7 +404,7 @@ mafft_foo(PyObject *self, PyObject *args) {
 static PyMethodDef MafftMethods[] = {
   {"disttbfast",  (PyCFunction)mafft_disttbfast, METH_VARARGS | METH_KEYWORDS,
    "Run mafft/disttbfast with given parameters."},
-	{"tbfast",  (PyCFunction)mafft_tbfast, METH_VARARGS | METH_KEYWORDS,
+  {"tbfast",  (PyCFunction)mafft_tbfast, METH_VARARGS | METH_KEYWORDS,
    "Run mafft/tbfast with given parameters."},
   {"dvtditr",  (PyCFunction)mafft_dvtditr, METH_VARARGS | METH_KEYWORDS,
    "Run mafft/dvtditr with given parameters."},
