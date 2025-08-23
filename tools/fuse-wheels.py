@@ -16,6 +16,8 @@ def fuse_wheelhouse(wheelhouse: Path):
             arm64.add(stem)
         elif "10_9_x86_64" in path.name:
             x86_64.add(stem)
+        elif "10_13_x86_64" in path.name:
+            x86_64.add(stem)
     for target in arm64 & x86_64:
         to_wheel = f"{target}-macosx_11_0_arm64.whl"
         from_wheel = f"{target}-macosx_10_9_x86_64.whl"
